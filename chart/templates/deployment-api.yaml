@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+{{ include "labels" . | indent 6 }}
+
+spec:
+  selector:
+    matchLabels:
+{{ include "selectorLabels" . | indent 6 }}
+  replicas: {{ .Values.worker.replicaCount }}
+  template:
+    metadata:
+      {{- if .Values.deployment.annotations }}
+      annotations:
+{{ tpl .Values.deployment.annotations . | indent 8 }}
+      {{- end }}
+      labels:
+{{ include "labels" . | indent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-api
+          image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
+          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.api.internalPort }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.worker.healthPrefix }}
+              port: {{ .Values.worker.healthPort }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.worker.healthPrefix }}
+              port: {{ .Values.worker.healthPort }}
+          env:
+            - name: NAME
+              value: {{ .Values.networkName }}
+            - name: NETWORK_NAME
+              value: {{ .Values.networkName }}
+            - name: PORT
+              value: {{ .Values.api.internalPort }}
+            - name: HEALTH_PORT
+              value: {{ .Values.api.healthPort }}
+            - name: REST_PREFIX
+              value: {{ .Values.api.restPrefix }}
+            - name: METRICS_PORT
+              value: {{ .Values.api.metricsPort }}
+            - name: HEALTH_PREFIX
+              value: {{ .Values.api.healthPrefix }}
+            - name: METRICS_PREFIX
+              value: {{ .Values.api.metricsPrefix }}
+            - name: LOG_LEVEL
+              value: {{ .Values.api.logLevel }}
+            - name: LOG_TO_FILE
+              value: {{ .Values.api.logToFile }}
+            - name: KAFKA_BROKER_URL
+              value: {{ .Values.kafka.kafkaBrokerURL }}
+            - name: SCHEMA_REGISTRY_URL
+              value: {{ .Values.kafka.schemaRegistryURL }}
+            - name: KAFKA_GROUP_ID
+              value: {{ .Values.kafka.kafkaGroupID }}
+            - name: CONSUMER_TOPICS
+              value: {{ .Values.kafka.consumerTopics }}
+            - name: PRODUCER_TOPICS
+              value: {{ .Values.kafka.producerTopics }}
+            - name: SCHEMA_NAME_TOPICS
+              value: {{ .Values.kafka.schemaNameTopics }}
+            - name: DB_DRIVER
+              value: {{ .Values.db.dbDriver }}
+            - name: DB_HOST
+              value: {{ .Values.db.dbHost }}
+            - name: DB_PORT
+              value: {{ .Values.db.dbPort }}
+            - name: DB_USER
+              value: {{ .Values.api.dbUser }}
+            - name: DB_PASSWORD
+              value: {{ .Values.api.dbPassword }}
+            - name: DB_DBNAME
+              value: {{ .Values.db.dbName }}
+            - name: DB_SSLMODE
+              value: {{ .Values.db.dbSslmode }}
+            - name: DB_TIMEZONE
+              value: {{ .Values.db.dbTimezone }}
+          resources:
+            requests:
+              cpu: {{ .Values.deployment.resources.requests.cpu }}
+              memory: {{ .Values.deployment.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.deployment.resources.limits.cpu }}
+              memory: {{ .Values.deployment.resources.limits.memory }}

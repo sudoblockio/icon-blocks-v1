@@ -1,0 +1,33 @@
+deployment:
+  image:
+    repository: 868027517775.dkr.ecr.us-west-2.amazonaws.com/icon-blocks
+    tag: '32'
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  annotations: |
+    "consul.hashicorp.com/connect-inject": "true"
+    "consul.hashicorp.com/connect-service-upstreams": "icon-blocks-db:5432,
+    drift-users:8081"
+  resources:
+    requests:
+      cpu: '0.25'
+      memory: 256Mi
+    limits:
+      cpu: '1'
+      memory: 1024Mi
+  backendAPIRoot: icon.geometry-dev.net
+autoscaler:
+  enabled: true
+  maxReplicas: 25
+  averageCPU: 50
+service:
+  name: geometry-fe
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 8080
+ingress:
+  enabled: true
+  regionalHost: app.us-west-2.aws.geometry-dev.net
+  apexHost: app.geometry-dev.net
+  annotations: |
+    "cert-manager.io/cluster-issuer": "letsencrypt"

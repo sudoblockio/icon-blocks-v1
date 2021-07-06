@@ -1,0 +1,105 @@
+name: icon-blocks
+networkName: mainnet
+
+deployment:
+  image:
+    repository: 868027517775.dkr.ecr.us-west-2.amazonaws.com/icon-blocks
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  # Defines additional annotations for app pods. This should be formatted as a multi-line string.
+  #
+  # ```yaml
+  # annotations: |
+  #   "sample/annotation1": "foo"
+  #   "sample/annotation2": "bar"
+  # ```
+  annotations: null
+  resources:
+    requests:
+      cpu: "0.25"
+      memory: "256Mi"
+    limits:
+      cpu: "1"
+      memory: "1024Mi"
+  backendAPIRoot: https://users.example.com
+
+autoscaler:
+  enabled: true
+  maxReplicas: 25
+  averageCPU: 50
+
+service:
+  name: icon-blocks
+  type: ClusterIP
+  externalPort: 80
+
+ingress:
+  enabled: true
+  regionalHost: "app.region.example.com"
+  apexHost: "app.example.com"
+  annotations: null
+
+api:
+  replicaCount: 1
+
+  # Ports
+  internalPort: 80
+  healthPort: 9300
+  metricsPort: 9400
+
+  # Prefixes
+  restPrefix: api/v1
+  websocketPrefix: /ws
+  healthPrefix: /healthcheck
+  metricsPrefix: metrics
+
+  # Monitoring
+  healthPollingInterval: 1
+  logLevel: debug
+  logToFile: true
+  logFileName: "./api.log"
+
+  # DB
+  dbUser: postgres
+  dbPassword: changeme
+
+worker:
+  replicaCount: 1
+
+  # Ports
+  healthPort: 9300
+  metricsPort: 9400
+
+  # Prefixes
+  restPrefix: api/v1
+  websocketPrefix: /ws
+  healthPrefix: /healthcheck
+  metricsPrefix: metrics
+
+  # Monitoring
+  healthPollingInterval: 1
+  logLevel: debug
+  logToFile: true
+  logFileName: "./worker.log"
+
+  # DB
+  dbUser: postgres
+  dbPassword: changeme
+
+# Kafka
+kafka:
+  kafkaBrokerURL: ""
+  schemaRegistryURL: ""
+  kafkaGroupID: websocket-group
+  consumerTopics: "[blocks]"
+  producerTopics: "[blocks-ws]"
+  schemaNameTopics: "{\"blocks\": \"block_raw\", \"blocks-ws\": \"block\"}"
+
+db:
+  dbDriver: postgres
+  dbHost: localhost
+  dbPort: 5432
+  dbName: blocks
+  dbSslmode: disable
+  dbTimezone: UTC

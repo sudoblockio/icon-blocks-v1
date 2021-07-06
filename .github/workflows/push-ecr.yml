@@ -1,0 +1,65 @@
+name: Push to main to dev
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'chart/**'
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build the stack
+        run: docker-compose up -d
+
+      - name: Check running containers
+        run: docker-compose ps
+
+      - name: Check logs
+        run: docker-compose logs worker api
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Worker - Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: icon-blocks-worker
+          IMAGE_TAG: ${{ github.run_number }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG docker/Dockerfile.worker.prod
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: API - Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: icon-blocks-api
+          IMAGE_TAG: ${{ github.run_number }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG docker/Dockerfile.api.prod
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Update dev deployment values file and re-commit
+        uses: fjogeleit/yaml-update-action@master
+        with:
+          valueFile: 'chart/deployments/dev/values.test.yaml'
+          propertyPath: 'deployment.image.tag'
+          value: ${{ github.run_number }}
+          branch: main
+          targetBranch: main
+          createPR: 'false'
+          message: 'Update dev deployment image version to ${{ github.run_number }}'
+          token: ${{ secrets.GITHUB_TOKEN }}
