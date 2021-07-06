@@ -1,5 +1,5 @@
 <p align="center">
-  <h3 align="center">Go API Template</h3>
+  <h3 align="center">Blocks Service</h3>
 </p>
 
 
