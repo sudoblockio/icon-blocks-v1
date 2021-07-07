@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.api.dev
-      target: dev
+#      target: dev
     ports:
       - "8000:8000"     # API
       - "8180:8180"     # Health
@@ -75,7 +75,7 @@ services:
       "stream",
       "-o", "kafka:9092",
       "--period-seconds", "1",
-      "--provider-uri", "http://tmp.main.icon.geometry.io:9000/api/v3",
+      "--provider-uri", "http://34.211.173.90:9000/api/v3",
       "-b", "100",
     ]
     depends_on:
