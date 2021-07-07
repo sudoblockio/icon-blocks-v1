@@ -8,7 +8,7 @@ ENV GO111MODULE=on \
 
 # COPY SRC
 WORKDIR /build
-COPY ../src .
+COPY ./src .
 
 # DOWNLOAND DEPS
 RUN go mod tidy
@@ -22,7 +22,7 @@ FROM ubuntu as prod
 # Uncomment if SSL certs needed
 # COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-COPY ../src/schemas ./schemas
-COPY --from=builder /build/worker /
+COPY ./src/schemas ./schemas
+COPY --from=builder /build/worker ./
 
-CMD ["/worker"]
+CMD ["./worker"]

@@ -22,7 +22,6 @@ func BlocksAddHandlers(app *fiber.App) {
 // @Tags root
 // @Accept */*
 // @Produce json
-// @Success 200 {object} *[]models.BlockRaw
 // @Router /blocks [get]
 func handlerGetQuery(c *fiber.Ctx) error {
 	params := new(service.BlocksQueryService)
