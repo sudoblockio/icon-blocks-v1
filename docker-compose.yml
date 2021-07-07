@@ -4,8 +4,8 @@ services:
   api:
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile.api.dev
-#      target: dev
+      dockerfile: dockerfiles/Dockerfile.api.prod
+      #dockerfile: dockerfiles/Dockerfile.api.dev
     ports:
       - "8000:8000"     # API
       - "8180:8180"     # Health
@@ -21,18 +21,12 @@ services:
       - postgres
     env_file:
       - ./envfiles/env.api.test
-    environment:
-      - ENV_FILE=env.api.test
-    volumes:
-      - ./src:/app
-#      - ./schemas:/app/schemas
-      - ./envfiles:/app/envfiles
 
   worker:
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile.worker.dev
-#      target: dev
+      dockerfile: dockerfiles/Dockerfile.worker.prod
+      #dockerfile: dockerfiles/Dockerfile.worker.dev
     ports:
       - "8181:8181"     # Health
       - "9401:9401"     # Prometheus
@@ -47,27 +41,6 @@ services:
       - postgres
     env_file:
       -  ./envfiles/env.worker.test
-    environment:
-      - ENV_FILE=env.worker.test
-    volumes:
-      - ./src:/app
-#      - ./schemas:/app/schemas
-      - ./envfiles:/app/envfiles
-
-  mongo:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: "mongo"
-      MONGO_INITDB_ROOT_PASSWORD: "changethis"
-
-  mongo-express:
-    image: mongo-express
-    depends_on:
-      - mongo
-    ports:
-      - 8081:8081
 
   etl:
     image: geometrylabs/iconetl:${ICON_ETL_TAG:-latest}
@@ -82,9 +55,11 @@ services:
       - kafka
     restart: on-failure
     volumes:
-      - "./etl/last_synced_block.txt:/icon-etl/last_synced_block.txt"
+      - ./volumes/etl/last_synced_block.txt:/icon-etl/last_synced_block.txt
 
-  ## postgres
+  ############
+  # Database #
+  ############
   postgres:
     #    container_name: postgres_container
     image: postgres
@@ -93,10 +68,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       PGDATA: /data/postgres
     volumes:
-      - postgres:/data/postgres
+      - ./volumes/postgres:/data/postgres
     ports:
       - "5432:5432"
-    #    restart: unless-stopped
 
   pgadmin:
     #    container_name: pgadmin_container
@@ -105,10 +79,9 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
     volumes:
-      - pgadmin:/root/.pgadmin
+      - ./volumes/pgadmin:/root/.pgadmin
     ports:
       - "${PGADMIN_PORT:-5050}:80"
-#    restart: unless-stopped
 
   #########
   # Kafka #
@@ -194,21 +167,3 @@ services:
     networks:
       - default
     restart: always
-
-  #######
-  # Admin
-  #######
-#  schema-registry-ui:
-#    image: landoop/schema-registry-ui
-#    hostname: schema-registry-ui
-#    depends_on:
-#      - kafka
-#      - schemaregistry
-#    ports:
-#      - "8001:8000"
-#    environment:
-#      SCHEMAREGISTRY_URL: 'http://schemaregistry:8081'
-
-volumes:
-  postgres:
-  pgadmin:
