@@ -1,20 +1,17 @@
 package healthcheck
 
 import (
-	"github.com/geometry-labs/go-service-template/config"
+	"github.com/geometry-labs/icon-blocks/config"
 	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/geometry-labs/go-service-template/api/routes"
+	"github.com/geometry-labs/icon-blocks/api/routes"
 )
 
 func init() {
 	//core.GetEnvironment()
-	config.Vars.ConfigFile = "config.api.test"
-	config.Vars.ConfigType = "yaml"
-	config.Vars.ConfigPath = "../../../envfiles"
 	config.ConfigInit()
 }
 

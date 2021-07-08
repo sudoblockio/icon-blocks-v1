@@ -1,7 +1,7 @@
 package crud_test
 
 import (
-	"github.com/geometry-labs/go-service-template/crud"
+	"github.com/geometry-labs/icon-blocks/crud"
 	"testing"
 
 	. "github.com/onsi/ginkgo"

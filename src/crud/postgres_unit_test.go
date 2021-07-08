@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/geometry-labs/go-service-template/crud"
+	"github.com/geometry-labs/icon-blocks/crud"
 )
 
 var _ = Describe("Postgres", func() {

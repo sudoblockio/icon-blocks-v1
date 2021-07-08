@@ -4,8 +4,9 @@ services:
   api:
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile.api.prod
-      #dockerfile: dockerfiles/Dockerfile.api.dev
+#      dockerfile: dockerfiles/Dockerfile.api.prod
+#      target: prod
+      dockerfile: dockerfiles/Dockerfile.api.dev
     ports:
       - "8000:8000"     # API
       - "8180:8180"     # Health
@@ -21,12 +22,19 @@ services:
       - postgres
     env_file:
       - ./envfiles/env.api.test
+    environment:
+      - ENV_FILE=env.api.test
+    volumes:
+      - ./src:/app
+      # - ./schemas:/app/schemas
+      - ./envfiles:/app/envfiles
 
   worker:
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile.worker.prod
-      #dockerfile: dockerfiles/Dockerfile.worker.dev
+#      dockerfile: dockerfiles/Dockerfile.worker.prod
+#      target: prod
+      dockerfile: dockerfiles/Dockerfile.worker.dev
     ports:
       - "8181:8181"     # Health
       - "9401:9401"     # Prometheus
@@ -41,6 +49,12 @@ services:
       - postgres
     env_file:
       -  ./envfiles/env.worker.test
+    environment:
+      - ENV_FILE=env.worker.test
+    volumes:
+      - ./src:/app
+      # - ./schemas:/app/schemas
+      - ./envfiles:/app/envfiles
 
   etl:
     image: geometrylabs/iconetl:${ICON_ETL_TAG:-latest}

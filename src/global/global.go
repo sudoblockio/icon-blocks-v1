@@ -3,7 +3,7 @@ package global
 import (
 	"sync"
 
-	"github.com/geometry-labs/go-service-template/crud"
+	"github.com/geometry-labs/icon-blocks/crud"
 )
 
 const Version = "v0.1.0"

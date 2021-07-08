@@ -2,7 +2,7 @@ package metrics
 
 import (
 	"fmt"
-	"github.com/geometry-labs/go-service-template/config"
+	"github.com/geometry-labs/icon-blocks/config"
 	"net/http"
 	"os"
 	"testing"

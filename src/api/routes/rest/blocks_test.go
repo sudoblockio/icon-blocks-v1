@@ -2,7 +2,7 @@ package rest
 
 import (
 	"encoding/json"
-	"github.com/geometry-labs/go-service-template/config"
+	"github.com/geometry-labs/icon-blocks/config"
 	"io/ioutil"
 	"net/http/httptest"
 	"testing"
@@ -13,9 +13,6 @@ import (
 
 func init() {
 	//core.GetEnvironment()
-	config.Vars.ConfigFile = "config.api.test"
-	config.Vars.ConfigType = "yaml"
-	config.Vars.ConfigPath = "../../../../envfiles"
 	config.ConfigInit()
 }
 
@@ -24,7 +21,7 @@ func TestHandlerGetBlock(t *testing.T) {
 
 	app := fiber.New()
 
-	app.Get("/", handlerGetBlock)
+	app.Get("/", handlerGetQuery)
 
 	resp, err := app.Test(httptest.NewRequest("GET", "/", nil))
 	assert.Equal(nil, err)

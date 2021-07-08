@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/geometry-labs/go-service-template/models"
+	"github.com/geometry-labs/icon-blocks/models"
 )
 
 const (

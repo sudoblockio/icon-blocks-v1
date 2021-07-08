@@ -1,18 +1,18 @@
 package main
 
 import (
-	"github.com/geometry-labs/go-service-template/config"
-	"github.com/geometry-labs/go-service-template/global"
-	"github.com/geometry-labs/go-service-template/kafka"
-	"github.com/geometry-labs/go-service-template/logging"
-	"github.com/geometry-labs/go-service-template/metrics"
-	"github.com/geometry-labs/go-service-template/worker/loader"
+	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/global"
+	"github.com/geometry-labs/icon-blocks/kafka"
+	"github.com/geometry-labs/icon-blocks/logging"
+	"github.com/geometry-labs/icon-blocks/metrics"
+	"github.com/geometry-labs/icon-blocks/worker/loader"
 	"go.uber.org/zap"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/geometry-labs/go-service-template/worker/transformers"
+	"github.com/geometry-labs/icon-blocks/worker/transformers"
 )
 
 func main() {

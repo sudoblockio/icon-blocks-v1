@@ -2,7 +2,7 @@ package crud
 
 import (
 	"github.com/cenkalti/backoff/v4"
-	"github.com/geometry-labs/go-service-template/models"
+	"github.com/geometry-labs/icon-blocks/models"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"strings"

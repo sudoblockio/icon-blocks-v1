@@ -1,11 +1,11 @@
 package transformers
 
 import (
-	"github.com/geometry-labs/go-service-template/config"
-	"github.com/geometry-labs/go-service-template/global"
-	"github.com/geometry-labs/go-service-template/kafka"
-	"github.com/geometry-labs/go-service-template/models"
-	"github.com/geometry-labs/go-service-template/worker/utils"
+	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/global"
+	"github.com/geometry-labs/icon-blocks/kafka"
+	"github.com/geometry-labs/icon-blocks/models"
+	"github.com/geometry-labs/icon-blocks/worker/utils"
 	"go.uber.org/zap"
 	"gopkg.in/Shopify/sarama.v1"
 )

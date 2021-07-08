@@ -2,8 +2,8 @@ package loader
 
 import (
 	"fmt"
-	"github.com/geometry-labs/go-service-template/global"
-	"github.com/geometry-labs/go-service-template/models"
+	"github.com/geometry-labs/icon-blocks/global"
+	"github.com/geometry-labs/icon-blocks/models"
 	"go.uber.org/zap"
 )
 

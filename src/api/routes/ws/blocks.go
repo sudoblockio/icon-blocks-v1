@@ -1,12 +1,12 @@
 package ws
 
 import (
-	"github.com/geometry-labs/go-service-template/config"
+	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"gopkg.in/Shopify/sarama.v1"
 
-	"github.com/geometry-labs/go-service-template/kafka"
+	"github.com/geometry-labs/icon-blocks/kafka"
 )
 
 func BlocksAddHandlers(app *fiber.App) {

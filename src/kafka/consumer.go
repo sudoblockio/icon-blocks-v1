@@ -2,7 +2,7 @@ package kafka
 
 import (
 	"github.com/cenkalti/backoff/v4"
-	"github.com/geometry-labs/go-service-template/config"
+	"github.com/geometry-labs/icon-blocks/config"
 	"go.uber.org/zap"
 	"gopkg.in/Shopify/sarama.v1"
 	"time"

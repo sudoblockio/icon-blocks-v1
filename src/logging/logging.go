@@ -1,8 +1,8 @@
 package logging
 
 import (
-	"github.com/geometry-labs/go-service-template/config"
-	"github.com/geometry-labs/go-service-template/global"
+	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/global"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log"

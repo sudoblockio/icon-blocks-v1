@@ -21,7 +21,7 @@ RUN go get github.com/riferrei/srclient@v0.3.0
 RUN swag init -g api/routes/api.go
 
 # BUILD
-RUN go build -gcflags="all=-N -l" -o api main-api.go
+RUN go build -gcflags="all=-N -l" -o /build/api main-api.go
 
 FROM ubuntu as prod
 
@@ -29,6 +29,6 @@ FROM ubuntu as prod
 # COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 COPY ./src/schemas ./schemas
-COPY --from=builder /build/api /
+COPY --from=builder /build/api ./
 
-CMD ["/api"]
+CMD ["api"]

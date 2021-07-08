@@ -13,7 +13,7 @@ type TopicBroadcastFunc func(channel chan *sarama.ConsumerMessage, message *sara
 
 type TopicBroadcaster struct {
 
-	// Input
+	// Input"
 	ConsumerChan chan *sarama.ConsumerMessage
 
 	// Output

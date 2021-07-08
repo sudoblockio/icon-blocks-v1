@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/geometry-labs/go-service-template/global"
-	"github.com/geometry-labs/go-service-template/models"
+	"github.com/geometry-labs/icon-blocks/global"
+	"github.com/geometry-labs/icon-blocks/models"
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 	"gorm.io/gorm"

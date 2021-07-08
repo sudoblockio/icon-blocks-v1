@@ -2,16 +2,16 @@ package routes
 
 import (
 	"encoding/json"
-	"github.com/geometry-labs/go-service-template/config"
-	"github.com/geometry-labs/go-service-template/global"
+	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/global"
 	"go.uber.org/zap"
 
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	fiber "github.com/gofiber/fiber/v2"
 
-	_ "github.com/geometry-labs/go-service-template/api/docs"
-	"github.com/geometry-labs/go-service-template/api/routes/rest"
-	"github.com/geometry-labs/go-service-template/api/routes/ws"
+	_ "github.com/geometry-labs/icon-blocks/api/docs"
+	"github.com/geometry-labs/icon-blocks/api/routes/rest"
+	"github.com/geometry-labs/icon-blocks/api/routes/ws"
 )
 
 // @title Go api template docs

@@ -1,7 +1,7 @@
 package crud
 
 import (
-	"github.com/geometry-labs/go-service-template/models"
+	"github.com/geometry-labs/icon-blocks/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"

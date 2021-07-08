@@ -1,7 +1,7 @@
 package ws
 
 import (
-	"github.com/geometry-labs/go-service-template/config"
+	"github.com/geometry-labs/icon-blocks/config"
 	"testing"
 	"time"
 
@@ -11,14 +11,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/Shopify/sarama.v1"
 
-	"github.com/geometry-labs/go-service-template/kafka"
+	"github.com/geometry-labs/icon-blocks/kafka"
 )
 
 func init() {
 	//core.GetEnvironment()
-	config.Vars.ConfigFile = "config.api.test"
-	config.Vars.ConfigType = "yaml"
-	config.Vars.ConfigPath = "../../../../envfiles"
 	config.ConfigInit()
 }
 

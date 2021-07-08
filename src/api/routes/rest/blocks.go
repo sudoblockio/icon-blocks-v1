@@ -3,8 +3,8 @@ package rest
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/geometry-labs/go-service-template/api/service"
-	"github.com/geometry-labs/go-service-template/config"
+	"github.com/geometry-labs/icon-blocks/api/service"
+	"github.com/geometry-labs/icon-blocks/config"
 	fiber "github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 )

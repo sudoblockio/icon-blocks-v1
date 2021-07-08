@@ -1,7 +1,7 @@
 package kafka
 
 import (
-	"github.com/geometry-labs/go-service-template/config"
+	"github.com/geometry-labs/icon-blocks/config"
 	"testing"
 	"time"
 

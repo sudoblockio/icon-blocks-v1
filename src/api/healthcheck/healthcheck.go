@@ -1,7 +1,7 @@
 package healthcheck
 
 import (
-	"github.com/geometry-labs/go-service-template/config"
+	"github.com/geometry-labs/icon-blocks/config"
 	"go.uber.org/zap"
 	"net/http"
 	"net/url"

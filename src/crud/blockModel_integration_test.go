@@ -3,8 +3,8 @@
 package crud_test
 
 import (
-	"github.com/geometry-labs/go-service-template/fixtures"
-	"github.com/geometry-labs/go-service-template/models"
+	"github.com/geometry-labs/icon-blocks/fixtures"
+	"github.com/geometry-labs/icon-blocks/models"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
