@@ -22,7 +22,7 @@ RUN go get github.com/riferrei/srclient@v0.3.0
 RUN swag init -g api/routes/api.go
 
 # BUILD
-RUN go build -o main main-worker.go
+RUN go build -o main main-api.go
 
 FROM ubuntu as prod
 ##############
