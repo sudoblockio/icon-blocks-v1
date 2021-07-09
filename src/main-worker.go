@@ -4,7 +4,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-  "time"
   "log"
 
 	"github.com/geometry-labs/icon-blocks/worker/transformers"
