@@ -1,10 +1,10 @@
 package main
 
 import (
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
-  "log"
 
 	"github.com/geometry-labs/icon-blocks/worker/transformers"
 	"go.uber.org/zap"
