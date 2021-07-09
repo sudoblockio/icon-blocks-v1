@@ -19,8 +19,6 @@ import (
 )
 
 func main() {
-  log.Printf("STARTING WORKER")
-
 	config.ReadEnvironment()
 
 	logging.StartLoggingInit()
