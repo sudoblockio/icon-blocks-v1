@@ -31,12 +31,12 @@ func RegisterSchema(topic string, isKey bool, srcSchemaFile string, forceUpdate 
 
 func registerSchema(schemaRegistryClient *srclient.SchemaRegistryClient, topic string, isKey bool, srcSchemaFile string) (*srclient.Schema, error) {
 	filePath := "schemas/" + srcSchemaFile + ".proto"
-	zap.S().Info("Adding/Updating Schema from: %s\n", filePath)
+	zap.S().Info("Adding/Updating Schema from filepath:", filePath)
 	schemaBytes, _ := ioutil.ReadFile(filePath)
 	schema, err := schemaRegistryClient.CreateSchema(topic, string(schemaBytes), srclient.Protobuf, isKey)
 	if err != nil {
 		//panic(fmt.Sprintf("Error creating the schema %s", err))
-		zap.S().Info("Error creating the schema %s\n", err)
+		zap.S().Info("Error creating the schema, err:", err)
 		return nil, err
 	}
 	return schema, nil

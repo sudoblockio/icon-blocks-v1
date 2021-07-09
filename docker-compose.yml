@@ -31,7 +31,7 @@ x-env: &env
   # Topics
   CONSUMER_TOPICS: "blocks"
   PRODUCER_TOPICS: "blocks-ws"
-  SCHEMA_NAME_TOPICS: "blocks-ws:blocks-ws"
+  SCHEMA_NAME_TOPICS: "blocks-ws:block"
 
   # DB
   DB_DRIVER: "postgres"
