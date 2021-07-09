@@ -12,7 +12,7 @@ import (
 type RegisterSchemaFunc func(topic string, isKey bool, srcSchemaFile string, forceUpdate bool) (int, error)
 
 func RegisterSchema(topic string, isKey bool, srcSchemaFile string, forceUpdate bool) (int, error) {
-	zap.S().Info("RegisterSchema() \n")
+	zap.S().Info("RegisterSchema()")
 	schemaRegistryClient := srclient.CreateSchemaRegistryClient("http://" + config.Config.SchemaRegistryURL)
 	schema, err := schemaRegistryClient.GetLatestSchema(topic, false)
 	if schema == nil {
@@ -31,12 +31,12 @@ func RegisterSchema(topic string, isKey bool, srcSchemaFile string, forceUpdate 
 
 func registerSchema(schemaRegistryClient *srclient.SchemaRegistryClient, topic string, isKey bool, srcSchemaFile string) (*srclient.Schema, error) {
 	filePath := "schemas/" + srcSchemaFile + ".proto"
-	zap.S().Info("Adding/Updating Schema from filepath:", filePath)
+	zap.S().Info("Adding/Updating Schema from filepath: ", filePath)
 	schemaBytes, _ := ioutil.ReadFile(filePath)
 	schema, err := schemaRegistryClient.CreateSchema(topic, string(schemaBytes), srclient.Protobuf, isKey)
 	if err != nil {
 		//panic(fmt.Sprintf("Error creating the schema %s", err))
-		zap.S().Info("Error creating the schema, err:", err)
+		zap.S().Info("Error creating the schema, err: ", err)
 		return nil, err
 	}
 	return schema, nil
