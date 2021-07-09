@@ -30,9 +30,9 @@ func MetricsWorkerStart() {
 	createWorkerGauges()
 
 	// Start server
-	http.Handle(config.Config.MetricsPrefix, promhttp.Handler())
+	http.Handle("/metrics", promhttp.Handler())
 	go http.ListenAndServe(":"+config.Config.MetricsPort, nil)
-	zap.S().Info("Started Metrics:", config.Config.MetricsPort)
+  zap.S().Info("Started Metrics on port:", config.Config.MetricsPort, config.Config.MetricsPrefix)
 }
 
 func createApiGauges() {

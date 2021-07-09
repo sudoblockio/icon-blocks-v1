@@ -1,4 +1,7 @@
 FROM golang:1.16-buster AS builder
+###########
+# BUILDER #
+###########
 
 # GO ENV VARS
 ENV GO111MODULE=on \
@@ -10,9 +13,7 @@ ENV GO111MODULE=on \
 WORKDIR /build
 COPY ./src .
 
-# DOWNLOAND DEPS
 RUN go mod tidy
-RUN go mod download
 
 # CREATE SWAGGER DOCS
 RUN go get github.com/swaggo/swag/cmd/swag
@@ -21,14 +22,22 @@ RUN go get github.com/riferrei/srclient@v0.3.0
 RUN swag init -g api/routes/api.go
 
 # BUILD
-RUN go build -gcflags="all=-N -l" -o /build/api main-api.go
+RUN go build -o main main-worker.go
 
 FROM ubuntu as prod
+##############
+# PRODUCTION #
+##############
 
-# Uncomment for SSL certs
+# Uncomment if SSL certs needed
 # COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-COPY ./src/schemas ./schemas
-COPY --from=builder /build/api ./
+COPY --from=builder /build/main /
+CMD ["/main"]
 
-CMD ["api"]
+FROM builder as test
+########
+# TEST #
+########
+#
+CMD ["go", "test", "./.../", "-v", "-timeout", "15m"]

@@ -1,139 +1,62 @@
 package config
 
 import (
-	"fmt"
-	"github.com/spf13/viper"
-	"log"
-	"os"
+	"encoding/json"
+  "log"
+
+	"github.com/kelseyhightower/envconfig"
 )
 
-type ConfigStruct struct {
-	Name        string `mapstructure:"NAME"`
-	NetworkName string `mapstructure:"NETWORK_NAME"`
+type configType struct {
+	Name        string `envconfig:"NAME" required:"false" default:"blocks-service"`
+	NetworkName string `envconfig:"NETWORK_NAME" required:"false" default:"mainnnet"`
 
 	// Ports
-	Port        string `mapstructure:"PORT"`
-	HealthPort  string `mapstructure:"HEALTH_PORT"`
-	MetricsPort string `mapstructure:"METRICS_PORT"`
+	Port        string `envconfig:"PORT" required:"false" default:"8000"`
+	HealthPort  string `envconfig:"HEALTH_PORT" required:"false" default:"8180"`
+	MetricsPort string `envconfig:"METRICS_PORT" required:"false" default:"9400"`
 
 	// Prefix
-	RestPrefix      string `mapstructure:"REST_PREFIX"`
-	WebsocketPrefix string `mapstructure:"WEBSOCKET_PREFIX"`
-	HealthPrefix    string `mapstructure:"HEALTH_PREFIX"`
-	MetricsPrefix   string `mapstructure:"METRICS_PREFIX"`
+	RestPrefix      string `envconfig:"REST_PREFIX" required:"false" default:"/api/v1"`
+	WebsocketPrefix string  `envconfig:"WEBSOCKET_PREFIX" required:"false" default:"/ws/v1"`
+	HealthPrefix    string  `envconfig:"HEALTH_PREFIX" required:"false" default:"/health"`
+	MetricsPrefix   string  `envconfig:"METRICS_PREFIX" required:"false" default:"/metrics"`
 
 	// Monitoring
-	HealthPollingInterval int    `mapstructure:"HEALTH_POLLING_INTERVAL"`
-	LogLevel              string `mapstructure:"LOG_LEVEL"`
-	LogToFile             bool   `mapstructure:"LOG_TO_FILE"`
-	LogFileName           string `mapstructure:"LOG_FILE_NAME"`
+	HealthPollingInterval int  `envconfig:"HEALTH_POLLING_INTERVAL" required:"false" default:"10"`
+	LogLevel              string  `envconfig:"LOG_LEVEL" required:"false" default:"INFO"`
+	LogToFile             bool    `envconfig:"LOG_TO_FILE" required:"false" default:"false"`
+	LogFileName           string  `envconfig:"LOG_FILE_NAME" required:"false" default:"blocks-service.log"`
 
 	// Kafka
-	KafkaBrokerURL    string `mapstructure:"KAFKA_BROKER_URL"`
-	SchemaRegistryURL string `mapstructure:"SCHEMA_REGISTRY_URL"`
-	KafkaGroupID      string `mapstructure:"KAFKA_GROUP_ID"`
+  KafkaBrokerURL    string  `envconfig:"KAFKA_BROKER_URL" required:"false" default:"kafka:9092"`
+  SchemaRegistryURL string  `envconfig:"SCHEMA_REGISTRY_URL" required:"false" default:"schemaregistry:8081"`
+	KafkaGroupID      string  `envconfig:"KAFKA_GROUP_ID" required:"false" default:"blocks-service"`
 
 	// Topics
-	ConsumerTopics   []string          `mapstructure:"CONSUMER_TOPICS"`
-	ProducerTopics   []string          `mapstructure:"PRODUCER_TOPICS"`
-	SchemaNameTopics map[string]string `mapstructure:"SCHEMA_NAME_TOPICS"`
+	ConsumerTopics   []string  `envconfig:"CONSUMER_TOPICS" required:"false" default:"blocks"`
+	ProducerTopics   []string   `envconfig:"PRODUCER_TOPICS" required:"false" default:"blocks-ws"`
+	SchemaNameTopics map[string]string  `envconfig:"SCHEMA_NAME_TOPICS" required:"false" default:"blocks:blocks"`
 
 	// DB
-	DbDriver   string `mapstructure:"DB_DRIVER"`
-	DbHost     string `mapstructure:"DB_HOST"`
-	DbPort     string `mapstructure:"DB_PORT"`
-	DbUser     string `mapstructure:"DB_USER"`
-	DbPassword string `mapstructure:"DB_PASSWORD"`
-	DbName     string `mapstructure:"DB_DBNAME"`
-	DbSslmode  string `mapstructure:"DB_SSLMODE"`
-	DbTimezone string `mapstructure:"DB_TIMEZONE"`
-
-	// Mongo
-	MongoHost string `mapstructure:"MONGO_HOST"`
-	MongoPort string `mapstructure:"MONGO_PORT"`
+	DbDriver   string  `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
+	DbHost     string  `envconfig:"DB_HOST" required:"false" default:"postgres"`
+	DbPort     string  `envconfig:"DB_PORT" required:"false" default:"5432"`
+	DbUser     string  `envconfig:"DB_USER" required:"false" default:"postgres"`
+	DbPassword string  `envconfig:"DB_PASSWORD" required:"false" default:"changethis"`
+	DbName     string  `envconfig:"DB_NAME" required:"false" default:"blocks"`
+	DbSslmode  string  `envconfig:"DB_SSL_MODE" required:"false" default:"disable"`
+	DbTimezone string  `envconfig:"DB_TIMEZONE" required:"false" default:"UTC"`
 }
 
-var Config ConfigStruct
+var Config configType
 
-// GetEnvironment Run once on main.go
-func GetEnvironment() {
-	////Get environment variable file
-	//env_file := os.Getenv("ENV_FILE")
-	//if env_file != "" {
-	//	_ = godotenv.Load(env_file)
-	//} else {
-	//	_ = godotenv.Load()
-	//}
-	//
-	//err := envconfig.Process("", &Vars)
-	//if err != nil {
-	//	log.Fatalf("ERROR: envconfig - %s\n", err.Error())
-	//}
-
-	// Fill Config struct
-	config := ConfigInit()
-	log.Println("config:", config)
-}
-
-func ConfigInit() ConfigStruct {
-	filename := os.Getenv("ENV_FILE")
-	viper.SetConfigName(filename)
-	viper.SetConfigType("env")
-	viper.AddConfigPath("./envfiles")
-
-	// Override values from config file with the values of the corresponding environment variables if they exist
-	viper.AutomaticEnv()
-
-	// Set Defaults
-	setDefaults()
-
-	err := viper.ReadInConfig()
+func ReadEnvironment() {
+	err := envconfig.Process("", &Config)
 	if err != nil {
-		log.Println(fmt.Errorf("FATAL error config file: %s, Error: %s \n", filename, err))
+		log.Fatalf("ERROR: envconfig - %s\n", err.Error())
 	}
 
-	err = viper.Unmarshal(&Config)
-	if err != nil {
-		panic(fmt.Errorf("unable to decode into struct, %v\n", err))
-	}
-
-	return Config
-}
-
-func setDefaults() {
-	viper.SetDefault("Name", "blocks service")
-	viper.SetDefault("NetworkName", "mainnet")
-
-	viper.SetDefault("Port", "8000")
-	viper.SetDefault("HealthPort", "8080")
-	viper.SetDefault("MetricsPort", "9400")
-
-	viper.SetDefault("RestPrefix", "/rest")
-	viper.SetDefault("WebsocketPrefix", "/ws")
-	viper.SetDefault("HealthPrefix", "/health")
-	viper.SetDefault("MetricsPrefix", "/metrics")
-
-	viper.SetDefault("HealthPollingInterval", 10)
-	viper.SetDefault("LogLevel", "INFO")
-	viper.SetDefault("LogToFile", false)
-
-	viper.SetDefault("KafkaBrokerURL", "")
-	viper.SetDefault("SchemaRegistryURL", "")
-	viper.SetDefault("KafkaGroupID", "websocket-group")
-
-	viper.SetDefault("ConsumerTopics", "[blocks]")
-	viper.SetDefault("ProducerTopics", "[blocks-ws]")
-	viper.SetDefault("SchemaNameTopics", map[string]string{"blocks": "block_raw", "blocks-ws": "block"})
-
-	viper.SetDefault("DbDriver", "postgres")
-	viper.SetDefault("DbHost", "localhost")
-	viper.SetDefault("DbPort", "5432")
-	viper.SetDefault("DbUser", "postgres")
-	viper.SetDefault("DbPassword", "changeme")
-	viper.SetDefault("DbName", "test_db")
-	viper.SetDefault("DbSslmode", "disable")
-	viper.SetDefault("DbTimezone", "UTC")
-
-	viper.SetDefault("MongoHost", "localhost")
-	viper.SetDefault("MongoPort", "27017")
+	vars, _ := json.Marshal(Config)
+	log.Printf("Config Vars: " + string(vars))
 }

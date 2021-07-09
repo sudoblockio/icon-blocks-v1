@@ -1,32 +1,33 @@
 package main
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
+  "time"
+  "log"
+
+	"github.com/geometry-labs/icon-blocks/worker/transformers"
+	"go.uber.org/zap"
+
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/global"
 	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/logging"
 	"github.com/geometry-labs/icon-blocks/metrics"
 	"github.com/geometry-labs/icon-blocks/worker/loader"
-	"go.uber.org/zap"
-	"os"
-	"os/signal"
-	"syscall"
-
-	"github.com/geometry-labs/icon-blocks/worker/transformers"
 )
 
 func main() {
+  log.Printf("STARTING WORKER")
 
-	config.GetEnvironment()
+	config.ReadEnvironment()
 
 	logging.StartLoggingInit()
-	zap.S().Debug("Main: Starting logging with level ", config.Config.LogLevel)
+	log.Printf("Main: Starting logging with level %s", config.Config.LogLevel)
 
 	// Start Prometheus client
 	metrics.MetricsWorkerStart()
-
-	// Start Health server
-	//healthcheck.Start()
 
 	// Start kafka consumer
 	kafka.StartWorkerConsumers()
@@ -34,7 +35,7 @@ func main() {
 	// Start kafka Producer
 	kafka.StartProducers()
 	// Wait for Kafka
-	//time.Sleep(1 * time.Second)
+	time.Sleep(1 * time.Second)
 
 	// Start Postgres loader
 	loader.StartBlockLoader()

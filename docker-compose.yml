@@ -1,12 +1,54 @@
 version: "3.7"
 
+x-env: &env
+  NAME: "blocks"
+  NETWORK_NAME: "mainnet"
+
+  # Ports
+  PORT: "8000"
+  HEALTH_PORT: "8180"
+  METRICS_PORT: "9400"
+
+  # Prefix
+  REST_PREFIX: "/api/v1"
+  WEBSOCKET_PREFIX: "/ws/v1"
+  HEALTH_PREFIX: "/heath"
+  METRICS_PREFIX: "/metrics"
+
+  # Monitoring
+  HEALTH_POLLING_INTERVAL: "60"
+
+  # Logging
+  LOG_LEVEL: "DEBUG"
+  LOG_TO_FILE: "false"
+  LOG_FILE_NAME: "blocks.log"
+
+  # Kafka
+  KAFKA_BROKER_URL: "kafka:9092"
+  SCHEMA_REGISTRY_URL: "schemaregistry:8081"
+  KAFKA_GROUP_ID: "blocks-service"
+
+  # Topics
+  CONSUMER_TOPICS: "blocks"
+  PRODUCER_TOPICS: "blocks-ws"
+  SCHEMA_NAME_TOPICS: "blocks-ws:blocks-ws"
+
+  # DB
+  DB_DRIVER: "postgres"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_USER: "postgres"
+  DB_PASSWORD: "changethis"
+  DB_DBNAME: "icon"
+  DB_SSLMODE: "disable"
+  DB_TIMEZONE: "UTC"
+
 services:
   api:
     build:
       context: .
-#      dockerfile: dockerfiles/Dockerfile.api.prod
-#      target: prod
-      dockerfile: dockerfiles/Dockerfile.api.dev
+      dockerfile: dockerfiles/Dockerfile.api.prod
+      target: prod
     ports:
       - "8000:8000"     # API
       - "8180:8180"     # Health
@@ -20,21 +62,17 @@ services:
       - kafka
       - schemaregistry
       - postgres
-    env_file:
-      - ./envfiles/env.api.test
-    environment:
-      - ENV_FILE=env.api.test
     volumes:
       - ./src:/app
-      # - ./schemas:/app/schemas
       - ./envfiles:/app/envfiles
+    environment:
+      <<: *env
 
   worker:
     build:
       context: .
-#      dockerfile: dockerfiles/Dockerfile.worker.prod
-#      target: prod
-      dockerfile: dockerfiles/Dockerfile.worker.dev
+      dockerfile: dockerfiles/Dockerfile.worker.prod
+      target: prod
     ports:
       - "8181:8181"     # Health
       - "9401:9401"     # Prometheus
@@ -47,14 +85,11 @@ services:
       - kafka
       - schemaregistry
       - postgres
-    env_file:
-      -  ./envfiles/env.worker.test
-    environment:
-      - ENV_FILE=env.worker.test
     volumes:
       - ./src:/app
-      # - ./schemas:/app/schemas
       - ./envfiles:/app/envfiles
+    environment:
+      <<: *env
 
   etl:
     image: geometrylabs/iconetl:${ICON_ETL_TAG:-latest}
@@ -79,12 +114,10 @@ services:
     image: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changethis}
       PGDATA: /data/postgres
     volumes:
       - ./volumes/postgres:/data/postgres
-    ports:
-      - "5432:5432"
 
   pgadmin:
     #    container_name: pgadmin_container

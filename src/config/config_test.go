@@ -38,7 +38,7 @@ func TestEnvironment(t *testing.T) {
 	}
 
 	// Load env
-	GetEnvironment()
+	ReadEnvironment()
 
 	// Check env
 	assert.Equal(env_map["NAME"], Config.Name)

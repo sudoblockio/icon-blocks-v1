@@ -1,21 +1,23 @@
 package main
 
 import (
-	"github.com/geometry-labs/icon-blocks/config"
-	"github.com/geometry-labs/icon-blocks/global"
-	"github.com/geometry-labs/icon-blocks/logging"
-	"github.com/geometry-labs/icon-blocks/metrics"
-	"go.uber.org/zap"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"go.uber.org/zap"
+
+	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/global"
+	"github.com/geometry-labs/icon-blocks/logging"
+	"github.com/geometry-labs/icon-blocks/metrics"
+	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/api/healthcheck"
 	"github.com/geometry-labs/icon-blocks/api/routes"
 )
 
 func main() {
-	config.GetEnvironment()
+	config.ReadEnvironment()
 
 	logging.StartLoggingInit()
 	zap.S().Debug("Main: Starting logging with level ", config.Config.LogLevel)
@@ -23,7 +25,7 @@ func main() {
 	global.GetGlobal()
 	// Start kafka consumers
 	// Go routines start in function
-	//kafka.StartApiConsumers()
+	kafka.StartApiConsumers()
 
 	// Start Prometheus client
 	// Go routine starts in function

@@ -1,12 +1,14 @@
 package logging
 
 import (
-	"github.com/geometry-labs/icon-blocks/config"
-	"github.com/geometry-labs/icon-blocks/global"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"log"
 	"strings"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+
+	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/global"
 )
 
 func StartLoggingInit() {
@@ -35,13 +37,9 @@ func newLogger(cfg zap.Config) *zap.Logger {
 
 func newLoggerConfig() zap.Config {
 	cfg := zap.Config{
-		Level:       setLoggerConfigLogLevel(), //zap.NewAtomicLevelAt(zap.InfoLevel),
-		Development: true,                      //false,
-		//Sampling: &zap.SamplingConfig{
-		//	Initial:    100,
-		//	Thereafter: 100,
-		//},
-		Encoding:         "console", //"json",
+		Level:            setLoggerConfigLogLevel(),
+		Development:      true,
+		Encoding:         "console",
 		EncoderConfig:    newLoggerEncoderConfig(),
 		OutputPaths:      setLoggerConfigOutputPaths(),
 		ErrorOutputPaths: setLoggerConfigErrorOutputPaths(),
