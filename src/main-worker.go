@@ -34,8 +34,6 @@ func main() {
 
 	// Start kafka Producer
 	kafka.StartProducers()
-	// Wait for Kafka
-	time.Sleep(1 * time.Second)
 
 	// Start Postgres loader
 	loader.StartBlockLoader()
