@@ -32,6 +32,7 @@ x-env: &env
   CONSUMER_TOPICS: "blocks"
   PRODUCER_TOPICS: "blocks-ws"
   SCHEMA_NAME_TOPICS: "blocks-ws:block"
+  SCHEMA_FOLDER_PATH: "/app/schemas/"
 
   # DB
   DB_DRIVER: "postgres"

@@ -37,6 +37,7 @@ type configType struct {
 	ConsumerTopics   []string          `envconfig:"CONSUMER_TOPICS" required:"false" default:"blocks"`
 	ProducerTopics   []string          `envconfig:"PRODUCER_TOPICS" required:"false" default:"blocks-ws"`
 	SchemaNameTopics map[string]string `envconfig:"SCHEMA_NAME_TOPICS" required:"false" default:"blocks-ws:block"`
+	SchemaFolderPath string            `envconfig:"SCHEMA_FOLDER_PATH" required:"false" default:"/app/schemas/"`
 
 	// DB
 	DbDriver   string `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
