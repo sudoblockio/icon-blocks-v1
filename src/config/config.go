@@ -44,8 +44,8 @@ type configType struct {
 	DbHost     string `envconfig:"DB_HOST" required:"false" default:"postgres"`
 	DbPort     string `envconfig:"DB_PORT" required:"false" default:"5432"`
 	DbUser     string `envconfig:"DB_USER" required:"false" default:"postgres"`
-	DbPassword string `envconfig:"DB_PASSWORD" required:"false" default:"changethis"`
-	DbName     string `envconfig:"DB_NAME" required:"false" default:"blocks"`
+	DbPassword string `envconfig:"DB_PASSWORD" required:"false" default:"changeme"`
+	DbName     string `envconfig:"DB_DBNAME" required:"false" default:"postgres"`
 	DbSslmode  string `envconfig:"DB_SSL_MODE" required:"false" default:"disable"`
 	DbTimezone string `envconfig:"DB_TIMEZONE" required:"false" default:"UTC"`
 }

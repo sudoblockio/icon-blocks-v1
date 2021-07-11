@@ -39,7 +39,7 @@ x-env: &env
   DB_HOST: "postgres"
   DB_PORT: "5432"
   DB_USER: "postgres"
-  DB_PASSWORD: "changethis"
+  DB_PASSWORD: "changeme"
   DB_DBNAME: "icon"
   DB_SSLMODE: "disable"
   DB_TIMEZONE: "UTC"
@@ -48,8 +48,8 @@ services:
   api:
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile.api.prod
-      target: prod
+      dockerfile: dockerfiles/Dockerfile.api.dev
+#      target: prod
     ports:
       - "8000:8000"     # API
       - "8180:8180"     # Health
@@ -72,8 +72,8 @@ services:
   worker:
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile.worker.prod
-      target: prod
+      dockerfile: dockerfiles/Dockerfile.worker.dev
+#      target: prod
     ports:
       - "8181:8181"     # Health
       - "9401:9401"     # Prometheus
@@ -115,10 +115,13 @@ services:
     image: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changethis}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       PGDATA: /data/postgres
     volumes:
       - ./volumes/postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    #    restart: unless-stopped
 
   pgadmin:
     #    container_name: pgadmin_container
