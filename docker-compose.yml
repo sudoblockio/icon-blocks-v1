@@ -48,8 +48,8 @@ services:
   api:
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile.api.dev
-#      target: prod
+      dockerfile: dockerfiles/Dockerfile.api.prod
+      target: prod
     ports:
       - "8000:8000"     # API
       - "8180:8180"     # Health
@@ -72,8 +72,8 @@ services:
   worker:
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile.worker.dev
-#      target: prod
+      dockerfile: dockerfiles/Dockerfile.worker.prod
+      target: prod
     ports:
       - "8181:8181"     # Health
       - "9401:9401"     # Prometheus
