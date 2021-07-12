@@ -1,10 +1,10 @@
 package main
 
 import (
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
-  "log"
 
 	"github.com/geometry-labs/icon-blocks/worker/transformers"
 	"go.uber.org/zap"
@@ -26,17 +26,17 @@ func main() {
 	// Start Prometheus client
 	metrics.MetricsWorkerStart()
 
-	// Start kafka consumer
-	kafka.StartWorkerConsumers()
+	// Start Postgres loader
+	loader.StartBlockLoader()
 
 	// Start kafka Producer
 	kafka.StartProducers()
 
-	// Start Postgres loader
-	loader.StartBlockLoader()
-
 	// Start transformers
 	transformers.StartBlocksTransformer()
+
+	// Start kafka consumer
+	kafka.StartWorkerConsumers()
 
 	// Listen for close sig
 	// Register for interupt (Ctrl+C) and SIGTERM (docker)
