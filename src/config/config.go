@@ -50,8 +50,8 @@ type configType struct {
 	DbTimezone string `envconfig:"DB_TIMEZONE" required:"false" default:"UTC"`
 
 	// Endpoints
-	MaxPageSize string `envconfig:"MAX_PAGE_SIZE" required:"false" default:"100"`
-	MinPageSize string `envconfig:"MIN_PAGE_SIZE" required:"false" default:"10"`
+	MaxPageSize int `envconfig:"MAX_PAGE_SIZE" required:"false" default:"100"`
+	MinPageSize int `envconfig:"MIN_PAGE_SIZE" required:"false" default:"10"`
 }
 
 var Config configType
