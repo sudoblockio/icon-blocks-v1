@@ -84,16 +84,18 @@ func (m *BlockModel) RetryCreate(block *models.Block) (*gorm.DB, error) {
 	return transaction, err
 }
 
-//func (m *BlockModel) Update(oldBlock *models.Block, newBlock *models.Block, whereClause ...interface{}) *gorm.DB {
-//	tx := m.db.Model(oldBlock).Where(whereClause[0], whereClause[1:]).Updates(newBlock)
-//	return tx
-//}
+// TODO: Delete this
+func (m *BlockModel) Update(oldBlock *models.Block, newBlock *models.Block, whereClause ...interface{}) *gorm.DB {
+	tx := m.db.Model(oldBlock).Where(whereClause[0], whereClause[1:]).Updates(newBlock)
+	return tx
+}
 
+// TODO: Delete this
 // TODO: Mv to crud_integration_test
-//func (m *BlockModel) Delete(conds ...interface{}) *gorm.DB {
-//	tx := m.db.Delete(m.model, conds...)
-//	return tx
-//}
+func (m *BlockModel) Delete(conds ...interface{}) *gorm.DB {
+	tx := m.db.Delete(m.model, conds...)
+	return tx
+}
 
 func (m *BlockModel) FindOne(conds ...interface{}) (*models.Block, *gorm.DB) {
 	block := &models.Block{}

@@ -22,7 +22,7 @@ var _ = Describe("BlockModel", func() {
 					blockModel.Delete("Signature = ?", block.Signature)
 				})
 				It("predefined block insert", func() {
-					blockModel.create(block)
+					blockModel.RetryCreate(block)
 					found, _ := blockModel.FindOne("Signature = ?", block.Signature)
 					Expect(found.Hash).To(Equal(block.Hash))
 				}) // It
@@ -35,7 +35,7 @@ var _ = Describe("BlockModel", func() {
 				block := fixture.GetBlock(fixture.Input)
 				BeforeEach(func() {
 					blockModel.Delete("Signature = ?", block.Signature)
-					blockModel.create(block)
+					blockModel.RetryCreate(block)
 				})
 				It("predefined block update", func() {
 					blockModel.Update(block, &models.Block{Type: "blockRaw"}, "Signature = ?", block.Signature)
@@ -50,7 +50,7 @@ var _ = Describe("BlockModel", func() {
 				block := fixture.GetBlock(fixture.Input)
 				BeforeEach(func() {
 					blockModel.Delete("Signature = ?", block.Signature)
-					blockModel.create(block)
+					blockModel.RetryCreate(block)
 				})
 				It("predefined block delete", func() {
 					blockModel.Delete("Signature = ?", block.Signature)

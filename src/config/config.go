@@ -41,7 +41,7 @@ type configType struct {
 
 	// DB
 	DbDriver   string `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
-	DbHost     string `envconfig:"DB_HOST" required:"false" default:"postgres"`
+	DbHost     string `envconfig:"DB_HOST" required:"false" default:"localhost"`
 	DbPort     string `envconfig:"DB_PORT" required:"false" default:"5432"`
 	DbUser     string `envconfig:"DB_USER" required:"false" default:"postgres"`
 	DbPassword string `envconfig:"DB_PASSWORD" required:"false" default:"changeme"`

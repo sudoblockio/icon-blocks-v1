@@ -3,7 +3,7 @@ package crud_test
 import (
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/crud"
-	"go.uber.org/zap"
+	"github.com/geometry-labs/icon-blocks/logging"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -21,27 +21,31 @@ func TestCrud(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	config.ReadEnvironment()
+	logging.StartLoggingInit()
 
 	blockModel = NewBlockModel()
 	_ = blockModel.Migrate() // Have to create table before running tests
 })
 
 func NewBlockModel() *crud.BlockModel {
-	dsn := crud.NewDsn("localhost", config.Config.DbPort, config.Config.DbUser, config.Config.DbPassword,
-		config.Config.DbName, config.Config.DbSslmode, config.Config.DbTimezone)
-	postgresConn, _ := NewPostgresConn(dsn)
+	//dsn := crud.NewDsn("localhost", config.Config.DbPort, config.Config.DbUser, config.Config.DbPassword,
+	//	config.Config.DbName, config.Config.DbSslmode, config.Config.DbTimezone)
+	postgresConn := crud.GetPostgresConn()
+	if postgresConn == nil {
+
+	}
+	//postgresConn, _ := NewPostgresConn(dsn)
 	testBlockRawModel := crud.NewBlockModel(postgresConn.GetConn())
 	return testBlockRawModel
 }
 
-func NewPostgresConn(dsn string) (*crud.PostgresConn, error) { // Only for testing
-	session, err := crud.createSession(dsn)
-	if err != nil {
-		zap.S().Info("Cannot create a connection to postgres", err)
-	}
-	crud.postgresInstance = &crud.PostgresConn{
-		conn: session,
-	}
-	return crud.postgresInstance, err
-}
-
+//func NewPostgresConn(dsn string) (*crud.PostgresConn, error) { // Only for testing
+//	session, err := crud.createSession(dsn)
+//	if err != nil {
+//		zap.S().Info("Cannot create a connection to postgres", err)
+//	}
+//	crud.postgresInstance = &crud.PostgresConn{
+//		conn: session,
+//	}
+//	return crud.postgresInstance, err
+//}
