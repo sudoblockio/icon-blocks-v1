@@ -14,10 +14,10 @@ import (
 
 // TODO split API and WORKER
 func Start() {
-	// Create a new health instance
+	// create a new health instance
 	h := health.New()
 
-	// Create a couple of checks
+	// create a couple of checks
 	blocksCheckerURL, _ := url.Parse("http://localhost:" + config.Config.Port + "/version")
 	blocksChecker, _ := checkers.NewHTTP(&checkers.HTTPConfig{
 		URL: blocksCheckerURL,

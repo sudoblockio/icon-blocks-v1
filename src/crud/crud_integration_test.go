@@ -9,10 +9,11 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("BlockModel", func() { // TODO: Remove dependency to Create database "test_db" manually before running the tests
+var _ = Describe("BlockModel", func() {
 	testFixtures, _ := fixtures.LoadTestFixtures(fixtures.Block_raws_fixture)
 
 	Describe("blockModel with postgres", func() {
+		// TODO: RM delete - does not ever happen
 
 		Context("insert in block table", func() {
 			for _, fixture := range testFixtures {
@@ -21,19 +22,20 @@ var _ = Describe("BlockModel", func() { // TODO: Remove dependency to Create dat
 					blockModel.Delete("Signature = ?", block.Signature)
 				})
 				It("predefined block insert", func() {
-					blockModel.Create(block)
+					blockModel.create(block)
 					found, _ := blockModel.FindOne("Signature = ?", block.Signature)
 					Expect(found.Hash).To(Equal(block.Hash))
 				}) // It
 			} // For
 		}) // context
 
+		// TODO: RM delete - does not ever happen
 		Context("update in block table", func() {
 			for _, fixture := range testFixtures {
 				block := fixture.GetBlock(fixture.Input)
 				BeforeEach(func() {
 					blockModel.Delete("Signature = ?", block.Signature)
-					blockModel.Create(block)
+					blockModel.create(block)
 				})
 				It("predefined block update", func() {
 					blockModel.Update(block, &models.Block{Type: "blockRaw"}, "Signature = ?", block.Signature)
@@ -48,7 +50,7 @@ var _ = Describe("BlockModel", func() { // TODO: Remove dependency to Create dat
 				block := fixture.GetBlock(fixture.Input)
 				BeforeEach(func() {
 					blockModel.Delete("Signature = ?", block.Signature)
-					blockModel.Create(block)
+					blockModel.create(block)
 				})
 				It("predefined block delete", func() {
 					blockModel.Delete("Signature = ?", block.Signature)

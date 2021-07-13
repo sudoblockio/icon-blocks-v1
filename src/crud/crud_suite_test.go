@@ -3,6 +3,7 @@ package crud_test
 import (
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/crud"
+	"go.uber.org/zap"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -27,8 +28,20 @@ var _ = BeforeSuite(func() {
 
 func NewBlockModel() *crud.BlockModel {
 	dsn := crud.NewDsn("localhost", config.Config.DbPort, config.Config.DbUser, config.Config.DbPassword,
-		config.Config.DbTestName, config.Config.DbSslmode, config.Config.DbTimezone)
-	postgresConn, _ := crud.NewPostgresConn(dsn)
+		config.Config.DbName, config.Config.DbSslmode, config.Config.DbTimezone)
+	postgresConn, _ := NewPostgresConn(dsn)
 	testBlockRawModel := crud.NewBlockModel(postgresConn.GetConn())
 	return testBlockRawModel
 }
+
+func NewPostgresConn(dsn string) (*crud.PostgresConn, error) { // Only for testing
+	session, err := crud.createSession(dsn)
+	if err != nil {
+		zap.S().Info("Cannot create a connection to postgres", err)
+	}
+	crud.postgresInstance = &crud.PostgresConn{
+		conn: session,
+	}
+	return crud.postgresInstance, err
+}
+

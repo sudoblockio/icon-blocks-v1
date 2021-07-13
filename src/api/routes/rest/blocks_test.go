@@ -12,8 +12,7 @@ import (
 )
 
 func init() {
-	//core.GetEnvironment()
-	config.ConfigInit()
+	config.ReadEnvironment()
 }
 
 func TestHandlerGetBlock(t *testing.T) {

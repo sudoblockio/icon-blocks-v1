@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/global"
 	"github.com/geometry-labs/icon-blocks/models"
 	"github.com/gofiber/fiber/v2"
@@ -70,9 +71,9 @@ func (service *BlocksQueryService) buildLimitClause() int {
 	pageSize = service.PageSize
 	switch {
 	case pageSize > 100:
-		pageSize = 100
+		pageSize = config.Config.MaxPageSize
 	case pageSize <= 0:
-		pageSize = 10
+		pageSize = config.Config.MaxPageSize
 	}
 	return pageSize
 }

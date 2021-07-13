@@ -15,14 +15,13 @@ import (
 )
 
 func init() {
-	//core.GetEnvironment()
-	config.ConfigInit()
+	config.ReadEnvironment()
 }
 
 func TestHandlerGetBlocks(t *testing.T) {
 	assert := assert.New(t)
 
-	// Create topic broadcaster
+	// create topic broadcaster
 	input_chan := make(chan *sarama.ConsumerMessage)
 	broadcaster := &kafka.TopicBroadcaster{
 		ConsumerChan:   input_chan,

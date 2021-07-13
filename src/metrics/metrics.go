@@ -26,7 +26,7 @@ func MetricsApiStart() {
 func MetricsWorkerStart() {
 	Metrics = make(map[string]prometheus.Counter)
 
-	// Create gauges
+	// create gauges
 	createWorkerGauges()
 
 	// Start server

@@ -45,10 +45,13 @@ type configType struct {
 	DbPort     string `envconfig:"DB_PORT" required:"false" default:"5432"`
 	DbUser     string `envconfig:"DB_USER" required:"false" default:"postgres"`
 	DbPassword string `envconfig:"DB_PASSWORD" required:"false" default:"changeme"`
-	DbName     string `envconfig:"DB_DBNAME" required:"false" default:"icon"`
-	DbTestName string `envconfig:"DB_DBTESTNAME" required:"false" default:"test_db"`
+	DbName     string `envconfig:"DB_DBNAME" required:"false" default:"postgres"`
 	DbSslmode  string `envconfig:"DB_SSL_MODE" required:"false" default:"disable"`
 	DbTimezone string `envconfig:"DB_TIMEZONE" required:"false" default:"UTC"`
+
+	// Endpoints
+	MaxPageSize string `envconfig:"MAX_PAGE_SIZE" required:"false" default:"100"`
+	MinPageSize string `envconfig:"MIN_PAGE_SIZE" required:"false" default:"10"`
 }
 
 var Config configType
