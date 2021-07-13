@@ -32,13 +32,14 @@ x-env: &env
   CONSUMER_TOPICS: "blocks"
   PRODUCER_TOPICS: "blocks-ws"
   SCHEMA_NAME_TOPICS: "blocks-ws:block"
+  SCHEMA_FOLDER_PATH: "/app/schemas/"
 
   # DB
   DB_DRIVER: "postgres"
   DB_HOST: "postgres"
   DB_PORT: "5432"
   DB_USER: "postgres"
-  DB_PASSWORD: "changethis"
+  DB_PASSWORD: "changeme"
   DB_DBNAME: "icon"
   DB_SSLMODE: "disable"
   DB_TIMEZONE: "UTC"
@@ -114,10 +115,13 @@ services:
     image: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changethis}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       PGDATA: /data/postgres
     volumes:
       - ./volumes/postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    #    restart: unless-stopped
 
   pgadmin:
     #    container_name: pgadmin_container

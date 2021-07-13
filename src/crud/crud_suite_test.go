@@ -1,6 +1,7 @@
 package crud_test
 
 import (
+	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/crud"
 	"testing"
 
@@ -9,8 +10,7 @@ import (
 )
 
 var (
-	blockModel         *crud.BlockModel
-	blockRawModelMongo *crud.BlockModelMongo
+	blockModel *crud.BlockModel
 )
 
 func TestCrud(t *testing.T) {
@@ -19,21 +19,16 @@ func TestCrud(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
+	config.ReadEnvironment()
+
 	blockModel = NewBlockModel()
 	_ = blockModel.Migrate() // Have to create table before running tests
-	blockRawModelMongo = NewBlockModelMongo()
 })
 
 func NewBlockModel() *crud.BlockModel {
-	dsn := crud.NewDsn("localhost", "5432", "postgres", "changeme", "test_db", "disable", "UTC")
+	dsn := crud.NewDsn("localhost", config.Config.DbPort, config.Config.DbUser, config.Config.DbPassword,
+		config.Config.DbTestName, config.Config.DbSslmode, config.Config.DbTimezone)
 	postgresConn, _ := crud.NewPostgresConn(dsn)
 	testBlockRawModel := crud.NewBlockModel(postgresConn.GetConn())
 	return testBlockRawModel
-}
-
-func NewBlockModelMongo() *crud.BlockModelMongo {
-	mongoConn := crud.NewMongoConn("mongodb://127.0.0.1:27017")
-	blockRawModelMongo := crud.NewBlockRawModelMongo(mongoConn)
-	_ = blockRawModelMongo.SetCollectionHandle("icon_test", "contracts")
-	return blockRawModelMongo
 }
