@@ -35,15 +35,6 @@ func GetBlockModel() *BlockModel {
 	return blockModelInstance
 }
 
-func NewBlockModel(conn *gorm.DB) *BlockModel { // Only for testing
-	blockModelInstance = &BlockModel{
-		db:        conn,
-		model:     &models.Block{},
-		writeChan: make(chan *models.Block, 1),
-	}
-	return blockModelInstance
-}
-
 func (m *BlockModel) GetDB() *gorm.DB {
 	return m.db
 }
@@ -82,19 +73,6 @@ func (m *BlockModel) RetryCreate(block *models.Block) (*gorm.DB, error) {
 	neb := backoff.NewExponentialBackOff()
 	err := backoff.Retry(operation, neb)
 	return transaction, err
-}
-
-// TODO: Delete this
-func (m *BlockModel) Update(oldBlock *models.Block, newBlock *models.Block, whereClause ...interface{}) *gorm.DB {
-	tx := m.db.Model(oldBlock).Where(whereClause[0], whereClause[1:]).Updates(newBlock)
-	return tx
-}
-
-// TODO: Delete this
-// TODO: Mv to crud_integration_test
-func (m *BlockModel) Delete(conds ...interface{}) *gorm.DB {
-	tx := m.db.Delete(m.model, conds...)
-	return tx
 }
 
 func (m *BlockModel) FindOne(conds ...interface{}) (*models.Block, *gorm.DB) {

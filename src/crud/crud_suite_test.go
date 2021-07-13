@@ -28,24 +28,6 @@ var _ = BeforeSuite(func() {
 })
 
 func NewBlockModel() *crud.BlockModel {
-	//dsn := crud.NewDsn("localhost", config.Config.DbPort, config.Config.DbUser, config.Config.DbPassword,
-	//	config.Config.DbName, config.Config.DbSslmode, config.Config.DbTimezone)
-	postgresConn := crud.GetPostgresConn()
-	if postgresConn == nil {
-
-	}
-	//postgresConn, _ := NewPostgresConn(dsn)
-	testBlockRawModel := crud.NewBlockModel(postgresConn.GetConn())
+	testBlockRawModel := crud.GetBlockModel()
 	return testBlockRawModel
 }
-
-//func NewPostgresConn(dsn string) (*crud.PostgresConn, error) { // Only for testing
-//	session, err := crud.createSession(dsn)
-//	if err != nil {
-//		zap.S().Info("Cannot create a connection to postgres", err)
-//	}
-//	crud.postgresInstance = &crud.PostgresConn{
-//		conn: session,
-//	}
-//	return crud.postgresInstance, err
-//}
