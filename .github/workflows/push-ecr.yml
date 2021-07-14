@@ -14,8 +14,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Run tests
-        run: make test
+      - name: Bring up DBs
+        run: docker-compose -f docker-compose.db.yml up -d
+
+      - name: Run unit tests
+        run: cd src && go test ./... -v --tags=unit
+
+      - name: Run integration tests
+        run: cd src && go test ./... -v --tags=integration
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
