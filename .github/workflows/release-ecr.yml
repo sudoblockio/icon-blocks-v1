@@ -43,7 +43,7 @@ jobs:
           ECR_REPOSITORY: icon-blocks-worker
           IMAGE_TAG: ${{ github.run_number }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG docker/Dockerfile.worker.prod
+          docker build --build-arg NODE_NAME=worker -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG docker/Dockerfile
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: API - Build, tag, and push image to Amazon ECR
@@ -52,7 +52,7 @@ jobs:
           ECR_REPOSITORY: icon-blocks-api
           IMAGE_TAG: ${{ github.run_number }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG docker/Dockerfile.api.prod
+          docker build --build-arg NODE_NAME=api -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG docker/Dockerfile
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Update dev deployment values file and re-commit

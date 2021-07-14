@@ -1,7 +1,10 @@
-.env.local
+
+# Swagger docs - Not committed to main - generated on container build
+src/docs/*
+
+# IDEs
 .idea
 *.log
-
 .vscode
 
 # In case use local volumes

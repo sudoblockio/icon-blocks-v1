@@ -25,4 +25,4 @@ jobs:
         run: cd src && go test ./... -v --tags=unit
 
       - name: Run integration tests
-        run: cd src && go test ./... -v --tags=integration
+        run: sleep 200 && cd src && go test ./... -v --tags=integration

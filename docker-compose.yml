@@ -48,8 +48,9 @@ services:
   blocks-api:
     build:
       context: ${BLOCKS_CONTEXT:-.}
-      dockerfile: Dockerfile.api
       target: prod
+      args:
+        - NODE_NAME=api
     ports:
       - "8000:8000"     # API
       - "8180:8180"     # Health
@@ -71,8 +72,9 @@ services:
   blocks-worker:
     build:
       context: ${BLOCKS_CONTEXT:-.}
-      dockerfile: Dockerfile.worker
       target: prod
+      args:
+        - NODE_NAME=worker
     ports:
       - "8181:8181"     # Health
       - "9401:9401"     # Prometheus
