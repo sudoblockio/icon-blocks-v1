@@ -1,7 +1,10 @@
-test: up-dbs test-unit test-chart
+test: up-dbs test-unit test-integration
 
 up-dbs:  ## Bring up the DBs
 	docker-compose -f docker-compose.db.yml up -d
+
+down-dbs:  ## Take down the DBs
+	docker-compose -f docker-compose.db.yml down
 
 test-unit:  ## Run unit tests - Need DB compose up
 	cd src && go test ./... -v --tags=unit
@@ -13,6 +16,9 @@ test-integration:  ## Run integration tests - Need DB compose up
 
 up:  ## Bring everything up as containers
 	docker-compose -f docker-compose.db.yml -f docker-compose.yml up -d
+
+down:  ## Take down all the containers
+	docker-compose -f docker-compose.db.yml -f docker-compose.yml down
 
 build-swagger:  ## Build the swagger docs
 	go get github.com/swaggo/swag/cmd/swag; \

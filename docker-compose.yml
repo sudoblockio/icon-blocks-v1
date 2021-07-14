@@ -74,7 +74,7 @@ services:
       context: ${BLOCKS_CONTEXT:-.}
       target: prod
       args:
-        - NODE_NAME=api
+        - NODE_NAME=worker
     ports:
       - "8181:8181"     # Health
       - "9401:9401"     # Prometheus
