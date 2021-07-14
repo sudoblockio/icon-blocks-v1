@@ -24,18 +24,18 @@ var _ = Describe("Postgres", func() {
 	)
 
 	BeforeEach(func() {
-		dsn = "host=localhost user=postgres password=changeme dbname=test_db port=5432 sslmode=disable TimeZone=UTC"
+		dsn = "host=localhost user=postgres password=changeme dbname=postgres port=5432 sslmode=disable TimeZone=UTC"
 
 		host = "localhost"
 		port = "5432"
 		user = "postgres"
 		password = "changeme"
-		dbname = "test_db"
+		dbname = "postgres"
 		sslmode = "disable"
 		timezone = "UTC"
 	})
 
-	Describe("Create DSN string", func() {
+	Describe("create DSN string", func() {
 		Context("new dsn string", func() {
 			It("dsn string valid", func() {
 				Expect(crud.NewDsn(host, port, user, password, dbname, sslmode, timezone)).To(Equal(dsn))

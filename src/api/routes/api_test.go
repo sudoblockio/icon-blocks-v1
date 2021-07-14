@@ -1,3 +1,5 @@
+//+build unit
+
 package routes
 
 import (
@@ -12,8 +14,7 @@ import (
 )
 
 func init() {
-	//core.GetEnvironment()
-	config.ConfigInit()
+	config.ReadEnvironment()
 }
 
 func TestHandlerVersion(t *testing.T) {

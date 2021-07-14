@@ -1,3 +1,5 @@
+//+build unit
+
 package logging
 
 import (
@@ -8,53 +10,48 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func init() {
-	//core.GetEnvironment()
-	config.ConfigInit()
-}
-
 func TestInit(t *testing.T) {
 
 	// Test file logging
 	os.Setenv("LOG_LEVEL", "Info")
 	os.Setenv("LOG_TO_FILE", "true")
-	config.GetEnvironment()
+	config.ReadEnvironment()
 	StartLoggingInit()
 	log.Info("File log")
 
 	// Test levels
 	os.Setenv("LOG_LEVEL", "Panic")
-	config.GetEnvironment()
+	config.ReadEnvironment()
 	StartLoggingInit()
 	log.Info("Should not log")
 
 	os.Setenv("LOG_LEVEL", "FATAL")
-	config.GetEnvironment()
+	config.ReadEnvironment()
 	StartLoggingInit()
 	log.Info("Should not log")
 
 	os.Setenv("LOG_LEVEL", "ERROR")
-	config.GetEnvironment()
+	config.ReadEnvironment()
 	StartLoggingInit()
 	log.Info("Should not log")
 
 	os.Setenv("LOG_LEVEL", "WARN")
-	config.GetEnvironment()
+	config.ReadEnvironment()
 	StartLoggingInit()
 	log.Warn("Warning")
 
 	os.Setenv("LOG_LEVEL", "INFO")
-	config.GetEnvironment()
+	config.ReadEnvironment()
 	StartLoggingInit()
 	log.Info("Info")
 
 	os.Setenv("LOG_LEVEL", "DEBUG")
-	config.GetEnvironment()
+	config.ReadEnvironment()
 	StartLoggingInit()
 	log.Debug("Debug")
 
 	os.Setenv("LOG_LEVEL", "TRACE")
-	config.GetEnvironment()
+	config.ReadEnvironment()
 	StartLoggingInit()
 	log.Trace("Trace")
 }

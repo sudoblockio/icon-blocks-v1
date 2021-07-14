@@ -12,9 +12,9 @@ import (
 type RegisterSchemaFunc func(topic string, isKey bool, srcSchemaFile string, forceUpdate bool) (int, error)
 
 func RegisterSchema(topic string, isKey bool, srcSchemaFile string, forceUpdate bool) (int, error) {
-	zap.S().Info("RegisterSchema()")
+	zap.S().Info("Registering Schema for ", topic)
 	schemaRegistryClient := srclient.CreateSchemaRegistryClient("http://" + config.Config.SchemaRegistryURL)
-	schema, err := schemaRegistryClient.GetLatestSchema(topic, false)
+	schema, err := schemaRegistryClient.GetLatestSchema(topic, isKey)
 	if schema == nil {
 		schema, err = registerSchema(schemaRegistryClient, topic, isKey, srcSchemaFile)
 	} else if forceUpdate {
@@ -30,12 +30,16 @@ func RegisterSchema(topic string, isKey bool, srcSchemaFile string, forceUpdate 
 }
 
 func registerSchema(schemaRegistryClient *srclient.SchemaRegistryClient, topic string, isKey bool, srcSchemaFile string) (*srclient.Schema, error) {
-	filePath := "schemas/" + srcSchemaFile + ".proto"
+	//filePath := "/app/schemas/" + srcSchemaFile + ".proto"
+	filePath := config.Config.SchemaFolderPath + srcSchemaFile + ".proto"
 	zap.S().Info("Adding/Updating Schema from filepath: ", filePath)
-	schemaBytes, _ := ioutil.ReadFile(filePath)
+	schemaBytes, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		zap.S().Info("Error reading the schema file, err: ", err)
+		return nil, err
+	}
 	schema, err := schemaRegistryClient.CreateSchema(topic, string(schemaBytes), srclient.Protobuf, isKey)
 	if err != nil {
-		//panic(fmt.Sprintf("Error creating the schema %s", err))
 		zap.S().Info("Error creating the schema, err: ", err)
 		return nil, err
 	}
