@@ -1,3 +1,5 @@
+//+build unit
+
 package kafka
 
 import (
@@ -10,13 +12,7 @@ import (
 )
 
 func init() {
-	// os.Setenv("LOG_LEVEL", "DEBUG")
-
-	//core.GetEnvironment()
-	//config.Vars.ConfigFile = "config.api.test"
-	//config.Vars.ConfigType = "yaml"
-	//config.Vars.ConfigPath = "../../envfiles"
-	config.ConfigInit()
+	config.ReadEnvironment()
 }
 
 func TestKafkaTopicProducer(t *testing.T) {

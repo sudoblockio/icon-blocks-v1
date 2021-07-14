@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"log"
 
 	"github.com/kelseyhightower/envconfig"
@@ -41,14 +40,17 @@ type configType struct {
 
 	// DB
 	DbDriver   string `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
-	DbHost     string `envconfig:"DB_HOST" required:"false" default:"postgres"`
+	DbHost     string `envconfig:"DB_HOST" required:"false" default:"localhost"`
 	DbPort     string `envconfig:"DB_PORT" required:"false" default:"5432"`
 	DbUser     string `envconfig:"DB_USER" required:"false" default:"postgres"`
 	DbPassword string `envconfig:"DB_PASSWORD" required:"false" default:"changeme"`
-	DbName     string `envconfig:"DB_DBNAME" required:"false" default:"icon"`
-	DbTestName string `envconfig:"DB_DBTESTNAME" required:"false" default:"test_db"`
+	DbName     string `envconfig:"DB_DBNAME" required:"false" default:"postgres"`
 	DbSslmode  string `envconfig:"DB_SSL_MODE" required:"false" default:"disable"`
 	DbTimezone string `envconfig:"DB_TIMEZONE" required:"false" default:"UTC"`
+
+	// Endpoints
+	MaxPageSize int `envconfig:"MAX_PAGE_SIZE" required:"false" default:"100"`
+	MinPageSize int `envconfig:"MIN_PAGE_SIZE" required:"false" default:"10"`
 }
 
 var Config configType
@@ -59,6 +61,6 @@ func ReadEnvironment() {
 		log.Fatalf("ERROR: envconfig - %s\n", err.Error())
 	}
 
-	vars, _ := json.Marshal(Config)
-	log.Printf("Config Vars: " + string(vars))
+	//vars, _ := json.Marshal(Config)
+	//log.Printf("Config Vars: " + string(vars))
 }

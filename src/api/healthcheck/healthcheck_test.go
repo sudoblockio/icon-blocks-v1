@@ -1,3 +1,5 @@
+//+build unit
+
 package healthcheck
 
 import (
@@ -11,8 +13,7 @@ import (
 )
 
 func init() {
-	//core.GetEnvironment()
-	config.ConfigInit()
+	config.ReadEnvironment()
 }
 
 func TestHealthCheck(t *testing.T) {

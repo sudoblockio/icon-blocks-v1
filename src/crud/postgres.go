@@ -17,21 +17,13 @@ type PostgresConn struct {
 var postgresInstance *PostgresConn
 var postgresConnOnce sync.Once
 
-func NewPostgresConn(dsn string) (*PostgresConn, error) { // Only for testing
-	session, err := createSession(dsn)
-	if err != nil {
-		zap.S().Info("Cannot create a connection to postgres", err)
-	}
-	postgresInstance = &PostgresConn{
-		conn: session,
-	}
-	return postgresInstance, err
+func NewDsn(host string, port string, user string, password string, dbname string, sslmode string, timezone string) string {
+	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
+		host, user, password, dbname, port, sslmode, timezone)
 }
 
 func GetPostgresConn() *PostgresConn {
 	postgresConnOnce.Do(func() {
-		// TODO: create dsn string from env variables
-		//dsn := NewDsn("postgres", "5432", "postgres", "changeme", "postgres", "disable", "UTC")
 		dsn := NewDsn(config.Config.DbHost, config.Config.DbPort, config.Config.DbUser,
 			config.Config.DbPassword, config.Config.DbName, config.Config.DbSslmode,
 			config.Config.DbTimezone)
@@ -62,11 +54,6 @@ func createSession(dsn string) (*gorm.DB, error) {
 	return db, err
 }
 
-func NewDsn(host string, port string, user string, password string, dbname string, sslmode string, timezone string) string {
-	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
-		host, user, password, dbname, port, sslmode, timezone)
-}
-
 func retryGetPostgresSession(dsn string) (*gorm.DB, error) {
 	var session *gorm.DB
 	operation := func() error {
@@ -79,7 +66,6 @@ func retryGetPostgresSession(dsn string) (*gorm.DB, error) {
 		return err
 	}
 	neb := backoff.NewExponentialBackOff()
-	//neb.MaxElapsedTime = time.Minute
 	err := backoff.Retry(operation, neb)
 	return session, err
 }

@@ -1,18 +1,13 @@
-build:
-	docker-compose build
+test: up-dbs test-unit test-chart
 
-up:
-	docker-compose up -d
-
-ps:
-	docker-compose ps
-
-test: test-unit test-chart
+up-dbs:
+	docker-compose -f docker-compose.db.yml up -d
 
 test-unit:
-	@docker-compose up -d; \
- 	docker-compose run api go test .
+	cd src && go test ./... -v --tags=unit
 
-test-chart:
-	# TODO
-	docker-compose ps
+test-integration:
+	cd src && go test ./... -v --tags=integration
+
+up:
+	docker-compose -f docker-compose.db.yml -f docker-compose.yml up -d

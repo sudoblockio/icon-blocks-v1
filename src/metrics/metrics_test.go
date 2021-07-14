@@ -1,3 +1,5 @@
+//+build unit
+
 package metrics
 
 import (
@@ -17,7 +19,7 @@ func TestMetricsApiStart(t *testing.T) {
 	os.Setenv("METRICS_PORT", "8888")
 	os.Setenv("METRICS_PREFIX", "/metrics")
 
-	config.GetEnvironment()
+	config.ReadEnvironment()
 
 	// Start metrics server
 	MetricsApiStart()

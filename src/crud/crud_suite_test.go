@@ -20,15 +20,13 @@ func TestCrud(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	config.ReadEnvironment()
+	//logging.StartLoggingInit()
 
 	blockModel = NewBlockModel()
 	_ = blockModel.Migrate() // Have to create table before running tests
 })
 
 func NewBlockModel() *crud.BlockModel {
-	dsn := crud.NewDsn("localhost", config.Config.DbPort, config.Config.DbUser, config.Config.DbPassword,
-		config.Config.DbTestName, config.Config.DbSslmode, config.Config.DbTimezone)
-	postgresConn, _ := crud.NewPostgresConn(dsn)
-	testBlockRawModel := crud.NewBlockModel(postgresConn.GetConn())
+	testBlockRawModel := crud.GetBlockModel()
 	return testBlockRawModel
 }
