@@ -1,7 +1,7 @@
 FROM golang:1.16-buster AS builder
 
-ARG NODE_NAME
-ENV NODE_NAME ${NODE_NAME:-api}
+ARG SERVICE_NAME
+ENV SERVICE_NAME ${SERVICE_NAME:-api}
 
 # GO ENV VARS
 ENV GO111MODULE=on \
@@ -19,10 +19,10 @@ RUN go mod tidy
 RUN go get github.com/swaggo/swag/cmd/swag
 RUN go get github.com/alecthomas/template
 RUN go get github.com/riferrei/srclient@v0.3.0
-RUN swag init -g ${NODE_NAME}/routes/api.go
+RUN swag init -g ${SERVICE_NAME}/routes/api.go
 
 # BUILD
-RUN go build -o main ./${NODE_NAME}
+RUN go build -o main ./${SERVICE_NAME}
 
 FROM ubuntu as prod
 COPY --from=builder /build/main /

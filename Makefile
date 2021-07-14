@@ -27,10 +27,10 @@ build-swagger:  ## Build the swagger docs
     cd src && swag init -g api/routes/api.go
 
 build-api:  ## Build the api
-	cd src && go build -o main ./api
+	docker-compose build blocks-api
 
 build-worker:  ## Build the worker
-	cd src && go build -o main ./worker
+	docker-compsoe build blocks-worker
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}'

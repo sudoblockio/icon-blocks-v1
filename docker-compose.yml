@@ -50,7 +50,7 @@ services:
       context: ${BLOCKS_CONTEXT:-.}
       target: prod
       args:
-        - NODE_NAME=api
+        - SERVICE_NAME=api
     ports:
       - "8000:8000"     # API
       - "8180:8180"     # Health
@@ -74,7 +74,7 @@ services:
       context: ${BLOCKS_CONTEXT:-.}
       target: prod
       args:
-        - NODE_NAME=worker
+        - SERVICE_NAME=worker
     ports:
       - "8181:8181"     # Health
       - "9401:9401"     # Prometheus
