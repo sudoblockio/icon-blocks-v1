@@ -14,14 +14,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build the stack
-        run: docker-compose up -d
-
-      - name: Check running containers
-        run: docker-compose ps
-
-      - name: Check logs
-        run: docker-compose logs worker api
+      - name: Run tests
+        run: make test
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1

@@ -15,12 +15,8 @@ jobs:
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
+        with:
+          install: true
 
-      - name: Build the stack
-        run: docker-compose up -d
-
-      - name: Check running containers
-        run: docker-compose ps
-
-      - name: Check logs
-        run: docker-compose logs worker
+      - name: Run tests
+        run: make test
