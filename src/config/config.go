@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"log"
 
 	"github.com/kelseyhightower/envconfig"
@@ -62,6 +61,6 @@ func ReadEnvironment() {
 		log.Fatalf("ERROR: envconfig - %s\n", err.Error())
 	}
 
-	vars, _ := json.Marshal(Config)
-	log.Printf("Config Vars: " + string(vars))
+	//vars, _ := json.Marshal(Config)
+	//log.Printf("Config Vars: " + string(vars))
 }
