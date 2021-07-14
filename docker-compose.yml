@@ -47,8 +47,8 @@ x-env: &env
 services:
   blocks-api:
     build:
-      context: .
-      dockerfile: dockerfiles/Dockerfile.api.prod
+      context: ${BLOCKS_CONTEXT:-.}
+      dockerfile: Dockerfile.api
       target: prod
     ports:
       - "8000:8000"     # API
@@ -59,20 +59,19 @@ services:
       - "seccomp:unconfined"
     cap_add:
       - SYS_PTRACE
-    depends_on:
-      - kafka
-      - schemaregistry
-      - postgres
+#    depends_on:
+#      - kafka
+#      - schemaregistry
+#      - postgres
     volumes:
-      - ./src:/app
-      - ./envfiles:/app/envfiles
+      - ${BLOCKS_CONTEXT:-.}/src:/app
     environment:
       <<: *env
 
   blocks-worker:
     build:
-      context: .
-      dockerfile: dockerfiles/Dockerfile.worker.prod
+      context: ${BLOCKS_CONTEXT:-.}
+      dockerfile: Dockerfile.worker
       target: prod
     ports:
       - "8181:8181"     # Health
@@ -82,12 +81,11 @@ services:
       - "seccomp:unconfined"
     cap_add:
       - SYS_PTRACE
-    depends_on:
-      - kafka
-      - schemaregistry
-      - postgres
+#    depends_on:
+#      - kafka
+#      - schemaregistry
+#      - postgres
     volumes:
-      - ./src:/app
-      - ./envfiles:/app/envfiles
+      - ${BLOCKS_CONTEXT:-.}/src:/app
     environment:
       <<: *env
