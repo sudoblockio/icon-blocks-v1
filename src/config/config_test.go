@@ -1,3 +1,5 @@
+//+build unit
+
 package config
 
 import (
@@ -30,7 +32,7 @@ func TestEnvironment(t *testing.T) {
 		"KAFKA_GROUP_ID":          "kafka_group_id",
 		"CONSUMER_TOPICS":         "topic_1,topic_2",
 		"PRODUCER_TOPICS":         "topic_1,topic_2,topic_3",
-		"SCHEMA_NAMES":            "schema_1:schema_1,schema_2:schema_2",
+		"SCHEMA_NAME_TOPICS":      "schema_1:schema_1,schema_2:schema_2",
 	}
 
 	for k, v := range env_map {

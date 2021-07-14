@@ -1,8 +1,11 @@
+//+build integration
+
 package rest
 
 import (
 	"encoding/json"
 	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/models"
 	"io/ioutil"
 	"net/http/httptest"
 	"testing"
@@ -15,7 +18,7 @@ func init() {
 	config.ReadEnvironment()
 }
 
-func TestHandlerGetBlock(t *testing.T) {
+func TestHandlerGetBlocks(t *testing.T) {
 	assert := assert.New(t)
 
 	app := fiber.New()
@@ -32,10 +35,13 @@ func TestHandlerGetBlock(t *testing.T) {
 	bytes, err := ioutil.ReadAll(resp.Body)
 	assert.Equal(nil, err)
 
-	body_map := make(map[string]interface{})
-	err = json.Unmarshal(bytes, &body_map)
+	//var body_map interface{}
+	//err = json.Unmarshal(bytes, &body_map)
+	//assert.Equal(nil, err)
+	var blocks []models.Block
+	err = json.Unmarshal(bytes, &blocks)
 	assert.Equal(nil, err)
 
 	// Verify body
-	assert.NotEqual(0, len(body_map["block"].(string)))
+	assert.NotEqual(0, len(blocks[0].Hash))
 }

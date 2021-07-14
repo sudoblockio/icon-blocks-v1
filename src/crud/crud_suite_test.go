@@ -3,7 +3,6 @@ package crud_test
 import (
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/crud"
-	"github.com/geometry-labs/icon-blocks/logging"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -21,7 +20,7 @@ func TestCrud(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	config.ReadEnvironment()
-	logging.StartLoggingInit()
+	//logging.StartLoggingInit()
 
 	blockModel = NewBlockModel()
 	_ = blockModel.Migrate() // Have to create table before running tests
