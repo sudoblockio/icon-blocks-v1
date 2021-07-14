@@ -13,8 +13,6 @@ services:
     depends_on:
       - kafka
     restart: on-failure
-    volumes:
-      - ./volumes/etl/last_synced_block.txt:/icon-etl/last_synced_block.txt
 
   ############
   # Database #
@@ -32,8 +30,6 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-    volumes:
-      - ./volumes/pgadmin:/root/.pgadmin
     ports:
       - "${PGADMIN_PORT:-5050}:80"
 
