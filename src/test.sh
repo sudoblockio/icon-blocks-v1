@@ -4,5 +4,3 @@ ginkgo -r -tags integration --randomizeAllSpecs --randomizeSuites --failOnPendin
 
 go test ./... -v --tags=unit
 go test ./... -v --tags=integration
-
-

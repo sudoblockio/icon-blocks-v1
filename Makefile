@@ -4,10 +4,10 @@ up-dbs:
 	docker-compose -f docker-compose.dbs.yml up -d
 
 test-unit:
-	ginkgo -r -tags unit --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace --race --progress -v src/crud
+	cd src && go test ./... -v --tags=unit
 
 test-integration:
-	ginkgo -r -tags integration --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace --race --progress -v
+	cd src && go test ./... -v --tags=integration
 
 up:
 	docker-compose -f docker-compose.dbs.yml -f docker-compose.yml up -d
