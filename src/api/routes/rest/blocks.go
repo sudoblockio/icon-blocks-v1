@@ -2,11 +2,12 @@ package rest
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/geometry-labs/icon-blocks/api/service"
-	"github.com/geometry-labs/icon-blocks/config"
+
 	fiber "github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
+
+	"github.com/geometry-labs/icon-blocks/api/service"
+	"github.com/geometry-labs/icon-blocks/config"
 )
 
 func BlocksAddHandlers(app *fiber.App) {
@@ -26,22 +27,22 @@ func BlocksAddHandlers(app *fiber.App) {
 func handlerGetQuery(c *fiber.Ctx) error {
 	params := new(service.BlocksQueryService)
 	if err := c.QueryParser(params); err != nil {
+    zap.S().Warnf("Blocks Get Handler ERROR: %s", err.Error())
+
 		c.Status(422)
-		return c.SendString(fmt.Sprintf("%s", err.Error()))
-	}
-	if json, err := json.Marshal(params); err == nil {
-		zap.S().Debug("params: ", string(json))
+    return c.SendString(`{"error": "could not parse query parameters"}`)
 	}
 
-	blocks := params.RunQuery(c)
+  // Get Blocks
+	blocks := params.RunQuery()
 	if len(*blocks) == 0 {
+    // No Content
 		c.Status(204)
-		return c.SendString(fmt.Sprintf("Empty Resultset"))
-	}
-	zap.S().Debug("ResultSet size:", len(*blocks))
+	} else {
+    // Success
+	  c.Status(200)
+  }
 
 	body, _ := json.Marshal(blocks)
-	c.Status(200)
 	return c.SendString(string(body))
-
 }

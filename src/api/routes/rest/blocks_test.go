@@ -4,14 +4,15 @@ package rest
 
 import (
 	"encoding/json"
-	"github.com/geometry-labs/icon-blocks/config"
-	"github.com/geometry-labs/icon-blocks/models"
 	"io/ioutil"
 	"net/http/httptest"
 	"testing"
 
 	fiber "github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/models"
 )
 
 func init() {
@@ -20,6 +21,10 @@ func init() {
 
 func TestHandlerGetBlocks(t *testing.T) {
 	assert := assert.New(t)
+
+  // Insert block fixtures
+  block := *models.Blocks{}
+  global.GetGlobal().Blocks.RetryCreate(block)
 
 	app := fiber.New()
 
@@ -35,9 +40,6 @@ func TestHandlerGetBlocks(t *testing.T) {
 	bytes, err := ioutil.ReadAll(resp.Body)
 	assert.Equal(nil, err)
 
-	//var body_map interface{}
-	//err = json.Unmarshal(bytes, &body_map)
-	//assert.Equal(nil, err)
 	var blocks []models.Block
 	err = json.Unmarshal(bytes, &blocks)
 	assert.Equal(nil, err)
@@ -45,3 +47,4 @@ func TestHandlerGetBlocks(t *testing.T) {
 	// Verify body
 	assert.NotEqual(0, len(blocks[0].Hash))
 }
+

@@ -24,10 +24,16 @@ func NewDsn(host string, port string, user string, password string, dbname strin
 
 func GetPostgresConn() *PostgresConn {
 	postgresConnOnce.Do(func() {
-		dsn := NewDsn(config.Config.DbHost, config.Config.DbPort, config.Config.DbUser,
-			config.Config.DbPassword, config.Config.DbName, config.Config.DbSslmode,
-			config.Config.DbTimezone)
-		//session, err := createSession(dsn)
+		dsn := NewDsn(
+      config.Config.DbHost,
+      config.Config.DbPort,
+      config.Config.DbUser,
+			config.Config.DbPassword,
+      config.Config.DbName,
+      config.Config.DbSslmode,
+			config.Config.DbTimezone,
+    )
+
 		session, err := retryGetPostgresSession(dsn)
 		if err != nil {
 			zap.S().Fatal("Finally Cannot create a connection to postgres", err)

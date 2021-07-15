@@ -19,7 +19,7 @@ RUN go mod tidy
 RUN go get github.com/swaggo/swag/cmd/swag
 RUN go get github.com/alecthomas/template
 RUN go get github.com/riferrei/srclient@v0.3.0
-RUN swag init -g ${SERVICE_NAME}/routes/api.go
+RUN swag init -g api/routes/api.go
 
 # BUILD
 RUN go build -o main ./${SERVICE_NAME}

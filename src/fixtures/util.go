@@ -2,10 +2,11 @@ package fixtures
 
 import (
 	"encoding/json"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"go.uber.org/zap"
 
 	"github.com/geometry-labs/icon-blocks/models"
 )

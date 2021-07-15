@@ -26,11 +26,17 @@ build-swagger:  ## Build the swagger docs
     go get github.com/riferrei/srclient@v0.3.0; \
     cd src && swag init -g api/routes/api.go
 
+build-all:  ## Build everything
+	docker-compose build
+
 build-api:  ## Build the api
 	docker-compose build blocks-api
 
 build-worker:  ## Build the worker
-	docker-compsoe build blocks-worker
+	docker-compose build blocks-worker
+
+ps:  ## List all containers and running status
+	docker-compose -f docker-compose.db.yml -f docker-compose.yml ps
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}'

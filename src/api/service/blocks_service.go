@@ -4,7 +4,6 @@ import (
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/global"
 	"github.com/geometry-labs/icon-blocks/models"
-	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"reflect"
@@ -21,7 +20,7 @@ type BlocksQueryService struct {
 	Start     uint32 `query:"start"`
 }
 
-func (service *BlocksQueryService) RunQuery(c *fiber.Ctx) *[]models.Block {
+func (service *BlocksQueryService) RunQuery() *[]models.Block {
 	blocksModel := global.GetGlobal().Blocks
 	db := blocksModel.GetDB()
 
