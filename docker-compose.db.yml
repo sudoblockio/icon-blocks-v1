@@ -2,17 +2,20 @@ version: "3.7"
 
 services:
   etl:
-    image: geometrylabs/iconetl:${ICON_ETL_TAG:-latest}
+    image: geometrylabs/iconetl:${ICON_ETL_TAG:-v0.1.4-alpha.6}
     command: [
       "stream",
+      "-s", "1",
       "-o", "kafka:9092",
       "--period-seconds", "1",
-      "--provider-uri", "http://54.214.27.154:9000/api/v3",
+      "--values-as-hex", "True",
       "-b", "100",
+      "-B", "100",
+      "-p", "http://34.211.173.90:9000/api/v3",
     ]
+    restart: on-failure
     depends_on:
       - kafka
-    restart: on-failure
 
   ############
   # Database #

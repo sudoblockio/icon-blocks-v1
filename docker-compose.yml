@@ -40,7 +40,7 @@ x-env: &env
   DB_PORT: "5432"
   DB_USER: "postgres"
   DB_PASSWORD: "changeme"
-  DB_DBNAME: "icon"
+  DB_DBNAME: "postgres"
   DB_SSLMODE: "disable"
   DB_TIMEZONE: "UTC"
 
