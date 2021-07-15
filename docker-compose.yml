@@ -48,7 +48,7 @@ services:
   blocks-api:
     build:
       context: ${BLOCKS_CONTEXT:-.}
-      target: prod
+      target: ${BLOCKS_TARGET:-prod}
       args:
         - SERVICE_NAME=api
     ports:
@@ -72,7 +72,7 @@ services:
   blocks-worker:
     build:
       context: ${BLOCKS_CONTEXT:-.}
-      target: prod
+      target: ${BLOCKS_TARGET:-prod}
       args:
         - SERVICE_NAME=worker
     ports:
