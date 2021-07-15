@@ -1,43 +1,42 @@
 package main
 
 import (
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/geometry-labs/icon-blocks/worker/transformers"
 	"go.uber.org/zap"
 
-	"github.com/geometry-labs/icon-blocks/api/healthcheck"
-	"github.com/geometry-labs/icon-blocks/api/routes"
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/global"
 	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/logging"
 	"github.com/geometry-labs/icon-blocks/metrics"
+	"github.com/geometry-labs/icon-blocks/worker/loader"
 )
 
 func main() {
 	config.ReadEnvironment()
 
 	logging.StartLoggingInit()
-	zap.S().Debug("Main: Starting logging with level ", config.Config.LogLevel)
-
-	global.GetGlobal()
-	// Start kafka consumers
-	// Go routines start in function
-	kafka.StartApiConsumers()
+	log.Printf("Main: Starting logging with level %s", config.Config.LogLevel)
 
 	// Start Prometheus client
-	// Go routine starts in function
-	metrics.MetricsApiStart()
+	metrics.MetricsWorkerStart()
 
-	// Start API server
-	// Go routine starts in function
-	routes.Start()
+	// Start Postgres loader
+	loader.StartBlockLoader()
 
-	// Start Health server
-	// Go routine starts in function
-	healthcheck.Start()
+	// Start kafka Producer
+	kafka.StartProducers()
+
+	// Start transformers
+	transformers.StartBlocksTransformer()
+
+	// Start kafka consumer
+	kafka.StartWorkerConsumers()
 
 	// Listen for close sig
 	// Register for interupt (Ctrl+C) and SIGTERM (docker)
