@@ -85,7 +85,7 @@ func (k *KafkaTopicConsumer) consumeTopic() {
 		}
 	}()
 
-	offset := sarama.OffsetOldest
+	offset := sarama.OffsetNewest
 	partitions, err := consumer.Partitions(k.TopicName)
 	if err != nil {
 		zap.S().Panic("KAFKA CONSUMER PARTITIONS PANIC: ", err.Error(), " Topic: ", k.TopicName)
@@ -102,13 +102,6 @@ func (k *KafkaTopicConsumer) consumeTopic() {
 			zap.S().Panic("KAFKA CONSUMER PARTITIONS PANIC: Failed to create PartitionConsumer")
 		}
 
-		// Watch errors
-		// go func() {
-		// 		for err := range pc.Errors() {
-		// log.Warn("KAFKA CONSUMER WARN: ", err.Error())
-		// 	}
-		// }()
-
 		// One routine per partition
 		go func(pc sarama.PartitionConsumer) {
 			for {
@@ -118,7 +111,6 @@ func (k *KafkaTopicConsumer) consumeTopic() {
 					topic_msg = msg
 				case consumerErr := <-pc.Errors():
 					zap.S().Warn("KAFKA PARTITION CONSUMER ERROR:", consumerErr.Err)
-					//consumerErr.Err
 					continue
 				case <-time.After(5 * time.Second):
 					zap.S().Debug("Consumer ", k.TopicName, ": No new kafka messages, waited 5 secs")

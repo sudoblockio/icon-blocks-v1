@@ -1,13 +1,14 @@
 package transformers
 
 import (
+	"go.uber.org/zap"
+	"gopkg.in/Shopify/sarama.v1"
+
 	"github.com/geometry-labs/icon-blocks/config"
-	"github.com/geometry-labs/icon-blocks/global"
+	"github.com/geometry-labs/icon-blocks/crud"
 	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/models"
 	"github.com/geometry-labs/icon-blocks/worker/utils"
-	"go.uber.org/zap"
-	"gopkg.in/Shopify/sarama.v1"
 )
 
 func StartBlocksTransformer() {
@@ -18,7 +19,6 @@ func blocksTransformer() {
 	consumer_topic_name := "blocks"
 	producer_topic_name := "blocks-ws"
 
-	// TODO: Need to move all of the config validations to config.go
 	// Check topic names
 	if utils.StringInSlice(consumer_topic_name, config.Config.ConsumerTopics) == false {
 		zap.S().Panic("Blocks Worker: no ", consumer_topic_name, " topic found in CONSUMER_TOPICS=", config.Config.ConsumerTopics)
@@ -29,7 +29,7 @@ func blocksTransformer() {
 
 	consumer_topic_chan := make(chan *sarama.ConsumerMessage)
 	producer_topic_chan := kafka.KafkaTopicProducers[producer_topic_name].TopicChan
-	postgresLoaderChan := global.GetGlobal().Blocks.GetWriteChan()
+	postgresLoaderChan := crud.GetBlockModel().WriteChan
 
 	// Register consumer channel
 	broadcaster_output_chan_id := kafka.Broadcasters[consumer_topic_name].AddBroadcastChannel(consumer_topic_chan)

@@ -12,7 +12,7 @@ type BlockModel struct {
 	db        *gorm.DB
 	model     *models.Block
 	modelORM  *models.BlockORM
-  writeChan chan *models.Block
+  WriteChan chan *models.Block
 }
 
 var blockModel *BlockModel
@@ -22,7 +22,7 @@ func GetBlockModel() *BlockModel {
 		blockModel = &BlockModel{
 			db:        GetPostgresConn().conn,
 			model:     &models.Block{},
-			writeChan: make(chan *models.Block, 1),
+			WriteChan: make(chan *models.Block, 1),
 		}
 
 		err := blockModel.Migrate()
