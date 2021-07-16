@@ -12,13 +12,17 @@ func StartBlockLoader() {
 }
 
 func BlockLoader() {
+
 	var block *models.Block
 	postgresLoaderChan := global.GetGlobal().Blocks.GetWriteChan()
+
 	for {
+    // Read block
 		block = <-postgresLoaderChan
-		global.GetGlobal().Blocks.RetryCreate(block) // inserted here !!
-		zap.S().Debug(fmt.Sprintf(
-			"Loader Block: Loaded in postgres table Blocks, Block Number %d", block.Number),
-		)
+
+    // Load block to database
+		global.GetGlobal().Blocks.Create(block)
+
+		zap.S().Debugf("Loader Block: Loaded in postgres table Blocks, Block Number %d", block.Number),
 	}
 }

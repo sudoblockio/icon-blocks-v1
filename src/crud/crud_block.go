@@ -6,45 +6,32 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"strings"
-	"sync"
 )
 
 type BlockModel struct {
 	db        *gorm.DB
 	model     *models.Block
 	modelORM  *models.BlockORM
-	writeChan chan *models.Block
+  writeChan chan *models.Block
 }
 
-var blockModelInstance *BlockModel
-var blockModelOnce sync.Once
+var blockModel *BlockModel
 
 func GetBlockModel() *BlockModel {
-	blockModelOnce.Do(func() {
-		blockModelInstance = &BlockModel{
+  if blockModel == nil {
+		blockModel = &BlockModel{
 			db:        GetPostgresConn().conn,
 			model:     &models.Block{},
 			writeChan: make(chan *models.Block, 1),
 		}
 
-		err := blockModelInstance.Migrate()
+		err := blockModel.Migrate()
 		if err != nil {
 			zap.S().Error("BlockModel: Unable create postgres table: Blocks")
 		}
-	})
-	return blockModelInstance
-}
+  }
 
-func (m *BlockModel) GetDB() *gorm.DB {
-	return m.db
-}
-
-func (m *BlockModel) GetModel() *models.Block {
-	return m.model
-}
-
-func (m *BlockModel) GetWriteChan() chan *models.Block {
-	return m.writeChan
+	return blockModel
 }
 
 func (m *BlockModel) Migrate() error {
@@ -53,26 +40,68 @@ func (m *BlockModel) Migrate() error {
 	return err
 }
 
-func (m *BlockModel) create(block *models.Block) (*gorm.DB, error) {
-	tx := m.db.Create(block)
-	return tx, tx.Error
+func (m *BlockModel) Create(block *models.Block) error {
+
+	err := backoff.Retry(func() error {
+		query := m.db.Create(block)
+		if query.Error != nil && !strings.Contains(query.Error.Error(), "duplicate key value violates unique constraint") {
+			zap.S().Warn("POSTGRES RetryCreate Error : ", query.Error.Error())
+		  return query.Error
+		}
+
+		return nil
+	}, backoff.NewExponentialBackOff())
+
+	return err
 }
 
-func (m *BlockModel) RetryCreate(block *models.Block) (*gorm.DB, error) {
-	var transaction *gorm.DB
-	operation := func() error {
-		tx, err := m.create(block)
-		if err != nil && !strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
-			zap.S().Info("POSTGRES RetryCreate Error : ", err.Error())
-		} else {
-			transaction = tx
-			return nil
-		}
-		return err
-	}
-	neb := backoff.NewExponentialBackOff()
-	err := backoff.Retry(operation, neb)
-	return transaction, err
+func (m *BlockModel) Select(
+  limit         int,
+  skip          int,
+  number        uint32,
+  start_number  uint32,
+  end_number    uint32,
+  hash          string,
+  created_by    string,
+) (*[]models.Block) {
+  db := m.db
+
+  // Limit is required and defaulted to 1
+  db = db.Limit(limit)
+
+  // Skip
+  if skip != 0 {
+    db = db.Offset(skip)
+  }
+
+  // Height
+  if number != 0 {
+    db = db.Where("number = ?", number)
+  }
+
+  // Start number and end number
+  if start_number != 0 && end_number != 0 {
+    db = db.Where("number BETWEEN ? AND ?", start_number, end_number)
+  } else if start_number != 0 {
+    db = db.Where("number > ?", start_number)
+  } else if end_number != 0 {
+    db = db.Where("number < ?", end_number)
+  }
+
+  // Hash
+  if hash != "" {
+    db = db.Where("hash = ?", hash)
+  }
+
+  // Created By
+  if created_by != "" {
+    db = db.Where("created_by = ?", created_by)
+  }
+
+  blocks := &[]models.Block{}
+  db.Find(blocks)
+
+  return blocks
 }
 
 func (m *BlockModel) FindOne(conds ...interface{}) (*models.Block, *gorm.DB) {

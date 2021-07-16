@@ -22,7 +22,7 @@ var _ = Describe("BlockModel", func() {
 					Delete(blockModel, "Signature = ?", block.Signature)
 				})
 				It("predefined block insert", func() {
-					_, err := blockModel.RetryCreate(block)
+					_, err := blockModel.Create(block)
 					if err != nil {
 						Expect(err).To(nil)
 					}

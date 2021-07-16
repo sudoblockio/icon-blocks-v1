@@ -6,7 +6,7 @@ import (
 	fiber "github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 
-	"github.com/geometry-labs/icon-blocks/api/service"
+	"github.com/geometry-labs/icon-blocks/crud"
 	"github.com/geometry-labs/icon-blocks/config"
 )
 
@@ -14,7 +14,18 @@ func BlocksAddHandlers(app *fiber.App) {
 
 	prefix := config.Config.RestPrefix + "/blocks"
 
-	app.Get(prefix+"/", handlerGetQuery)
+	app.Get(prefix+"/", handlerGetBlocks)
+}
+
+// Parameters for handlerGetBlocks
+type paramsGetBlocks struct {
+  Limit       int     `query:"limit"`
+  Skip        int     `query:"skip"`
+  Number      uint32  `query:"number"`
+  StartNumber uint32  `query:"start_number"`
+  EndNumber   uint32  `query:"end_number"`
+  Hash        string  `query:"hash"`
+  CreatedBy   string  `query:"created_by"`
 }
 
 // Blocks
@@ -24,8 +35,8 @@ func BlocksAddHandlers(app *fiber.App) {
 // @Accept */*
 // @Produce json
 // @Router /blocks [get]
-func handlerGetQuery(c *fiber.Ctx) error {
-	params := new(service.BlocksQueryService)
+func handlerGetBlocks(c *fiber.Ctx) error {
+  params := &paramsGetBlocks{}
 	if err := c.QueryParser(params); err != nil {
     zap.S().Warnf("Blocks Get Handler ERROR: %s", err.Error())
 
@@ -33,16 +44,21 @@ func handlerGetQuery(c *fiber.Ctx) error {
     return c.SendString(`{"error": "could not parse query parameters"}`)
 	}
 
-  // Get Blocks
-	blocks := params.RunQuery()
-	if len(*blocks) == 0 {
-    // No Content
-		c.Status(204)
-	} else {
-    // Success
-	  c.Status(200)
+  // Default params
+  if params.Limit == 0 {
+    params.Limit = 1
   }
 
-	body, _ := json.Marshal(blocks)
-	return c.SendString(string(body))
+  blocks := crud.GetBlockModel().Select(
+    params.Limit,
+    params.Skip,
+    params.Number,
+    params.StartNumber,
+    params.EndNumber,
+    params.Hash,
+    params.CreatedBy,
+  )
+
+  body, _ := json.Marshal(blocks)
+  return c.SendString(string(body))
 }
