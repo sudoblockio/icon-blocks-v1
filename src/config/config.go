@@ -33,6 +33,7 @@ type configType struct {
 	KafkaGroupID      string `envconfig:"KAFKA_GROUP_ID" required:"false" default:"blocks-service"`
 
 	// Topics
+	ConsumerGroup    string            `envconfig:"CONSUMER_GROUP" required:"false" default:"blocks-consumer-group"`
 	ConsumerTopics   []string          `envconfig:"CONSUMER_TOPICS" required:"false" default:"blocks"`
 	ProducerTopics   []string          `envconfig:"PRODUCER_TOPICS" required:"false" default:"blocks-ws"`
 	SchemaNameTopics map[string]string `envconfig:"SCHEMA_NAME_TOPICS" required:"false" default:"blocks-ws:block"`

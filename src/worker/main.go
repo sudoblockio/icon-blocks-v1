@@ -26,24 +26,27 @@ func main() {
 	// Start Prometheus client
 	metrics.MetricsWorkerStart()
 
-	// Start Postgres loader
-	loader.StartBlockLoader()
-
 	// Start kafka Producer
+  // 3
 	kafka.StartProducers()
 
-	// Start transformers
-	transformers.StartBlocksTransformer()
+	// Start Postgres loader
+  // 4
+	loader.StartBlockLoader()
 
 	// Start kafka consumer
+  // 1
 	kafka.StartWorkerConsumers()
 
-	// Listen for close sig
-	// Register for interupt (Ctrl+C) and SIGTERM (docker)
+	// Start transformers
+  // 2
+	transformers.StartBlocksTransformer()
 
 	//create a notification channel to shutdown
 	sigChan := make(chan os.Signal, 1)
 
+	// Listen for close sig
+	// Register for interupt (Ctrl+C) and SIGTERM (docker)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-sigChan

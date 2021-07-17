@@ -22,7 +22,6 @@ func main() {
 	logging.StartLoggingInit()
 	zap.S().Debug("Main: Starting logging with level ", config.Config.LogLevel)
 
-	global.GetGlobal()
 	// Start kafka consumers
 	// Go routines start in function
 	kafka.StartApiConsumers()
@@ -39,16 +38,15 @@ func main() {
 	// Go routine starts in function
 	healthcheck.Start()
 
-	// Listen for close sig
-	// Register for interupt (Ctrl+C) and SIGTERM (docker)
-
 	//create a notification channel to shutdown
 	sigChan := make(chan os.Signal, 1)
 
+	// Listen for close sig
+	// Register for interupt (Ctrl+C) and SIGTERM (docker)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-sigChan
-		zap.S().Info("Shutting down...")
+    zap.S().Info("Main: Shutting down...")
 		global.ShutdownChan <- 1
 	}()
 
