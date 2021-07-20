@@ -14,11 +14,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Bring up stack
-        run: make up
-
       - name: Run unit tests
         run: cd src && go test ./... -v
+
+      - name: Bring up stack
+        run: make up
 
       - name: Run integration tests
         run: sleep 120 && cd tests && go test ./... -v
