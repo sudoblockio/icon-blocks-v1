@@ -21,7 +21,7 @@ jobs:
         run: cd src && go test ./... -v
 
       - name: Run integration tests
-        run: cd tests && go test ./... -v
+        run: sleep 120 && cd tests && go test ./... -v
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
