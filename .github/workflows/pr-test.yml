@@ -22,7 +22,7 @@ jobs:
         run: docker-compose -f docker-compose.db.yml up -d
 
       - name: Run unit tests
-        run: cd src && go test ./... -v --tags=unit
+        run: cd src && go test ./... -v
 
       - name: Run integration tests
-        run: sleep 200 && cd src && go test ./... -v --tags=integration
+        run: sleep 120 && cd tests && go test ./... -v
