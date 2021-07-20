@@ -69,7 +69,7 @@ func (m *BlockModel) Select(
   db := m.db
 
   // Latest blocks first
-  db.Order("number desc")
+  db = db.Order("number desc")
 
   // Limit is required and defaulted to 1
   db = db.Limit(limit)

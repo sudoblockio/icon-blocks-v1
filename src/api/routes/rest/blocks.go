@@ -35,13 +35,13 @@ type paramsGetBlocks struct {
 // @BasePath /api/v1
 // @Accept */*
 // @Produce json
-// @Param limit query int false "1"
-// @Param skip query int false "0"
-// @Param number query int false "0"
-// @Param start_number query int false "0"
-// @Param end_number query int false "0"
-// @Param hash query string false "\"\""
-// @Param created_by query string false "\"\""
+// @Param limit query int false "amount of records"
+// @Param skip query int false "skip to a record"
+// @Param number query int false "find by block number"
+// @Param start_number query int false "range by start block number"
+// @Param end_number query int false "range by end block number"
+// @Param hash query string false "find by block hash"
+// @Param created_by query string false "find by block creator"
 // @Router /api/v1/blocks [get]
 // @Success 200 {object} []models.Block
 // @Failure 422 {object} map[string]interface{}
