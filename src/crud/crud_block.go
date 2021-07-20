@@ -1,11 +1,13 @@
 package crud
 
 import (
-	"github.com/cenkalti/backoff/v4"
-	"github.com/geometry-labs/icon-blocks/models"
+	"strings"
+
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"strings"
+	"github.com/cenkalti/backoff/v4"
+
+	"github.com/geometry-labs/icon-blocks/models"
 )
 
 type BlockModel struct {
@@ -65,6 +67,9 @@ func (m *BlockModel) Select(
   created_by    string,
 ) (*[]models.Block) {
   db := m.db
+
+  // Latest blocks first
+  db.Order("number desc")
 
   // Limit is required and defaulted to 1
   db = db.Limit(limit)

@@ -14,6 +14,7 @@ import (
 	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/api/healthcheck"
 	"github.com/geometry-labs/icon-blocks/api/routes"
+	_ "github.com/geometry-labs/icon-blocks/models" // for swagger docs
 )
 
 func main() {

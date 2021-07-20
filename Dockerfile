@@ -17,10 +17,11 @@ RUN go mod tidy
 
 # CREATE SWAGGER DOCS
 RUN go get github.com/swaggo/swag/cmd/swag
+RUN go get github.com/arsmn/fiber-swagger/v2
 RUN go get github.com/alecthomas/template
 RUN go get github.com/riferrei/srclient@v0.3.0
 WORKDIR /build/api
-RUN swag init -g routes/api.go
+RUN swag init --parseDependency -g routes/api.go
 
 # BUILD
 WORKDIR /build

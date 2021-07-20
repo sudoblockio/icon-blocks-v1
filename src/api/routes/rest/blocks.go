@@ -29,12 +29,22 @@ type paramsGetBlocks struct {
 }
 
 // Blocks
-// @Summary Get Blocks that match the query
-// @Description Get all blocks in the system.
-// @Tags root
+// @Summary Get Blocks
+// @Description get historical blocks
+// @Tags Blocks
+// @BasePath /api/v1
 // @Accept */*
 // @Produce json
-// @Router /blocks [get]
+// @Param limit query int false "1"
+// @Param skip query int false "0"
+// @Param number query int false "0"
+// @Param start_number query int false "0"
+// @Param end_number query int false "0"
+// @Param hash query string false "\"\""
+// @Param created_by query string false "\"\""
+// @Router /api/v1/blocks [get]
+// @Success 200 {object} []models.Block
+// @Failure 422 {object} map[string]interface{}
 func handlerGetBlocks(c *fiber.Ctx) error {
   params := &paramsGetBlocks{}
 	if err := c.QueryParser(params); err != nil {

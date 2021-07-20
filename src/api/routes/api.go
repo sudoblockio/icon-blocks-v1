@@ -17,6 +17,8 @@ import (
 // @title Go api template docs
 // @version 2.0
 // @description This is a sample server server.
+// @host localhost:8000
+// @BasePath /
 func Start() {
 
 	app := fiber.New()
@@ -46,7 +48,7 @@ func Start() {
 // Version
 // @Summary Show the status of server.
 // @Description get the status of server.
-// @Tags root
+// @Tags Version
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
@@ -64,7 +66,7 @@ func handlerVersion(c *fiber.Ctx) error {
 // Metadata
 // @Summary Show the status of server.
 // @Description get the status of server.
-// @Tags root
+// @Tags Version
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
