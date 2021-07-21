@@ -1,4 +1,4 @@
-name: Release chart for public
+name: Push Chart
 
 on:
   push:

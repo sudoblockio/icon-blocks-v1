@@ -1,12 +1,12 @@
 package kafka
 
 import (
-  "context"
+	"context"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"go.uber.org/zap"
 	"gopkg.in/Shopify/sarama.v1"
-	"github.com/cenkalti/backoff/v4"
 
 	"github.com/geometry-labs/icon-blocks/config"
 )
@@ -46,7 +46,7 @@ func StartApiConsumers() {
 func StartWorkerConsumers() {
 	kafka_broker := config.Config.KafkaBrokerURL
 	consumer_topics := config.Config.ConsumerTopics
-  consumer_group := config.Config.ConsumerGroup
+	consumer_group := config.Config.ConsumerGroup
 
 	zap.S().Info("Start Consumer Group: kafka_broker=", kafka_broker, " consumer_topics=", consumer_topics, " consumer_group=", consumer_group)
 
@@ -77,59 +77,59 @@ type KafkaTopicConsumer struct {
 func (*KafkaTopicConsumer) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (*KafkaTopicConsumer) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 func (k *KafkaTopicConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-  for {
+	for {
 		var topic_msg *sarama.ConsumerMessage
-    select {
-      case msg := <-claim.Messages():
-        topic_msg = msg
-      case <-time.After(5 * time.Second):
-        zap.S().Debug("Consumer ", k.TopicName, ": No new kafka messages, waited 5 secs")
-        continue
-    }
+		select {
+		case msg := <-claim.Messages():
+			topic_msg = msg
+		case <-time.After(5 * time.Second):
+			zap.S().Debug("Consumer ", k.TopicName, ": No new kafka messages, waited 5 secs")
+			continue
+		}
 
-    zap.S().Info("New Kafka Consumer Group Message: offset=", topic_msg.Offset, " key=", string(topic_msg.Key))
+		zap.S().Info("New Kafka Consumer Group Message: offset=", topic_msg.Offset, " key=", string(topic_msg.Key))
 
-    // Commit offset
-    sess.MarkMessage(topic_msg, "")
+		// Commit offset
+		sess.MarkMessage(topic_msg, "")
 
-    // Broadcast
-    k.Broadcaster.ConsumerChan <- topic_msg
+		// Broadcast
+		k.Broadcaster.ConsumerChan <- topic_msg
 
-    zap.S().Debug("Consumer ", k.TopicName, ": Broadcasted message key=", string(topic_msg.Key))
+		zap.S().Debug("Consumer ", k.TopicName, ": Broadcasted message key=", string(topic_msg.Key))
 	}
 	return nil
 }
 
 func (k *KafkaTopicConsumer) consumeGroup(group string) {
-  version, err := sarama.ParseKafkaVersion("2.1.1")
+	version, err := sarama.ParseKafkaVersion("2.1.1")
 	if err != nil {
-    zap.S().Panic("CONSUME GROUP ERROR: parsing Kafka version: ", err.Error())
+		zap.S().Panic("CONSUME GROUP ERROR: parsing Kafka version: ", err.Error())
 	}
 
-  sarama_config := sarama.NewConfig()
-  sarama_config.Version = version
-  sarama_config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
-  sarama_config.Consumer.Offsets.Initial = sarama.OffsetOldest
+	sarama_config := sarama.NewConfig()
+	sarama_config.Version = version
+	sarama_config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
+	sarama_config.Consumer.Offsets.Initial = sarama.OffsetOldest
 
-  ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 	client, err := sarama.NewConsumerGroup([]string{k.BrokerURL}, group, sarama_config)
 	if err != nil {
-    zap.S().Panic("CONSUME GROUP ERROR: creating consumer group client: ", err.Error())
+		zap.S().Panic("CONSUME GROUP ERROR: creating consumer group client: ", err.Error())
 	}
 
-  // From example: /sarama/blob/master/examples/consumergroup/main.go
+	// From example: /sarama/blob/master/examples/consumergroup/main.go
 	go func() {
 		for {
 			// `Consume` should be called inside an infinite loop, when a
 			// server-side rebalance happens, the consumer session will need to be
 			// recreated to get the new claims
-      err := client.Consume(ctx, []string{k.TopicName}, k)
+			err := client.Consume(ctx, []string{k.TopicName}, k)
 			if err != nil {
-        zap.S().Warn("CONSUME GROUP ERROR: from consumer: ", err.Error())
+				zap.S().Warn("CONSUME GROUP ERROR: from consumer: ", err.Error())
 			}
 			// check if context was cancelled, signaling that the consumer should stop
 			if ctx.Err() != nil {
-        zap.S().Warn("CONSUME GROUP WARN: from context: ", ctx.Err().Error())
+				zap.S().Warn("CONSUME GROUP WARN: from context: ", ctx.Err().Error())
 				return
 			}
 		}
@@ -138,22 +138,22 @@ func (k *KafkaTopicConsumer) consumeGroup(group string) {
 	// Waiting, so that client remains alive
 	ch := make(chan int, 1)
 	<-ch
-  cancel()
+	cancel()
 }
 
 func (k *KafkaTopicConsumer) consumeTopic() {
 	sarama_config := sarama.NewConfig()
 	sarama_config.Consumer.Return.Errors = true
 
-  // Connect consumer on Retry
+	// Connect consumer on Retry
 	var consumer sarama.Consumer
-  err := backoff.Retry(func() error {
-    var err error
-    consumer, err = sarama.NewConsumer([]string{k.BrokerURL}, sarama_config)
+	err := backoff.Retry(func() error {
+		var err error
+		consumer, err = sarama.NewConsumer([]string{k.BrokerURL}, sarama_config)
 		if err != nil {
-      zap.S().Warn("Kafka New Consumer Error: ", err.Error())
+			zap.S().Warn("Kafka New Consumer Error: ", err.Error())
 			zap.S().Warn("Cannot conCect to kafka broker retrying...")
-      return err
+			return err
 		}
 
 		return nil
@@ -179,12 +179,12 @@ func (k *KafkaTopicConsumer) consumeTopic() {
 	zap.S().Debug("Consumer ", k.TopicName, ": Started consuming")
 	for _, p := range partitions {
 		pc, err := consumer.ConsumePartition(k.TopicName, p, offset)
-    defer func() {
-      err = pc.Close()
-      if err != nil {
-        zap.S().Warn("PARTITION CONSUMER CLOSE: ", err.Error())
-      }
-    }()
+		defer func() {
+			err = pc.Close()
+			if err != nil {
+				zap.S().Warn("PARTITION CONSUMER CLOSE: ", err.Error())
+			}
+		}()
 
 		if err != nil {
 			zap.S().Panic("KAFKA CONSUMER PARTITIONS PANIC: ", err.Error())

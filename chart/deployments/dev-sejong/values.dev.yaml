@@ -6,8 +6,7 @@ deployment:
   replicaCount: 1
   annotations: |
     "consul.hashicorp.com/connect-inject": "true"
-    "consul.hashicorp.com/connect-service-upstreams": "icon-blocks-db:5432,
-    drift-users:8081"
+    "consul.hashicorp.com/connect-service-upstreams": "icon-blocks-db:5432"
   resources:
     requests:
       cpu: '0.25'
@@ -21,13 +20,13 @@ autoscaler:
   maxReplicas: 25
   averageCPU: 50
 service:
-  name: geometry-fe
+  name: icon-blocks
   type: ClusterIP
   externalPort: 80
   internalPort: 8080
 ingress:
   enabled: true
-  regionalHost: app.us-west-2.aws.geometry-dev.net
-  apexHost: app.geometry-dev.net
+  regionalHost: sejong.icon.us-west-2.aws.geometry-dev.net
+  apexHost: sejong.icon.geometry-dev.net
   annotations: |
     "cert-manager.io/cluster-issuer": "letsencrypt"

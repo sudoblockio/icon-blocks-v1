@@ -1,4 +1,4 @@
-name: Release from main to prod
+name: Release to Prod
 
 on:
   release:
@@ -46,7 +46,7 @@ jobs:
           ECR_REPOSITORY: icon-blocks-worker
           IMAGE_TAG: ${{ github.run_number }}
         run: |
-          docker build --build-arg NODE_NAME=worker -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG docker/Dockerfile
+          docker build --build-arg SERVICE_NAME=worker -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG Dockerfile
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: API - Build, tag, and push image to Amazon ECR
@@ -55,17 +55,29 @@ jobs:
           ECR_REPOSITORY: icon-blocks-api
           IMAGE_TAG: ${{ github.run_number }}
         run: |
-          docker build --build-arg NODE_NAME=api -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG docker/Dockerfile
+          docker build --build-arg SERVICE_NAME=api -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG Dockerfile
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Update dev deployment values file and re-commit
+      - name: Update prod-mainnet deployment values file and re-commit
         uses: fjogeleit/yaml-update-action@master
         with:
-          valueFile: 'chart/deployments/prod/values.test.yaml'
+          valueFile: 'chart/deployments/prod-mainnet/values.test.yaml'
           propertyPath: 'deployment.image.tag'
           value: ${{ github.run_number }}
           branch: main
           targetBranch: main
           createPR: 'false'
-          message: 'Update dev deployment image version to ${{ github.run_number }}'
+          message: 'Update prod deployment image version to ${{ github.run_number }}'
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update prod-sejong deployment values file and re-commit
+        uses: fjogeleit/yaml-update-action@master
+        with:
+          valueFile: 'chart/deployments/prod-sejong/values.test.yaml'
+          propertyPath: 'deployment.image.tag'
+          value: ${{ github.run_number }}
+          branch: main
+          targetBranch: main
+          createPR: 'false'
+          message: 'Update prod deployment image version to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
