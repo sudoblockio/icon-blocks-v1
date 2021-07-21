@@ -32,7 +32,7 @@ jobs:
           aws-region: us-west-2
 
       - name: Login to Amazon ECR
-        id: login-ecr
+        id: login-ecr-worker
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Tag name
@@ -42,7 +42,7 @@ jobs:
 
       - name: Worker - Build, tag, and push image to Amazon ECR
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ steps.login-ecr-worker.outputs.registry }}
           ECR_REPOSITORY: icon-blocks-worker
           IMAGE_TAG: ${{ github.run_number }}
         run: |
@@ -57,12 +57,12 @@ jobs:
           aws-region: us-west-2
 
       - name: Login to Amazon ECR
-        id: login-ecr
+        id: login-ecr-api
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: API - Build, tag, and push image to Amazon ECR
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ steps.login-ecr-api.outputs.registry }}
           ECR_REPOSITORY: icon-blocks-api
           IMAGE_TAG: ${{ github.run_number }}
         run: |
@@ -81,16 +81,30 @@ jobs:
           echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
 
       - name: Build and push
-        id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: .
+          build-args:
+            - SERVICE_NAME=api
           file: ./Dockerfile
           target: prod
           push: true
           tags: |
-            geometrylabs/icon-blocks:latest
-            geometrylabs/icon-blocks:${{ steps.source.outputs.TAG }}
+            geometrylabs/icon-blocks-api:latest
+            geometrylabs/icon-blocks-api:${{ steps.source.outputs.TAG }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          build-args:
+            - SERVICE_NAME=worker
+          file: ./Dockerfile
+          target: prod
+          push: true
+          tags: |
+            geometrylabs/icon-blocks-worker:latest
+            geometrylabs/icon-blocks-worker:${{ steps.source.outputs.TAG }}
 
       - name: Update prod-mainnet deployment values file and re-commit
         uses: fjogeleit/yaml-update-action@master
