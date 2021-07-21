@@ -6,10 +6,11 @@ import (
 	fiber "github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 
-	"github.com/geometry-labs/icon-blocks/crud"
 	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/crud"
 )
 
+// BlocksAddHandlers - add blocks endpoints to fiber router
 func BlocksAddHandlers(app *fiber.App) {
 
 	prefix := config.Config.RestPrefix + "/blocks"
@@ -19,13 +20,13 @@ func BlocksAddHandlers(app *fiber.App) {
 
 // Parameters for handlerGetBlocks
 type paramsGetBlocks struct {
-  Limit       int     `query:"limit"`
-  Skip        int     `query:"skip"`
-  Number      uint32  `query:"number"`
-  StartNumber uint32  `query:"start_number"`
-  EndNumber   uint32  `query:"end_number"`
-  Hash        string  `query:"hash"`
-  CreatedBy   string  `query:"created_by"`
+	Limit       int    `query:"limit"`
+	Skip        int    `query:"skip"`
+	Number      uint32 `query:"number"`
+	StartNumber uint32 `query:"start_number"`
+	EndNumber   uint32 `query:"end_number"`
+	Hash        string `query:"hash"`
+	CreatedBy   string `query:"created_by"`
 }
 
 // Blocks
@@ -46,29 +47,29 @@ type paramsGetBlocks struct {
 // @Success 200 {object} []models.Block
 // @Failure 422 {object} map[string]interface{}
 func handlerGetBlocks(c *fiber.Ctx) error {
-  params := &paramsGetBlocks{}
+	params := &paramsGetBlocks{}
 	if err := c.QueryParser(params); err != nil {
-    zap.S().Warnf("Blocks Get Handler ERROR: %s", err.Error())
+		zap.S().Warnf("Blocks Get Handler ERROR: %s", err.Error())
 
 		c.Status(422)
-    return c.SendString(`{"error": "could not parse query parameters"}`)
+		return c.SendString(`{"error": "could not parse query parameters"}`)
 	}
 
-  // Default params
-  if params.Limit == 0 {
-    params.Limit = 1
-  }
+	// Default params
+	if params.Limit == 0 {
+		params.Limit = 1
+	}
 
-  blocks := crud.GetBlockModel().Select(
-    params.Limit,
-    params.Skip,
-    params.Number,
-    params.StartNumber,
-    params.EndNumber,
-    params.Hash,
-    params.CreatedBy,
-  )
+	blocks := crud.GetBlockModel().Select(
+		params.Limit,
+		params.Skip,
+		params.Number,
+		params.StartNumber,
+		params.EndNumber,
+		params.Hash,
+		params.CreatedBy,
+	)
 
-  body, _ := json.Marshal(blocks)
-  return c.SendString(string(body))
+	body, _ := json.Marshal(blocks)
+	return c.SendString(string(body))
 }

@@ -11,11 +11,8 @@ import (
 	"github.com/geometry-labs/icon-blocks/global"
 )
 
-func StartLoggingInit() {
-	go loggingInit()
-}
-
-func loggingInit() {
+// Init - init logging config
+func Init() {
 	cfg := newLoggerConfig()
 
 	logger := newLogger(cfg)

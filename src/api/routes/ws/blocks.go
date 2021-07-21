@@ -9,6 +9,7 @@ import (
 	"github.com/geometry-labs/icon-blocks/kafka"
 )
 
+// BlocksAddHandlers - add fiber endpoint handlers for websocket connections
 func BlocksAddHandlers(app *fiber.App) {
 
 	prefix := config.Config.WebsocketPrefix + "/blocks"
@@ -31,20 +32,20 @@ func handlerGetBlocks(broadcaster *kafka.TopicBroadcaster) func(c *websocket.Con
 	return func(c *websocket.Conn) {
 
 		// Add broadcaster
-		topic_chan := make(chan *sarama.ConsumerMessage)
-		id := broadcaster.AddBroadcastChannel(topic_chan)
+		topicChan := make(chan *sarama.ConsumerMessage)
+		id := broadcaster.AddBroadcastChannel(topicChan)
 		defer func() {
 			// Remove broadcaster
 			broadcaster.RemoveBroadcastChannel(id)
 		}()
 
 		// Read for close
-		client_close_sig := make(chan bool)
+		clientCloseSig := make(chan bool)
 		go func() {
 			for {
 				_, _, err := c.ReadMessage()
 				if err != nil {
-					client_close_sig <- true
+					clientCloseSig <- true
 					break
 				}
 			}
@@ -52,7 +53,7 @@ func handlerGetBlocks(broadcaster *kafka.TopicBroadcaster) func(c *websocket.Con
 
 		for {
 			// Read
-			msg := <-topic_chan
+			msg := <-topicChan
 
 			// Broadcast
 			err := c.WriteMessage(websocket.TextMessage, msg.Value)
@@ -62,7 +63,7 @@ func handlerGetBlocks(broadcaster *kafka.TopicBroadcaster) func(c *websocket.Con
 
 			// check for client close
 			select {
-			case _ = <-client_close_sig:
+			case _ = <-clientCloseSig:
 				break
 			default:
 				continue

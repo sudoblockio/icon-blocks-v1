@@ -2,37 +2,38 @@ package crud
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/geometry-labs/icon-blocks/config"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"sync"
 )
 
-type PostgresConn struct {
+type postgresConn struct {
 	conn *gorm.DB
 }
 
-var postgresInstance *PostgresConn
+var postgresInstance *postgresConn
 var postgresConnOnce sync.Once
 
-func NewDsn(host string, port string, user string, password string, dbname string, sslmode string, timezone string) string {
+func formatPostgresDSN(host string, port string, user string, password string, dbname string, sslmode string, timezone string) string {
 	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
 		host, user, password, dbname, port, sslmode, timezone)
 }
 
-func GetPostgresConn() *PostgresConn {
+func getPostgresConn() *postgresConn {
 	postgresConnOnce.Do(func() {
-		dsn := NewDsn(
-      config.Config.DbHost,
-      config.Config.DbPort,
-      config.Config.DbUser,
+		dsn := formatPostgresDSN(
+			config.Config.DbHost,
+			config.Config.DbPort,
+			config.Config.DbUser,
 			config.Config.DbPassword,
-      config.Config.DbName,
-      config.Config.DbSslmode,
+			config.Config.DbName,
+			config.Config.DbSslmode,
 			config.Config.DbTimezone,
-    )
+		)
 
 		session, err := retryGetPostgresSession(dsn)
 		if err != nil {
@@ -40,14 +41,14 @@ func GetPostgresConn() *PostgresConn {
 		} else {
 			zap.S().Info("Finally successful connection to postgres")
 		}
-		postgresInstance = &PostgresConn{
+		postgresInstance = &postgresConn{
 			conn: session,
 		}
 	})
 	return postgresInstance
 }
 
-func (p *PostgresConn) GetConn() *gorm.DB {
+func (p *postgresConn) GetConn() *gorm.DB {
 	return p.conn
 }
 

@@ -1,18 +1,19 @@
 package healthcheck
 
 import (
-	"github.com/geometry-labs/icon-blocks/config"
-	"go.uber.org/zap"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/geometry-labs/icon-blocks/config"
+	"go.uber.org/zap"
 
 	"github.com/InVisionApp/go-health/v2"
 	"github.com/InVisionApp/go-health/v2/checkers"
 	"github.com/InVisionApp/go-health/v2/handlers"
 )
 
-// TODO split API and WORKER
+// Start - start health server
 func Start() {
 	// create a new health instance
 	h := health.New()

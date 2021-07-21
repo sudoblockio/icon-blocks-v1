@@ -1,12 +1,14 @@
 package models
 
 import (
-	"go.uber.org/zap"
-	"google.golang.org/protobuf/encoding/protojson"
 	"math"
 	"strconv"
+
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
+// ConvertToBlockRaw - []byte -> models.BlockRaw
 func ConvertToBlockRaw(value []byte) (*BlockRaw, error) {
 	block := BlockRaw{}
 	err := protojson.Unmarshal(value, &block)
@@ -16,6 +18,7 @@ func ConvertToBlockRaw(value []byte) (*BlockRaw, error) {
 	return &block, err
 }
 
+// ValidateHeight - string -> int
 func ValidateHeight(heightString string) bool {
 	height, err := strconv.Atoi(heightString)
 	if err != nil {

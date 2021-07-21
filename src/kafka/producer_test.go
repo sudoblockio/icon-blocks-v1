@@ -3,9 +3,10 @@
 package kafka
 
 import (
-	"github.com/geometry-labs/icon-blocks/config"
 	"testing"
 	"time"
+
+	"github.com/geometry-labs/icon-blocks/config"
 
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/Shopify/sarama.v1"
@@ -17,49 +18,49 @@ func init() {
 
 func TestKafkaTopicProducer(t *testing.T) {
 
-	topic_name := "mock-topic"
+	topicName := "mock-topic"
 
 	// Mock broker
-	mock_broker_id := int32(1)
-	mock_broker := sarama.NewMockBroker(t, mock_broker_id)
-	defer mock_broker.Close()
+	mockBrockerID := int32(1)
+	mockBroker := sarama.NewMockBroker(t, mockBrockerID)
+	defer mockBroker.Close()
 
-	mock_broker.SetHandlerByMap(map[string]sarama.MockResponse{
+	mockBroker.SetHandlerByMap(map[string]sarama.MockResponse{
 		"MetadataRequest": sarama.NewMockMetadataResponse(t).
-			SetBroker(mock_broker.Addr(), mock_broker.BrokerID()).
-			SetLeader(topic_name, 0, mock_broker.BrokerID()),
+			SetBroker(mockBroker.Addr(), mockBroker.BrokerID()).
+			SetLeader(topicName, 0, mockBroker.BrokerID()),
 		"ProduceRequest": sarama.NewMockProduceResponse(t),
 	})
 
-	KafkaTopicProducers[topic_name] = &KafkaTopicProducer{
-		mock_broker.Addr(),
-		topic_name,
+	kafkaTopicProducers[topicName] = &kafkaTopicProducer{
+		mockBroker.Addr(),
+		topicName,
 		make(chan *sarama.ProducerMessage),
 	}
 
-	go KafkaTopicProducers[topic_name].produceTopic()
+	go kafkaTopicProducers[topicName].produceTopic()
 
-	msg_key := "KEY"
-	msg_value := "VALUE"
+	msgKey := "KEY"
+	msgValue := "VALUE"
 	go func() {
 		for {
-			KafkaTopicProducers[topic_name].TopicChan <- &sarama.ProducerMessage{
-				Topic:     topic_name,
+			kafkaTopicProducers[topicName].TopicChan <- &sarama.ProducerMessage{
+				Topic:     topicName,
 				Partition: -1,
-				Key:       sarama.StringEncoder(msg_key),
-				Value:     sarama.StringEncoder(msg_value),
+				Key:       sarama.StringEncoder(msgKey),
+				Value:     sarama.StringEncoder(msgValue),
 			}
 			time.Sleep(100 * time.Millisecond)
 		}
 	}()
 
-	total_bytes_read := 0
-	total_bytes_written := 0
-	mock_broker.SetNotifier(func(bytes_read int, bytes_written int) {
-		log.Debug("MOCK NOTIFIER: bytes_read=", bytes_read, " bytes_written=", bytes_written)
+	totalBytesRead := 0
+	totalBytesWritten := 0
+	mockBroker.SetNotifier(func(bytesRead int, bytesWritten int) {
+		log.Debug("MOCK NOTIFIER: bytesRead=", bytesRead, " bytesWritten=", bytesWritten)
 
-		total_bytes_read += bytes_read
-		total_bytes_written += bytes_written
+		totalBytesRead += bytesRead
+		totalBytesWritten += bytesWritten
 	})
 
 	loops := 0
@@ -67,7 +68,7 @@ func TestKafkaTopicProducer(t *testing.T) {
 		if loops > 10 {
 			t.Fatal("No messages to mock broker")
 		}
-		if total_bytes_read > 400 && total_bytes_written > 200 {
+		if totalBytesRead > 400 && totalBytesWritten > 200 {
 			// Test passed
 			return
 		}

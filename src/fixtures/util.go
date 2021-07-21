@@ -12,10 +12,14 @@ import (
 )
 
 const (
-	Block_raws_fixture = "block_raws.json"
+	// BlockRawFixturesPath - path to block-raw fixtures
+	BlockRawFixturesPath = "block_raws.json"
 )
 
+// Fixtures - slice of Fixture
 type Fixtures []Fixture
+
+// Fixture - loaded from fixture file
 type Fixture struct {
 	Input    map[string]interface{}
 	Expected map[string]interface{}
@@ -27,6 +31,7 @@ func check(e error) {
 	}
 }
 
+// LoadTestFixtures - load fixture into memory
 func LoadTestFixtures(file string) (Fixtures, error) {
 	var fs Fixtures
 	dat, err := ioutil.ReadFile(getFixtureDir() + file)
@@ -52,6 +57,7 @@ func getFixtureDir() string {
 	return fixtureDir
 }
 
+// ReadCurrentDir - read current dir
 func ReadCurrentDir() {
 	file, err := os.Open(".")
 	if err != nil {
@@ -65,6 +71,7 @@ func ReadCurrentDir() {
 	}
 }
 
+// GetBlock - interface -> models.Block
 func (f *Fixture) GetBlock(data map[string]interface{}) *models.Block {
 	block := models.Block{
 		Signature:        data["signature"].(string),

@@ -14,7 +14,7 @@ func TestEnvironment(t *testing.T) {
 	assert := assert.New(t)
 
 	// Set env
-	env_map := map[string]string{
+	envMap := map[string]string{
 		"NAME":                    "name",
 		"PORT":                    "port",
 		"HEALTH_PORT":             "health_port",
@@ -35,7 +35,7 @@ func TestEnvironment(t *testing.T) {
 		"SCHEMA_NAME_TOPICS":      "schema_1:schema_1,schema_2:schema_2",
 	}
 
-	for k, v := range env_map {
+	for k, v := range envMap {
 		os.Setenv(k, v)
 	}
 
@@ -43,21 +43,21 @@ func TestEnvironment(t *testing.T) {
 	ReadEnvironment()
 
 	// Check env
-	assert.Equal(env_map["NAME"], Config.Name)
-	assert.Equal(env_map["PORT"], Config.Port)
-	assert.Equal(env_map["HEALTH_PORT"], Config.HealthPort)
-	assert.Equal(env_map["METRICS_PORT"], Config.MetricsPort)
-	assert.Equal(env_map["REST_PREFIX"], Config.RestPrefix)
-	assert.Equal(env_map["WEBSOCKET_PREFIX"], Config.WebsocketPrefix)
-	assert.Equal(env_map["HEALTH_PREFIX"], Config.HealthPrefix)
-	assert.Equal(env_map["METRICS_PREFIX"], Config.MetricsPrefix)
+	assert.Equal(envMap["NAME"], Config.Name)
+	assert.Equal(envMap["PORT"], Config.Port)
+	assert.Equal(envMap["HEALTH_PORT"], Config.HealthPort)
+	assert.Equal(envMap["METRICS_PORT"], Config.MetricsPort)
+	assert.Equal(envMap["REST_PREFIX"], Config.RestPrefix)
+	assert.Equal(envMap["WEBSOCKET_PREFIX"], Config.WebsocketPrefix)
+	assert.Equal(envMap["HEALTH_PREFIX"], Config.HealthPrefix)
+	assert.Equal(envMap["METRICS_PREFIX"], Config.MetricsPrefix)
 	assert.Equal(5, Config.HealthPollingInterval)
-	assert.Equal(env_map["LOG_LEVEL"], Config.LogLevel)
+	assert.Equal(envMap["LOG_LEVEL"], Config.LogLevel)
 	assert.Equal(true, Config.LogToFile)
-	assert.Equal(env_map["NETWORK_NAME"], Config.NetworkName)
-	assert.Equal(env_map["KAFKA_BROKER_URL"], Config.KafkaBrokerURL)
-	assert.Equal(env_map["SCHEMA_REGISTRY_URL"], Config.SchemaRegistryURL)
-	assert.Equal(env_map["KAFKA_GROUP_ID"], Config.KafkaGroupID)
+	assert.Equal(envMap["NETWORK_NAME"], Config.NetworkName)
+	assert.Equal(envMap["KAFKA_BROKER_URL"], Config.KafkaBrokerURL)
+	assert.Equal(envMap["SCHEMA_REGISTRY_URL"], Config.SchemaRegistryURL)
+	assert.Equal(envMap["KAFKA_GROUP_ID"], Config.KafkaGroupID)
 	assert.Equal(2, len(Config.ConsumerTopics))
 	assert.Equal(3, len(Config.ProducerTopics))
 	assert.Equal("schema_1", Config.SchemaNameTopics["schema_1"])

@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/global"
 	"go.uber.org/zap"
@@ -9,11 +10,12 @@ import (
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	fiber "github.com/gofiber/fiber/v2"
 
-	_ "github.com/geometry-labs/icon-blocks/api/docs"
+	_ "github.com/geometry-labs/icon-blocks/api/docs" // import for swagger docs
 	"github.com/geometry-labs/icon-blocks/api/routes/rest"
 	"github.com/geometry-labs/icon-blocks/api/routes/ws"
 )
 
+// Start - start fiber server
 // @title Go api template docs
 // @version 2.0
 // @description This is a sample server server.
@@ -58,9 +60,9 @@ func handlerVersion(c *fiber.Ctx) error {
 		"version": global.Version,
 	}
 
-	json_message, _ := json.Marshal(message)
+	jsonMessage, _ := json.Marshal(message)
 
-	return c.SendString(string(json_message))
+	return c.SendString(string(jsonMessage))
 }
 
 // Metadata
@@ -78,7 +80,7 @@ func handlerMetadata(c *fiber.Ctx) error {
 		"description": "a go api template",
 	}
 
-	json_message, _ := json.Marshal(message)
+	jsonMessage, _ := json.Marshal(message)
 
-	return c.SendString(string(json_message))
+	return c.SendString(string(jsonMessage))
 }

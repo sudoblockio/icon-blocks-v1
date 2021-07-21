@@ -2,29 +2,31 @@ package kafka
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/geometry-labs/icon-blocks/config"
 	"go.uber.org/zap"
 	"gopkg.in/Shopify/sarama.v1"
-	"time"
 )
 
-type KafkaTopicProducer struct {
-	BrokerURL string
-	TopicName string
-	TopicChan chan *sarama.ProducerMessage
+type kafkaTopicProducer struct {
+	brokerURL string
+	topicName string
+	topicChan chan *sarama.ProducerMessage
 }
 
 // map[Topic_Name] -> Producer
-var KafkaTopicProducers = map[string]*KafkaTopicProducer{}
+var kafkaTopicProducers = map[string]*kafkaTopicProducer{}
 
+// StartProducers - start goroutine to produce to kafka
 func StartProducers() {
-	kafka_broker := config.Config.KafkaBrokerURL
-	producer_topics := config.Config.ProducerTopics
+	kafkaBrokerURL := config.Config.KafkaBrokerURL
+	producerTopics := config.Config.ProducerTopics
 
-	zap.S().Info("Start Producer: kafka_broker=", kafka_broker, " producer_topics=", producer_topics)
+	zap.S().Info("Start Producer: kafkaBrokerURL=", kafkaBrokerURL, " producerTopics=", producerTopics)
 
-	for _, t := range producer_topics {
+	for _, t := range producerTopics {
 		// Todo: parameterize schema
 		schema := "block" //config.Config.SchemaNameTopics["block-ws"] //"block"
 		_, err := RetriableRegisterSchema(RegisterSchema, t, false, "block", true)
@@ -34,23 +36,23 @@ func StartProducers() {
 		}
 		zap.S().Info(fmt.Sprintf("Registered schema: %s for topic: %s", schema, t))
 
-		KafkaTopicProducers[t] = &KafkaTopicProducer{
-			kafka_broker,
+		kafkaTopicProducers[t] = &kafkaTopicProducer{
+			kafkaBrokerURL,
 			t,
 			make(chan *sarama.ProducerMessage),
 		}
 
-		go KafkaTopicProducers[t].produceTopic()
+		go kafkaTopicProducers[t].produceTopic()
 	}
 }
 
-func (k *KafkaTopicProducer) produceTopic() {
-	sarama_config := sarama.NewConfig()
-	sarama_config.Producer.Partitioner = sarama.NewRandomPartitioner
-	sarama_config.Producer.RequiredAcks = sarama.WaitForAll
-	sarama_config.Producer.Return.Successes = true
+func (k *kafkaTopicProducer) produceTopic() {
+	saramaConfig := sarama.NewConfig()
+	saramaConfig.Producer.Partitioner = sarama.NewRandomPartitioner
+	saramaConfig.Producer.RequiredAcks = sarama.WaitForAll
+	saramaConfig.Producer.Return.Successes = true
 
-	producer, err := getProducer(k, sarama_config)
+	producer, err := getProducer(k, saramaConfig)
 	if err != nil {
 		zap.S().Info("KAFKA PRODUCER NEWSYNCPRODUCER: Finally Connection cannot be established")
 	} else {
@@ -62,23 +64,23 @@ func (k *KafkaTopicProducer) produceTopic() {
 		}
 	}()
 
-	zap.S().Debug("Producer ", k.TopicName, ": Started producing")
+	zap.S().Debug("Producer ", k.topicName, ": Started producing")
 	for {
-		topic_msg := <-k.TopicChan
+		topicMsg := <-k.topicChan
 
-		partition, offset, err := producer.SendMessage(topic_msg)
+		partition, offset, err := producer.SendMessage(topicMsg)
 		if err != nil {
-			zap.S().Warn("Producer ", k.TopicName, ": Err sending message=", err.Error())
+			zap.S().Warn("Producer ", k.topicName, ": Err sending message=", err.Error())
 		}
 
-		zap.S().Debug("Producer ", k.TopicName, ": Producing message partition=", partition, " offset=", offset)
+		zap.S().Debug("Producer ", k.topicName, ": Producing message partition=", partition, " offset=", offset)
 	}
 }
 
-func getProducer(k *KafkaTopicProducer, sarama_config *sarama.Config) (sarama.SyncProducer, error) {
+func getProducer(k *kafkaTopicProducer, saramaConfig *sarama.Config) (sarama.SyncProducer, error) {
 	var producer sarama.SyncProducer
 	operation := func() error {
-		pro, err := sarama.NewSyncProducer([]string{k.BrokerURL}, sarama_config)
+		pro, err := sarama.NewSyncProducer([]string{k.brokerURL}, saramaConfig)
 		if err != nil {
 			zap.S().Info("KAFKA PRODUCER NEWSYNCPRODUCER PANIC: ", err.Error())
 		} else {

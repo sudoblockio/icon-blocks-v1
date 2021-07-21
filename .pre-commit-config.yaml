@@ -8,17 +8,5 @@ repos:
     rev: master
     hooks:
       - id: go-fmt
-      - id: go-vet
       - id: go-lint
       - id: go-imports
-      - id: go-cyclo
-        args: [ -over=15 ]
-      - id: validate-toml
-      - id: no-go-testing
-      - id: golangci-lint
-      - id: go-critic
-      - id: go-unit-tests
-        exclude: chart/
-      - id: go-build
-        exclude: chart/
-      - id: go-mod-tidy

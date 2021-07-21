@@ -2,15 +2,17 @@ package kafka
 
 import (
 	"encoding/binary"
+	"io/ioutil"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/riferrei/srclient"
 	"go.uber.org/zap"
-	"io/ioutil"
 )
 
-type RegisterSchemaFunc func(topic string, isKey bool, srcSchemaFile string, forceUpdate bool) (int, error)
+type registerSchemaFunc func(topic string, isKey bool, srcSchemaFile string, forceUpdate bool) (int, error)
 
+// RegisterSchema - register kafka message schema to schemaregistry service
 func RegisterSchema(topic string, isKey bool, srcSchemaFile string, forceUpdate bool) (int, error) {
 	zap.S().Info("Registering Schema for ", topic)
 	schemaRegistryClient := srclient.CreateSchemaRegistryClient("http://" + config.Config.SchemaRegistryURL)
@@ -46,7 +48,8 @@ func registerSchema(schemaRegistryClient *srclient.SchemaRegistryClient, topic s
 	return schema, nil
 }
 
-func RetriableRegisterSchema(fn RegisterSchemaFunc, topic string, isKey bool, srcSchemaFile string, forceUpdate bool) (int, error) {
+// RetriableRegisterSchema - RegisterSchema on retry
+func RetriableRegisterSchema(fn registerSchemaFunc, topic string, isKey bool, srcSchemaFile string, forceUpdate bool) (int, error) {
 	x := 0
 	operation := func() error {
 		val, err := fn(topic, isKey, srcSchemaFile, forceUpdate)

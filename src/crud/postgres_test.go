@@ -1,15 +1,13 @@
-//+build unit
-
-package crud_test
+package crud
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"testing"
 
-	"github.com/geometry-labs/icon-blocks/crud"
+	"github.com/stretchr/testify/assert"
 )
 
-var _ = Describe("Postgres", func() {
+func TestFormatPostgresDSN(t *testing.T) {
+	assert := assert.New(t)
 
 	var (
 		dsn string
@@ -23,23 +21,15 @@ var _ = Describe("Postgres", func() {
 		timezone string
 	)
 
-	BeforeEach(func() {
-		dsn = "host=localhost user=postgres password=changeme dbname=postgres port=5432 sslmode=disable TimeZone=UTC"
+	dsn = "host=localhost user=postgres password=changeme dbname=postgres port=5432 sslmode=disable TimeZone=UTC"
 
-		host = "localhost"
-		port = "5432"
-		user = "postgres"
-		password = "changeme"
-		dbname = "postgres"
-		sslmode = "disable"
-		timezone = "UTC"
-	})
+	host = "localhost"
+	port = "5432"
+	user = "postgres"
+	password = "changeme"
+	dbname = "postgres"
+	sslmode = "disable"
+	timezone = "UTC"
 
-	Describe("create DSN string", func() {
-		Context("new dsn string", func() {
-			It("dsn string valid", func() {
-				Expect(crud.NewDsn(host, port, user, password, dbname, sslmode, timezone)).To(Equal(dsn))
-			})
-		})
-	})
-})
+	assert.Equal(dsn, formatPostgresDSN(host, port, user, password, dbname, sslmode, timezone))
+}

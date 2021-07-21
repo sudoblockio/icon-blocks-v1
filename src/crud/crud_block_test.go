@@ -11,7 +11,7 @@ import (
 )
 
 var _ = Describe("BlockModel", func() {
-	testFixtures, _ := fixtures.LoadTestFixtures(fixtures.Block_raws_fixture)
+	testFixtures, _ := fixtures.LoadTestFixtures(fixtures.BlockRawFixturesPath)
 
 	Describe("blockModel with postgres", func() {
 

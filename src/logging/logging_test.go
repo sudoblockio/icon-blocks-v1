@@ -3,9 +3,10 @@
 package logging
 
 import (
-	"github.com/geometry-labs/icon-blocks/config"
 	"os"
 	"testing"
+
+	"github.com/geometry-labs/icon-blocks/config"
 
 	log "github.com/sirupsen/logrus"
 )

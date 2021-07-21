@@ -7,13 +7,13 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/geometry-labs/icon-blocks/config"
-	"github.com/geometry-labs/icon-blocks/global"
-	"github.com/geometry-labs/icon-blocks/logging"
-	"github.com/geometry-labs/icon-blocks/metrics"
-	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/api/healthcheck"
 	"github.com/geometry-labs/icon-blocks/api/routes"
+	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/global"
+	"github.com/geometry-labs/icon-blocks/kafka"
+	"github.com/geometry-labs/icon-blocks/logging"
+	"github.com/geometry-labs/icon-blocks/metrics"
 	_ "github.com/geometry-labs/icon-blocks/models" // for swagger docs
 )
 
@@ -25,11 +25,11 @@ func main() {
 
 	// Start kafka consumers
 	// Go routines start in function
-	kafka.StartApiConsumers()
+	kafka.StartAPIConsumers()
 
 	// Start Prometheus client
 	// Go routine starts in function
-	metrics.MetricsApiStart()
+	metrics.APIStart()
 
 	// Start API server
 	// Go routine starts in function
@@ -47,7 +47,7 @@ func main() {
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-sigChan
-    zap.S().Info("Main: Shutting down...")
+		zap.S().Info("Main: Shutting down...")
 		global.ShutdownChan <- 1
 	}()
 

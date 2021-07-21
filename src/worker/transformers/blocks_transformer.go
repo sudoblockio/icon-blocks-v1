@@ -11,37 +11,38 @@ import (
 	"github.com/geometry-labs/icon-blocks/worker/utils"
 )
 
+// StartBlocksTransformer - start block transformer go routine
 func StartBlocksTransformer() {
 	go blocksTransformer()
 }
 
 func blocksTransformer() {
-	consumer_topic_name := "blocks"
-	producer_topic_name := "blocks-ws"
+	consumerTopicName := "blocks"
+	producerTopicName := "blocks-ws"
 
 	// Check topic names
-	if utils.StringInSlice(consumer_topic_name, config.Config.ConsumerTopics) == false {
-		zap.S().Panic("Blocks Worker: no ", consumer_topic_name, " topic found in CONSUMER_TOPICS=", config.Config.ConsumerTopics)
+	if utils.StringInSlice(consumerTopicName, config.Config.ConsumerTopics) == false {
+		zap.S().Panic("Blocks Worker: no ", consumerTopicName, " topic found in CONSUMER_TOPICS=", config.Config.ConsumerTopics)
 	}
-	if utils.StringInSlice(producer_topic_name, config.Config.ProducerTopics) == false {
-		zap.S().Panic("Blocks Worker: no ", producer_topic_name, " topic found in PRODUCER_TOPICS=", config.Config.ConsumerTopics)
+	if utils.StringInSlice(producerTopicName, config.Config.ProducerTopics) == false {
+		zap.S().Panic("Blocks Worker: no ", producerTopicName, " topic found in PRODUCER_TOPICS=", config.Config.ConsumerTopics)
 	}
 
-	consumer_topic_chan := make(chan *sarama.ConsumerMessage)
-	producer_topic_chan := kafka.KafkaTopicProducers[producer_topic_name].TopicChan
+	consumerTopicChan := make(chan *sarama.ConsumerMessage)
+	producerTopicChan := kafka.KafkaTopicProducers[producerTopicName].TopicChan
 	postgresLoaderChan := crud.GetBlockModel().WriteChan
 
 	// Register consumer channel
-	broadcaster_output_chan_id := kafka.Broadcasters[consumer_topic_name].AddBroadcastChannel(consumer_topic_chan)
+	broadcasterOutputChanID := kafka.Broadcasters[consumerTopicName].AddBroadcastChannel(consumerTopicChan)
 	defer func() {
-		kafka.Broadcasters[consumer_topic_name].RemoveBroadcastChannel(broadcaster_output_chan_id)
+		kafka.Broadcasters[consumerTopicName].RemoveBroadcastChannel(broadcasterOutputChanID)
 	}()
 
 	zap.S().Debug("Blocks Worker: started working")
 	for {
 		// Read from kafka
-		consumer_topic_msg := <-consumer_topic_chan
-		blockRaw, err := models.ConvertToBlockRaw(consumer_topic_msg.Value)
+		consumerTopicMsg := <-consumerTopicChan
+		blockRaw, err := models.ConvertToBlockRaw(consumerTopicMsg.Value)
 		if err != nil {
 			zap.S().Error("Blocks Worker: Unable to proceed cannot convert kafka msg value to Block")
 		}
@@ -50,18 +51,18 @@ func blocksTransformer() {
 		transformedBlock, _ := transform(blockRaw)
 
 		// Produce to Kafka
-		producer_topic_msg := &sarama.ProducerMessage{
-			Topic: producer_topic_name,
-			Key:   sarama.ByteEncoder(consumer_topic_msg.Key),
-			Value: sarama.ByteEncoder(consumer_topic_msg.Value),
+		producerTopicMsg := &sarama.ProducerMessage{
+			Topic: producerTopicName,
+			Key:   sarama.ByteEncoder(consumerTopicMsg.Key),
+			Value: sarama.ByteEncoder(consumerTopicMsg.Value),
 		}
 
-		producer_topic_chan <- producer_topic_msg
+		producerTopicChan <- producerTopicMsg
 
 		// Load to Postgres
 		postgresLoaderChan <- transformedBlock
 
-		zap.S().Debug("Blocks worker: last seen block #", string(consumer_topic_msg.Key))
+		zap.S().Debug("Blocks worker: last seen block #", string(consumerTopicMsg.Key))
 	}
 }
 

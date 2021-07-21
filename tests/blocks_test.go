@@ -1,41 +1,40 @@
 package tests
 
 import (
-  "os"
-  "testing"
-  "net/http"
-  "encoding/json"
-  "io/ioutil"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestBlocksEndpoint(t *testing.T) {
-  assert := assert.New(t)
+	assert := assert.New(t)
 
-  blocks_service_url := os.Getenv("BLOCKS_SERVICE_URL")
-  if blocks_service_url == "" {
-    blocks_service_url = "http://localhost:8000"
-  }
-  blocks_service_rest_prefix := os.Getenv("BLOCKS_SERVICE_REST_PREFIX")
-  if blocks_service_rest_prefix == "" {
-    blocks_service_rest_prefix = "/api/v1"
-  }
+	blocksServiceURL := os.Getenv("BLOCKS_SERVICE_URL")
+	if blocksServiceURL == "" {
+		blocksServiceURL = "http://localhost:8000"
+	}
+	blocksServiceRestPrefx := os.Getenv("BLOCKS_SERVICE_REST_PREFIX")
+	if blocksServiceRestPrefx == "" {
+		blocksServiceRestPrefx = "/api/v1"
+	}
 
-  resp, err := http.Get(blocks_service_url + blocks_service_rest_prefix + "/blocks")
-  assert.Equal(nil, err)
-  assert.Equal(200, resp.StatusCode)
+	resp, err := http.Get(blocksServiceURL + blocksServiceRestPrefx + "/blocks")
+	assert.Equal(nil, err)
+	assert.Equal(200, resp.StatusCode)
 
-  defer resp.Body.Close()
+	defer resp.Body.Close()
 
 	bytes, err := ioutil.ReadAll(resp.Body)
 	assert.Equal(nil, err)
 
-	body_map := make([]interface{}, 0)
-	err = json.Unmarshal(bytes, &body_map)
+	bodyMap := make([]interface{}, 0)
+	err = json.Unmarshal(bytes, &bodyMap)
 	assert.Equal(nil, err)
 
 	// Verify body
-	assert.NotEqual(0, len(body_map))
+	assert.NotEqual(0, len(bodyMap))
 }

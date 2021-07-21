@@ -54,8 +54,10 @@ type configType struct {
 	MinPageSize int `envconfig:"MIN_PAGE_SIZE" required:"false" default:"10"`
 }
 
+// Config - runtime config struct
 var Config configType
 
+// ReadEnvironment - Read and store runtime config
 func ReadEnvironment() {
 	err := envconfig.Process("", &Config)
 	if err != nil {

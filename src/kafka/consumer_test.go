@@ -3,9 +3,10 @@
 package kafka
 
 import (
-	"github.com/geometry-labs/icon-blocks/config"
 	"testing"
 	"time"
+
+	"github.com/geometry-labs/icon-blocks/config"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -21,56 +22,56 @@ func init() {
 func TestKafkaTopicConsumer(t *testing.T) {
 	assert := assert.New(t)
 
-	topic_name := "mock-topic"
+	topicName := "mock-topic"
 
 	// Mock broker
-	mock_broker_id := int32(1)
-	mock_broker := sarama.NewMockBroker(t, mock_broker_id)
-	defer mock_broker.Close()
+	mockBrokerID := int32(1)
+	mockBroker := sarama.NewMockBroker(t, mockBrokerID)
+	defer mockBroker.Close()
 
-	mock_broker.SetHandlerByMap(map[string]sarama.MockResponse{
+	mockBroker.SetHandlerByMap(map[string]sarama.MockResponse{
 		"MetadataRequest": sarama.NewMockMetadataResponse(t).
-			SetBroker(mock_broker.Addr(), mock_broker.BrokerID()).
-			SetLeader(topic_name, 0, mock_broker.BrokerID()),
+			SetBroker(mockBroker.Addr(), mockBroker.BrokerID()).
+			SetLeader(topicName, 0, mockBroker.BrokerID()),
 		"OffsetRequest": sarama.NewMockOffsetResponse(t).
-			SetOffset(topic_name, 0, sarama.OffsetOldest, 0).
-			SetOffset(topic_name, 0, sarama.OffsetNewest, 2),
+			SetOffset(topicName, 0, sarama.OffsetOldest, 0).
+			SetOffset(topicName, 0, sarama.OffsetNewest, 2),
 		"FetchRequest": sarama.NewMockFetchResponse(t, 1).
-			SetMessage(topic_name, 0, 0, sarama.ByteEncoder([]byte{0x41, 0x42})).
-			SetMessage(topic_name, 0, 1, sarama.ByteEncoder([]byte{0x41, 0x43})).
-			SetMessage(topic_name, 0, 2, sarama.ByteEncoder([]byte{0x41, 0x44})),
+			SetMessage(topicName, 0, 0, sarama.ByteEncoder([]byte{0x41, 0x42})).
+			SetMessage(topicName, 0, 1, sarama.ByteEncoder([]byte{0x41, 0x43})).
+			SetMessage(topicName, 0, 2, sarama.ByteEncoder([]byte{0x41, 0x44})),
 	})
 
-	mock_broker.SetNotifier(func(bytes_read int, bytes_written int) {
+	mockBroker.SetNotifier(func(bytes_read int, bytes_written int) {
 		log.Debug("MOCK NOTIFIER: bytes_read=", bytes_read, " bytes_written=", bytes_written)
 	})
 
 	// Start broadcaster
-	newBroadcaster(topic_name, nil)
+	newBroadcaster(topicName, nil)
 	log.Info("TestKafkaTopicConsumer: Starting broadcaster...")
-	go Broadcasters[topic_name].Start()
+	go Broadcasters[topicName].Start()
 
 	// Start consumer
-	topic_consumer := &KafkaTopicConsumer{
-		mock_broker.Addr(),
-		topic_name,
-		Broadcasters[topic_name],
+	topicConsumer := &KafkaTopicConsumer{
+		mockBroker.Addr(),
+		topicName,
+		Broadcasters[topicName],
 	}
 	log.Info("TestKafkaTopicConsumer: Starting consumer...")
-	go topic_consumer.consumeTopic()
+	go topicConsumer.consumeTopic()
 
 	// Add broadcasting channeld
-	topic_chan := make(chan *sarama.ConsumerMessage)
-	broadcaster_output_chan_id := Broadcasters[topic_name].AddBroadcastChannel(topic_chan)
+	topicChan := make(chan *sarama.ConsumerMessage)
+	broadcasterOutputChanID := Broadcasters[topicName].AddBroadcastChannel(topicChan)
 	defer func() {
-		Broadcasters[topic_name].RemoveBroadcastChannel(broadcaster_output_chan_id)
+		Broadcasters[topicName].RemoveBroadcastChannel(broadcasterOutputChanID)
 	}()
 
 	for {
 		select {
-		case topic_msg := <-topic_chan:
+		case topicMsg := <-topicChan:
 			// Pass
-			assert.NotEqual(len(topic_msg.Value), 0)
+			assert.NotEqual(len(topicMsg.Value), 0)
 			return
 		case <-time.After(10 * time.Second):
 			t.Fatal("No messages from consumer")

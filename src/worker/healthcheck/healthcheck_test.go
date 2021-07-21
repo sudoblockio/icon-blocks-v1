@@ -3,9 +3,10 @@
 package healthcheck
 
 import (
-	"github.com/geometry-labs/icon-blocks/config"
 	"net/http"
 	"testing"
+
+	"github.com/geometry-labs/icon-blocks/config"
 
 	"github.com/stretchr/testify/assert"
 

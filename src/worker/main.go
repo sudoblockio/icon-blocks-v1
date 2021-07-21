@@ -10,36 +10,36 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/crud"
 	"github.com/geometry-labs/icon-blocks/global"
 	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/logging"
 	"github.com/geometry-labs/icon-blocks/metrics"
-	"github.com/geometry-labs/icon-blocks/worker/loader"
 )
 
 func main() {
 	config.ReadEnvironment()
 
-	logging.StartLoggingInit()
+	logging.Init()
 	log.Printf("Main: Starting logging with level %s", config.Config.LogLevel)
 
 	// Start Prometheus client
-	metrics.MetricsWorkerStart()
+	metrics.WorkerStart()
 
 	// Start kafka Producer
-  // 3
+	// 3
 	kafka.StartProducers()
 
 	// Start Postgres loader
-  // 4
-	loader.StartBlockLoader()
+	// 4
+	crud.StartBlockLoader()
 
 	// Start kafka consumer
-  // 1
+	// 1
 	kafka.StartWorkerConsumers()
 
 	// Start transformers
-  // 2
+	// 2
 	transformers.StartBlocksTransformer()
 
 	//create a notification channel to shutdown

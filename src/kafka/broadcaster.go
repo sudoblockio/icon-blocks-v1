@@ -4,13 +4,15 @@ import (
 	"gopkg.in/Shopify/sarama.v1"
 )
 
-// TODO use uuid for larger ID range
+// BroadcasterID - type for broadcaster channel IDs
 type BroadcasterID int
 
-var LAST_BROADCASTER_ID BroadcasterID = 0
+var lastBroadcasterID BroadcasterID = 0
 
+// TopicBroadcastFunc - Custom broadcaster function
 type TopicBroadcastFunc func(channel chan *sarama.ConsumerMessage, message *sarama.ConsumerMessage)
 
+// TopicBroadcaster - Broadcaster channels
 type TopicBroadcaster struct {
 
 	// Input"
@@ -22,33 +24,36 @@ type TopicBroadcaster struct {
 	BroadcastFunc TopicBroadcastFunc
 }
 
+// Broadcasters - topic name -> broadcaster
 var Broadcasters = map[string]*TopicBroadcaster{}
 
-func newBroadcaster(topic_name string, BroadcastFunc TopicBroadcastFunc) {
+func newBroadcaster(topicName string, BroadcastFunc TopicBroadcastFunc) {
 	if BroadcastFunc == nil {
 		BroadcastFunc = func(channel chan *sarama.ConsumerMessage, message *sarama.ConsumerMessage) {
 			channel <- message
 		}
 	}
 
-	Broadcasters[topic_name] = &TopicBroadcaster{
+	Broadcasters[topicName] = &TopicBroadcaster{
 		make(chan *sarama.ConsumerMessage),
 		make(map[BroadcasterID]chan *sarama.ConsumerMessage),
 		BroadcastFunc,
 	}
 
-	go Broadcasters[topic_name].Start()
+	go Broadcasters[topicName].Start()
 }
 
-func (tb *TopicBroadcaster) AddBroadcastChannel(topic_chan chan *sarama.ConsumerMessage) BroadcasterID {
-	id := LAST_BROADCASTER_ID
-	LAST_BROADCASTER_ID++
+// AddBroadcastChannel - add channel to topic broadcaster
+func (tb *TopicBroadcaster) AddBroadcastChannel(topicChan chan *sarama.ConsumerMessage) BroadcasterID {
+	id := lastBroadcasterID
+	lastBroadcasterID++
 
-	tb.BroadcastChans[id] = topic_chan
+	tb.BroadcastChans[id] = topicChan
 
 	return id
 }
 
+// RemoveBroadcastChannel - remove channel from topic broadcaster
 func (tb *TopicBroadcaster) RemoveBroadcastChannel(id BroadcasterID) {
 	_, ok := tb.BroadcastChans[id]
 	if ok {
@@ -56,6 +61,7 @@ func (tb *TopicBroadcaster) RemoveBroadcastChannel(id BroadcasterID) {
 	}
 }
 
+// Start - Start broadcaster go routine
 func (tb *TopicBroadcaster) Start() {
 	for {
 		msg := <-tb.ConsumerChan
