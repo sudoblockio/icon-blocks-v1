@@ -1,4 +1,4 @@
-name: Release to Prod
+name: release-prod
 
 on:
   release:
@@ -112,7 +112,7 @@ jobs:
           valueFile: 'chart/deployments/prod-mainnet/values.test.yaml'
           propertyPath: 'deployment.image.tag'
           value: ${{ github.run_number }}
-          branch: main
+          branch: deployment
           targetBranch: main
           createPR: 'false'
           message: 'Update prod deployment image version to ${{ github.run_number }}'
@@ -124,7 +124,7 @@ jobs:
           valueFile: 'chart/deployments/prod-sejong/values.test.yaml'
           propertyPath: 'deployment.image.tag'
           value: ${{ github.run_number }}
-          branch: main
+          branch: deployment
           targetBranch: main
           createPR: 'false'
           message: 'Update prod deployment image version to ${{ github.run_number }}'

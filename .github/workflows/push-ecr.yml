@@ -1,4 +1,4 @@
-name: Push to Main
+name: push-main
 
 on:
   push:
@@ -78,7 +78,7 @@ jobs:
           valueFile: 'chart/deployments/dev-mainnet/values.dev.yaml'
           propertyPath: 'deployment.image.tag'
           value: ${{ github.run_number }}
-          branch: main
+          branch: deployment
           targetBranch: main
           createPR: 'false'
           message: 'Update dev deployment image version to ${{ github.run_number }}'
@@ -90,8 +90,13 @@ jobs:
           valueFile: 'chart/deployments/dev-sejong/values.dev.yaml'
           propertyPath: 'deployment.image.tag'
           value: ${{ github.run_number }}
-          branch: main
+          branch: deployment
           targetBranch: main
           createPR: 'false'
           message: 'Update dev deployment image version to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload coverage to Codecov
+        run: |
+          make test-coverage
+          bash <(curl -s https://codecov.io/bash)

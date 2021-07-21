@@ -2,9 +2,13 @@
   <h3 align="center">ICON Blocks Service</h3>
 </p>
 
-![](https://img.shields.io/github/v/release/geometry-labs/icon-blocks) ![](https://github.com/geometry-labs/icon-blocks/actions/workflows/pr-test.yml/badge.svg?branch=main) [![codecov](https://codecov.io/gh/geometry-labs/icon-blocks/branch/main/graph/badge.svg)](https://codecov.io/gh/geometry-labs/icon-blocks) ![](https://img.shields.io/docker/pulls/geometrylabs/icon-blocks.svg) ![](https://img.shields.io/github/license/geometry-labs/icon-blocks)
+![](https://img.shields.io/github/v/release/geometry-labs/icon-blocks) ![](https://github.com/geometry-labs/icon-blocks/workflows/pr-test/badge.svg?branch=main) [![codecov](https://codecov.io/gh/geometry-labs/icon-blocks/branch/main/graph/badge.svg)](https://codecov.io/gh/geometry-labs/icon-blocks) ![](https://img.shields.io/docker/pulls/geometrylabs/icon-blocks.svg) ![](https://img.shields.io/github/license/geometry-labs/icon-blocks)
 
 Off chain indexer for the ICON Blockchain serving the **blocks** context of the [icon-explorer](https://github.com/geometry-labs/icon-explorer). Service is broken up into API and worker components that are run as individual docker containers. It depends on data coming in from [icon-etl]() over a Kafka message queue with persistence on a postgres database. 
+
+### Endpoints 
+
+TODO: Links and table 
 
 ### Deployment 
 
