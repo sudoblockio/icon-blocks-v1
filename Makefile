@@ -1,3 +1,5 @@
+.PHONY: test help
+
 test: up-dbs test-unit test-integration
 
 up-dbs:  ## Bring up the DBs
