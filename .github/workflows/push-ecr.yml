@@ -75,7 +75,7 @@ jobs:
       - name: Update dev-mainnet deployment values file and re-commit
         uses: fjogeleit/yaml-update-action@master
         with:
-          valueFile: 'chart/deployments/dev-mainnet/values.test.yaml'
+          valueFile: 'chart/deployments/dev-mainnet/values.dev.yaml'
           propertyPath: 'deployment.image.tag'
           value: ${{ github.run_number }}
           branch: main
@@ -87,7 +87,7 @@ jobs:
       - name: Update dev-sejong deployment values file and re-commit
         uses: fjogeleit/yaml-update-action@master
         with:
-          valueFile: 'chart/deployments/dev-sejong/values.test.yaml'
+          valueFile: 'chart/deployments/dev-sejong/values.dev.yaml'
           propertyPath: 'deployment.image.tag'
           value: ${{ github.run_number }}
           branch: main
