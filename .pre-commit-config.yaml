@@ -5,7 +5,7 @@ repos:
       - id: helmlint
 
   - repo: git://github.com/dnephin/pre-commit-golang
-    rev: main
+    rev: master
     hooks:
       - id: go-fmt
       - id: go-vet
