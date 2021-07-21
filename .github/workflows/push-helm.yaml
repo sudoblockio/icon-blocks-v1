@@ -1,11 +1,11 @@
-name: Release chart for public
+name: Push Chart
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'charts/**'
+      - 'chart/**'
 
 jobs:
   release:
