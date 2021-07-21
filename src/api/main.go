@@ -20,7 +20,7 @@ import (
 func main() {
 	config.ReadEnvironment()
 
-	logging.StartLoggingInit()
+	logging.Init()
 	zap.S().Debug("Main: Starting logging with level ", config.Config.LogLevel)
 
 	// Start kafka consumers

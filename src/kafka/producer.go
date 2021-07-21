@@ -13,11 +13,11 @@ import (
 type kafkaTopicProducer struct {
 	brokerURL string
 	topicName string
-	topicChan chan *sarama.ProducerMessage
+	TopicChan chan *sarama.ProducerMessage
 }
 
-// map[Topic_Name] -> Producer
-var kafkaTopicProducers = map[string]*kafkaTopicProducer{}
+// KafkaTopicProducers - map[Topic_Name] -> Producer
+var KafkaTopicProducers = map[string]*kafkaTopicProducer{}
 
 // StartProducers - start goroutine to produce to kafka
 func StartProducers() {
@@ -36,13 +36,13 @@ func StartProducers() {
 		}
 		zap.S().Info(fmt.Sprintf("Registered schema: %s for topic: %s", schema, t))
 
-		kafkaTopicProducers[t] = &kafkaTopicProducer{
+		KafkaTopicProducers[t] = &kafkaTopicProducer{
 			kafkaBrokerURL,
 			t,
 			make(chan *sarama.ProducerMessage),
 		}
 
-		go kafkaTopicProducers[t].produceTopic()
+		go KafkaTopicProducers[t].produceTopic()
 	}
 }
 
@@ -66,7 +66,7 @@ func (k *kafkaTopicProducer) produceTopic() {
 
 	zap.S().Debug("Producer ", k.topicName, ": Started producing")
 	for {
-		topicMsg := <-k.topicChan
+		topicMsg := <-k.TopicChan
 
 		partition, offset, err := producer.SendMessage(topicMsg)
 		if err != nil {

@@ -10,12 +10,15 @@ import (
 	"github.com/geometry-labs/icon-blocks/models"
 )
 
-var blockModel *struct {
+// BlockModel - type for block table model
+type BlockModel struct {
 	db        *gorm.DB
 	model     *models.Block
 	modelORM  *models.BlockORM
 	WriteChan chan *models.Block
 }
+
+var blockModel *BlockModel
 
 // GetBlockModel - create and/or return the blocks table model
 func GetBlockModel() *BlockModel {
@@ -46,7 +49,7 @@ func (m *BlockModel) Migrate() error {
 func (m *BlockModel) Insert(block *models.Block) error {
 
 	err := backoff.Retry(func() error {
-		query := m.db.Insert(block)
+		query := m.db.Create(block)
 		if query.Error != nil && !strings.Contains(query.Error.Error(), "duplicate key value violates unique constraint") {
 			zap.S().Warn("POSTGRES Insert Error : ", query.Error.Error())
 			return query.Error
@@ -88,9 +91,9 @@ func (m *BlockModel) Select(
 
 	// Start number and end number
 	if startNumber != 0 && endNumber != 0 {
-		db = db.Where("number BETWEEN ? AND ?", start_number, endNumber)
+		db = db.Where("number BETWEEN ? AND ?", startNumber, endNumber)
 	} else if startNumber != 0 {
-		db = db.Where("number > ?", start_number)
+		db = db.Where("number > ?", startNumber)
 	} else if endNumber != 0 {
 		db = db.Where("number < ?", endNumber)
 	}
