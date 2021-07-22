@@ -152,7 +152,7 @@ func (k *kafkaTopicConsumer) consumeTopic() {
 		consumer, err = sarama.NewConsumer([]string{k.brokerURL}, saramaConfig)
 		if err != nil {
 			zap.S().Warn("Kafka New Consumer Error: ", err.Error())
-			zap.S().Warn("Cannot conCect to kafka broker retrying...")
+			zap.S().Warn("Cannot connect to kafka broker retrying...")
 			return err
 		}
 
