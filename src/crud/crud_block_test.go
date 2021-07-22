@@ -74,6 +74,38 @@ func TestBlockModelSelect(t *testing.T) {
 	// Select all blocks
 	blocks := blockModel.Select(len(blockFixtures), 0, 0, 0, 0, "", "")
 	assert.Equal(len(blockFixtures), len(blocks))
+
+	// Test limit
+	blocks := blockModel.Select(1, 0, 0, 0, 0, "", "")
+	assert.Equal(1, len(blocks))
+
+	// Test skip
+	blocks := blockModel.Select(1, 1, 0, 0, 0, "", "")
+	assert.Equal(1, len(blocks))
+
+	// Test number
+	blocks := blockModel.Select(1, 0, 33788433, 0, 0, "", "")
+	assert.Equal(1, len(blocks))
+
+	// Test start_number
+	blocks := blockModel.Select(1, 0, 0, 8150, 0, "", "")
+	assert.Equal(1, len(blocks))
+
+	// Test end_number
+	blocks := blockModel.Select(1, 0, 0, 0, 8160, "", "")
+	assert.Equal(1, len(blocks))
+
+	// Test start_number <-> end_number
+	blocks := blockModel.Select(1, 0, 0, 8150, 8160, "", "")
+	assert.Equal(1, len(blocks))
+
+	// Test hash
+	blocks := blockModel.Select(1, 0, 0, 0, 0, "f2934304af91a2cecca184162dda895ab9929c28eddaee104cda988000824019", "")
+	assert.Equal(1, len(blocks))
+
+	// Test created_by (peer_id)
+	blocks := blockModel.Select(1, 0, 0, 0, 0, "", "hx116e5ea176419cd990c2f39b0eda21b946728a38")
+	assert.Equal(1, len(blocks))
 }
 
 func TestBlockModelLoader(t *testing.T) {

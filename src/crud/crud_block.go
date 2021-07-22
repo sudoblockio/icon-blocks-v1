@@ -108,9 +108,9 @@ func (m *BlockModel) Select(
 		db = db.Where("hash = ?", hash)
 	}
 
-	// Created By
+	// Created By (peer id)
 	if createdBy != "" {
-		db = db.Where("createdBy = ?", createdBy)
+		db = db.Where("peer_id = ?", createdBy)
 	}
 
 	blocks := []models.Block{}

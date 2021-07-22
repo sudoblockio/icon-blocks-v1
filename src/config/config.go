@@ -63,7 +63,4 @@ func ReadEnvironment() {
 	if err != nil {
 		log.Fatalf("ERROR: envconfig - %s\n", err.Error())
 	}
-
-	//vars, _ := json.Marshal(Config)
-	//log.Printf("Config Vars: " + string(vars))
 }
