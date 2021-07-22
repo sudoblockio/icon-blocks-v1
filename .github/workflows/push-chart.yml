@@ -1,5 +1,8 @@
 name: push-chart
 
+# 1. Run unit and integration tests on chart
+# 2. Release the chart
+
 on:
   push:
     branches:
