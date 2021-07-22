@@ -46,7 +46,7 @@ func TestFormatPostgresDSN(t *testing.T) {
 	assert.Equal(dsn, formatPostgresDSN(host, port, user, password, dbname, sslmode, timezone))
 }
 
-func TestGetPostgressConn(t *testing) {
+func TestGetPostgressConn(t *testing.T) {
 	assert := assert.New(t)
 
 	conn := getPostgresConn()
