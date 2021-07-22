@@ -24,7 +24,7 @@ var blockModel *BlockModel
 func GetBlockModel() *BlockModel {
 	if blockModel == nil {
 		blockModel = &BlockModel{
-			db:        getPostgresConn().conn,
+			db:        getPostgresConn(),
 			model:     &models.Block{},
 			WriteChan: make(chan *models.Block, 1),
 		}
@@ -32,6 +32,7 @@ func GetBlockModel() *BlockModel {
 		err := blockModel.Migrate()
 		if err != nil {
 			zap.S().Error("BlockModel: Unable create postgres table: blocks")
+			return nil
 		}
 	}
 
@@ -70,7 +71,7 @@ func (m *BlockModel) Select(
 	endNumber uint32,
 	hash string,
 	createdBy string,
-) *[]models.Block {
+) []models.Block {
 	db := m.db
 
 	// Latest blocks first
@@ -108,8 +109,8 @@ func (m *BlockModel) Select(
 		db = db.Where("createdBy = ?", createdBy)
 	}
 
-	blocks := &[]models.Block{}
-	db.Find(blocks)
+	blocks := []models.Block{}
+	db.Find(&blocks)
 
 	return blocks
 }

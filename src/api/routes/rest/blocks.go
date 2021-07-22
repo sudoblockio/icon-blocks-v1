@@ -70,6 +70,6 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 		params.CreatedBy,
 	)
 
-	body, _ := json.Marshal(blocks)
+	body, _ := json.Marshal(&blocks)
 	return c.SendString(string(body))
 }
