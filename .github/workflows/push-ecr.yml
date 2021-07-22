@@ -1,4 +1,4 @@
-name: Push to Main
+name: push-main
 
 on:
   push:
@@ -35,39 +35,50 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_WORKER }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_WORKER }}
           aws-region: us-west-2
 
       - name: Login to Amazon ECR
-        id: login-ecr
+        id: login-ecr-worker
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Worker - Build, tag, and push image to Amazon ECR
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ steps.login-ecr-worker.outputs.registry }}
           ECR_REPOSITORY: icon-blocks-worker
           IMAGE_TAG: ${{ github.run_number }}
         run: |
-          docker build --build-arg SERVICE_NAME=worker -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG Dockerfile
+          docker build --build-arg SERVICE_NAME=worker -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_API }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_API }}
+          aws-region: us-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr-api
+        uses: aws-actions/amazon-ecr-login@v1
 
       - name: API - Build, tag, and push image to Amazon ECR
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ steps.login-ecr-api.outputs.registry }}
           ECR_REPOSITORY: icon-blocks-api
           IMAGE_TAG: ${{ github.run_number }}
         run: |
-          docker build --build-arg SERVICE_NAME=api -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG Dockerfile
+          docker build --build-arg SERVICE_NAME=api -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Update dev-mainnet deployment values file and re-commit
         uses: fjogeleit/yaml-update-action@master
         with:
-          valueFile: 'chart/deployments/dev-mainnet/values.test.yaml'
+          valueFile: 'chart/deployments/dev-mainnet/values.dev.yaml'
           propertyPath: 'deployment.image.tag'
           value: ${{ github.run_number }}
-          branch: main
+          branch: deployment
           targetBranch: main
           createPR: 'false'
           message: 'Update dev deployment image version to ${{ github.run_number }}'
@@ -76,11 +87,16 @@ jobs:
       - name: Update dev-sejong deployment values file and re-commit
         uses: fjogeleit/yaml-update-action@master
         with:
-          valueFile: 'chart/deployments/dev-sejong/values.test.yaml'
+          valueFile: 'chart/deployments/dev-sejong/values.dev.yaml'
           propertyPath: 'deployment.image.tag'
           value: ${{ github.run_number }}
-          branch: main
+          branch: deployment
           targetBranch: main
           createPR: 'false'
           message: 'Update dev deployment image version to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload coverage to Codecov
+        run: |
+          make test-coverage
+          bash <(curl -s https://codecov.io/bash)
