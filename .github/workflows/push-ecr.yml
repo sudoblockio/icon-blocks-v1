@@ -21,7 +21,10 @@ jobs:
         run: make ps
 
       - name: Run unit tests
-        run: cd src && go test ./... -v
+        run: cd src && go test -v -race -covermode=atomic -coverprofile=coverage.out ./...
+
+      - name: Upload coverage to Codecov
+        run: bash <(curl -s https://codecov.io/bash)
 
       - name: Bring up stack
         run: make up && sleep 30
@@ -96,7 +99,3 @@ jobs:
           message: 'Update dev deployment image version to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload coverage to Codecov
-        run: |
-          make test-coverage
-          bash <(curl -s https://codecov.io/bash)

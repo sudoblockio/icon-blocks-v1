@@ -1,5 +1,3 @@
-//+build unit
-
 package kafka
 
 import (
@@ -52,7 +50,7 @@ func TestKafkaTopicConsumer(t *testing.T) {
 	go Broadcasters[topicName].Start()
 
 	// Start consumer
-	topicConsumer := &KafkaTopicConsumer{
+	topicConsumer := &kafkaTopicConsumer{
 		mockBroker.Addr(),
 		topicName,
 		Broadcasters[topicName],
