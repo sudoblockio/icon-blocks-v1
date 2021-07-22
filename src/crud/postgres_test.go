@@ -4,7 +4,19 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/logging"
 )
+
+func init() {
+	// Read env
+	// Defaults should work
+	config.ReadEnvironment()
+
+	// Set up logging
+	logging.Init()
+}
 
 func TestFormatPostgresDSN(t *testing.T) {
 	assert := assert.New(t)
@@ -32,4 +44,11 @@ func TestFormatPostgresDSN(t *testing.T) {
 	timezone = "UTC"
 
 	assert.Equal(dsn, formatPostgresDSN(host, port, user, password, dbname, sslmode, timezone))
+}
+
+func TestGetPostgressConn(t *testing) {
+	assert := assert.New(t)
+
+	conn := getPostgresConn()
+	assert.NotEqual(nil, conn)
 }

@@ -30,6 +30,7 @@ func getPostgresConn() *gorm.DB {
 	session, err := retryGetPostgresSession(dsn)
 	if err != nil {
 		zap.S().Warn("Cannot create a connection to postgres", err)
+		return nil
 	}
 
 	zap.S().Info("Successful connection to postgres")

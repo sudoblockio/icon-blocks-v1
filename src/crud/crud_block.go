@@ -23,16 +23,20 @@ var blockModel *BlockModel
 // GetBlockModel - create and/or return the blocks table model
 func GetBlockModel() *BlockModel {
 	if blockModel == nil {
+		dbConn := getPostgresConn()
+		if dbConn == nil {
+			zap.S().Fatal("Cannot connect to postgres database")
+		}
+
 		blockModel = &BlockModel{
-			db:        getPostgresConn(),
+			db:        dbConn,
 			model:     &models.Block{},
 			WriteChan: make(chan *models.Block, 1),
 		}
 
 		err := blockModel.Migrate()
 		if err != nil {
-			zap.S().Error("BlockModel: Unable create postgres table: blocks")
-			return nil
+			zap.S().Fatal("BlockModel: Unable create postgres table: blocks")
 		}
 	}
 
