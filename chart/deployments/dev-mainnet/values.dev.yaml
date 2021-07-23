@@ -1,7 +1,7 @@
 deployment:
   image:
     repository: 868027517775.dkr.ecr.us-west-2.amazonaws.com/icon-blocks
-    tag: '4'
+    tag: '5'
     pullPolicy: IfNotPresent
   replicaCount: 1
   annotations: |
