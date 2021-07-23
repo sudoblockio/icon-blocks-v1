@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	blockRawFixturesPath = "block_raws.json"
+	blockRawFixturesPath = "blocks_raw.json"
 )
 
 // Fixtures - slice of Fixture
