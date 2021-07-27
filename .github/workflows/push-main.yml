@@ -41,10 +41,7 @@ jobs:
         run: make ps
 
       - name: Run integration tests
-        run: cd tests && go test ./... -v
-
-#      - name: Upload coverage to Codecov
-#        run: bash <(curl -s https://codecov.io/bash)
+        run: cd tests && go test -v -covermode=atomic -coverprofile=coverage.out ./...
 
       - uses: codecov/codecov-action@v2
         with:
