@@ -30,7 +30,7 @@ jobs:
       - uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.out
+          files: ./src/coverage.out
           flags: unit
           fail_ci_if_error: true
 
@@ -46,7 +46,7 @@ jobs:
       - uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.out
+          files: ./tests/coverage.out
           flags: integration
           fail_ci_if_error: true
 
