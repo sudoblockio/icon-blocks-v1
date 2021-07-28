@@ -22,6 +22,7 @@ x-env: &env
   LOG_LEVEL: "INFO"
   LOG_TO_FILE: "false"
   LOG_FILE_NAME: "blocks.log"
+  LOG_FORMAT: "string"
 
   # Kafka
   KAFKA_BROKER_URL: "kafka:9092"
