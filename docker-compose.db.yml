@@ -8,7 +8,6 @@ services:
       "-s", "1",
       "-o", "kafka:9092",
       "--period-seconds", "1",
-      "--values-as-hex", "True",
       "--provider-uri", "http://34.218.244.40:9000/api/v3",
       "-b", "100",
       "-B", "100",
