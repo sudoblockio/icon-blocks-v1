@@ -2,6 +2,7 @@ package crud
 
 import (
 	"strings"
+	"sync"
 
 	"github.com/cenkalti/backoff/v4"
 	"go.uber.org/zap"
@@ -19,10 +20,11 @@ type BlockModel struct {
 }
 
 var blockModel *BlockModel
+var blockModelOnce sync.Once
 
 // GetBlockModel - create and/or return the blocks table model
 func GetBlockModel() *BlockModel {
-	if blockModel == nil {
+	blockModelOnce.Do(func() {
 		dbConn := getPostgresConn()
 		if dbConn == nil {
 			zap.S().Fatal("Cannot connect to postgres database")
@@ -38,7 +40,7 @@ func GetBlockModel() *BlockModel {
 		if err != nil {
 			zap.S().Fatal("BlockModel: Unable migrate postgres table: ", err.Error())
 		}
-	}
+	})
 
 	return blockModel
 }
