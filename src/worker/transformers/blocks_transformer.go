@@ -42,9 +42,9 @@ func blocksTransformer() {
 	for {
 		// Read from kafka
 		consumerTopicMsg := <-consumerTopicChan
-		blockRaw, err := models.ConvertToBlockRaw(consumerTopicMsg.Value)
+		blockRaw, err := models.ConvertToBlockRawJSON(consumerTopicMsg.Value)
 		if err != nil {
-			zap.S().Error("Blocks Worker: Unable to proceed cannot convert kafka msg value to Block")
+			zap.S().Fatal("BLOCKS TRANSFORMER PANIC: Unable to proceed cannot convert kafka msg value to Block")
 		}
 
 		// Transform logic
