@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
 {{ include "selectorLabels" . | indent 6 }}
-  replicas: {{ .Values.worker.replicaCount }}
+  replicas: {{ .Values.api.replicaCount }}
   template:
     metadata:
       {{- if .Values.deployment.annotations }}
@@ -27,12 +27,12 @@ spec:
             - containerPort: {{ .Values.api.internalPort }}
           livenessProbe:
             httpGet:
-              path: {{ .Values.worker.healthPrefix }}
-              port: {{ .Values.worker.healthPort }}
+              path: {{ .Values.api.healthPrefix }}
+              port: {{ .Values.api.healthPort }}
           readinessProbe:
             httpGet:
-              path: {{ .Values.worker.healthPrefix }}
-              port: {{ .Values.worker.healthPort }}
+              path: {{ .Values.api.healthPrefix }}
+              port: {{ .Values.api.healthPort }}
           env:
             - name: NAME
               value: {{ .Values.networkName }}
