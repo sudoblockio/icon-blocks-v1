@@ -24,10 +24,10 @@ func ConvertToBlockRawJSON(value []byte) (*BlockRaw, error) {
 // ConvertToBlockRawProtoBuf - []byte -> models.BlockRaw in ProtoBuf format
 func ConvertToBlockRawProtoBuf(value []byte) (*BlockRaw, error) {
 	block := BlockRaw{}
-	err := proto.Unmarshal(value[7:], &block)
+	err := proto.Unmarshal(value[6:], &block)
 	if err != nil {
 		zap.S().Error("Error: ", err.Error())
-		zap.S().Error("Value=", hex.Dump(value[7:]))
+		zap.S().Error("Value=", hex.Dump(value[6:]))
 	}
 	return &block, err
 }
