@@ -13,6 +13,7 @@ import (
 
 // Init - init logging config
 func Init() {
+
 	go func() {
 		cfg := newLoggerConfig()
 
@@ -22,7 +23,7 @@ func Init() {
 		undo := zap.ReplaceGlobals(logger)
 		defer undo()
 
-		<-global.ShutdownChan
+		global.WaitShutdownSig()
 	}()
 }
 

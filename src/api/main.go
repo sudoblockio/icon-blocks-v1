@@ -1,11 +1,7 @@
 package main
 
 import (
-	"os"
-	"os/signal"
-	"syscall"
-
-	"go.uber.org/zap"
+	"log"
 
 	"github.com/geometry-labs/icon-blocks/api/healthcheck"
 	"github.com/geometry-labs/icon-blocks/api/routes"
@@ -21,7 +17,7 @@ func main() {
 	config.ReadEnvironment()
 
 	logging.Init()
-	zap.S().Debug("Main: Starting logging with level ", config.Config.LogLevel)
+	log.Printf("Main: Starting logging with level %s", config.Config.LogLevel)
 
 	// Start kafka consumers
 	// Go routines start in function
@@ -39,17 +35,5 @@ func main() {
 	// Go routine starts in function
 	healthcheck.Start()
 
-	//create a notification channel to shutdown
-	sigChan := make(chan os.Signal, 1)
-
-	// Listen for close sig
-	// Register for interupt (Ctrl+C) and SIGTERM (docker)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-sigChan
-		zap.S().Info("Main: Shutting down...")
-		global.ShutdownChan <- 1
-	}()
-
-	<-global.ShutdownChan
+	global.WaitShutdownSig()
 }
