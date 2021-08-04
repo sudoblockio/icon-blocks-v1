@@ -1,8 +1,8 @@
 <p align="center">
-  <h3 align="center">ICON Blocks Service</h3>
+  <h2 align="center">ICON Blocks Service</h2>
 </p>
 
-![](https://img.shields.io/github/v/release/geometry-labs/icon-blocks) ![](https://github.com/geometry-labs/icon-blocks/workflows/pr-test/badge.svg?branch=main) [![codecov](https://codecov.io/gh/geometry-labs/icon-blocks/branch/main/graph/badge.svg)](https://codecov.io/gh/geometry-labs/icon-blocks) ![](https://img.shields.io/docker/pulls/geometrylabs/icon-blocks.svg) ![](https://img.shields.io/github/license/geometry-labs/icon-blocks)
+[![loopchain](https://img.shields.io/badge/ICON-API-blue?logoColor=white&logo=icon&labelColor=31B8BB)](https://shields.io) [![GitHub Release](https://img.shields.io/github/release/geometry-labs/icon-blocks.svg?style=flat)]() ![](https://github.com/geometry-labs/icon-blocks/workflows/push-main/badge.svg?branch=main) [![codecov](https://codecov.io/gh/geometry-labs/icon-blocks/branch/main/graph/badge.svg)](https://codecov.io/gh/geometry-labs/icon-blocks) ![](https://img.shields.io/docker/pulls/geometrylabs/icon-blocks-api.svg) ![](https://img.shields.io/github/license/geometry-labs/icon-blocks)
 
 Off chain indexer for the ICON Blockchain serving the **blocks** context of the [icon-explorer](https://github.com/geometry-labs/icon-explorer). Service is broken up into API and worker components that are run as individual docker containers. It depends on data coming in from [icon-etl](https://github.com/geometry-labs/icon-etl) over a Kafka message queue with persistence on a postgres database. 
 
