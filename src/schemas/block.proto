@@ -4,10 +4,6 @@ option go_package = "./models";
 
 import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
 
-message Blocks {
-  repeated Block blocks = 1;
-}
-
 message Block {
   option (gorm.opts) = {ormable: true};
 
