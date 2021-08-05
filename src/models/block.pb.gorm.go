@@ -7,32 +7,24 @@ Package models is a generated protocol buffer package.
 It is generated from these files:
 	block.proto
 	block_raw.proto
-	blocks_api.proto
 
 It has these top-level messages:
 	Blocks
 	Block
 	BlocksRaw
 	BlockRaw
-	BlocksApi
-	BlockApi
 */
 package models
 
-import (
-	context "context"
+import context "context"
 
-	errors1 "github.com/infobloxopen/protoc-gen-gorm/errors"
-	field_mask1 "google.golang.org/genproto/protobuf/field_mask"
+import errors1 "github.com/infobloxopen/protoc-gen-gorm/errors"
+import field_mask1 "google.golang.org/genproto/protobuf/field_mask"
+import gorm1 "github.com/jinzhu/gorm"
+import gorm2 "github.com/infobloxopen/atlas-app-toolkit/gorm"
 
-	gorm1 "github.com/jinzhu/gorm"
-
-	gorm2 "github.com/infobloxopen/atlas-app-toolkit/gorm"
-
-	fmt "fmt"
-
-	math "math"
-)
+import fmt "fmt"
+import math "math"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = fmt.Errorf
