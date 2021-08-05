@@ -9,9 +9,7 @@ It is generated from these files:
 	block_raw.proto
 
 It has these top-level messages:
-	Blocks
 	Block
-	BlocksRaw
 	BlockRaw
 */
 package models
