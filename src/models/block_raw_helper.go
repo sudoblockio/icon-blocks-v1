@@ -4,16 +4,30 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/golang/protobuf/proto"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/encoding/protojson"
+
+	"encoding/hex"
 )
 
-// ConvertToBlockRaw - []byte -> models.BlockRaw
-func ConvertToBlockRaw(value []byte) (*BlockRaw, error) {
+// ConvertToBlockRawJSON - []byte -> models.BlockRaw in JSON format
+func ConvertToBlockRawJSON(value []byte) (*BlockRaw, error) {
 	block := BlockRaw{}
 	err := protojson.Unmarshal(value, &block)
 	if err != nil {
-		zap.S().Error("Block_raw_helper: Error in ConvertToBlockRaw: %v", err)
+		zap.S().Error("Block_raw_helper: Error in ConvertToBlockRawJSON: %v", err)
+	}
+	return &block, err
+}
+
+// ConvertToBlockRawProtoBuf - []byte -> models.BlockRaw in ProtoBuf format
+func ConvertToBlockRawProtoBuf(value []byte) (*BlockRaw, error) {
+	block := BlockRaw{}
+	err := proto.Unmarshal(value[6:], &block)
+	if err != nil {
+		zap.S().Error("Error: ", err.Error())
+		zap.S().Error("Value=", hex.Dump(value[6:]))
 	}
 	return &block, err
 }
