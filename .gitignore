@@ -1,3 +1,4 @@
+volumes/*
 
 # Swagger docs - Not committed to main - generated on container build
 src/docs/*

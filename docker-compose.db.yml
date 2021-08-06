@@ -5,7 +5,7 @@ services:
     image: geometrylabs/iconetl:${ICON_ETL_TAG:-latest}
     command: [
       "stream",
-      "-s", "34000000",
+      # "-s", "34000000",
       "-o", "kafka:9092",
       "--period-seconds", "1",
       #"--values-as-hex", "True",
@@ -18,6 +18,8 @@ services:
     restart: on-failure
     depends_on:
       - kafka
+    volumes:
+      - "./volumes/etl/last_synced_block.txt:/icon-etl/last_synced_block.txt"
 
   ############
   # Database #
@@ -29,6 +31,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
     ports:
       - "5432:5432"
+    volumes:
+      - "./volumes/postgres:/var/lib/postgresql"
 
   pgadmin:
     image: dpage/pgadmin4
