@@ -1,6 +1,7 @@
 package rest
 
 import (
+  "strconv"
 	"encoding/json"
 
 	fiber "github.com/gofiber/fiber/v2"
@@ -69,6 +70,9 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 		params.Hash,
 		params.CreatedBy,
 	)
+
+  // Set headers
+  c.Append("X-TOTAL-COUNT", strconv.Itoa(len(blocks)))
 
 	body, _ := json.Marshal(&blocks)
 	return c.SendString(string(body))
