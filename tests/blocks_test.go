@@ -28,6 +28,9 @@ func TestBlocksEndpoint(t *testing.T) {
 
 	defer resp.Body.Close()
 
+  // Test headers
+  assert.Equal("1", resp.Header.Get("X-TOTAL-COUNT"))
+
 	bytes, err := ioutil.ReadAll(resp.Body)
 	assert.Equal(nil, err)
 
