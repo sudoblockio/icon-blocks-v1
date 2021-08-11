@@ -52,6 +52,12 @@ type configType struct {
 	DbSslmode  string `envconfig:"DB_SSL_MODE" required:"false" default:"disable"`
 	DbTimezone string `envconfig:"DB_TIMEZONE" required:"false" default:"UTC"`
 
+  // Redis
+  RedisHost     string  `envconfig:"REDIS_HOST" required:"false" default:"redis"`
+  RedisPort     string  `envconfig:"REDIS_PORT" required:"false" default:"6380"`
+  RedisPassword string  `envconfig:"REDIS_PASSWORD" required:"false" default:""`
+  RedisChannel  string  `envconfig:"REDIS_CHANNEL" required:"false" default:"blocks"`
+
 	// Endpoints
 	MaxPageSize int `envconfig:"MAX_PAGE_SIZE" required:"false" default:"100"`
 	MinPageSize int `envconfig:"MIN_PAGE_SIZE" required:"false" default:"10"`

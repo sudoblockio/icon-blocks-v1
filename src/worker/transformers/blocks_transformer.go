@@ -8,6 +8,7 @@ import (
 	"github.com/geometry-labs/icon-blocks/crud"
 	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/models"
+	"github.com/geometry-labs/icon-blocks/redis"
 	"github.com/geometry-labs/icon-blocks/worker/utils"
 )
 
@@ -28,9 +29,11 @@ func blocksTransformer() {
 		zap.S().Panic("Blocks Worker: no ", producerTopicName, " topic found in PRODUCER_TOPICS=", config.Config.ConsumerTopics)
 	}
 
+  // Init channels
 	consumerTopicChan := make(chan *sarama.ConsumerMessage)
 	producerTopicChan := kafka.KafkaTopicProducers[producerTopicName].TopicChan
 	postgresLoaderChan := crud.GetBlockModel().WriteChan
+  redisClient := redis.GetRedisClient()
 
 	// Register consumer channel
 	broadcasterOutputChanID := kafka.Broadcasters[consumerTopicName].AddBroadcastChannel(consumerTopicChan)
@@ -56,11 +59,14 @@ func blocksTransformer() {
 			Key:   sarama.ByteEncoder(consumerTopicMsg.Key),
 			Value: sarama.ByteEncoder(consumerTopicMsg.Value),
 		}
-
 		producerTopicChan <- producerTopicMsg
 
 		// Load to Postgres
 		postgresLoaderChan <- transformedBlock
+
+    // Push to redis
+    blockBytes, _ := models.ConvertBlockToBytes(transformedBlock)
+    redisClient.Publish(blockBytes)
 
 		zap.S().Debug("Blocks worker: last seen block #", string(consumerTopicMsg.Key))
 	}
