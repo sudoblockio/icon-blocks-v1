@@ -72,7 +72,7 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 	)
 
   // Set headers
-  c.Append("X-TOTAL-COUNT", strconv.Itoa(len(blocks)))
+  c.Append("X-TOTAL-COUNT", strconv.FormatInt(crud.GetBlockModel().CountAll(), 10))
 
 	body, _ := json.Marshal(&blocks)
 	return c.SendString(string(body))
