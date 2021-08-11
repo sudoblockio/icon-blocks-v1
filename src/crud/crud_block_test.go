@@ -108,6 +108,26 @@ func TestBlockModelSelect(t *testing.T) {
 	assert.Equal(1, len(blocks))
 }
 
+func TestBlockModelCountAll(t *testing.T) {
+	assert := assert.New(t)
+
+	blockModel := GetBlockModel()
+	assert.NotEqual(nil, blockModel)
+
+	migrateErr := blockModel.Migrate()
+	assert.Equal(nil, migrateErr)
+
+	// Load fixtures
+	blockFixtures := fixtures.LoadBlockFixtures()
+	for _, block := range blockFixtures {
+		insertErr := blockModel.Insert(block)
+		assert.Equal(nil, insertErr)
+	}
+
+	count := blockModel.CountAll()
+	assert.NotEqual(0, count)
+}
+
 func TestBlockModelLoader(t *testing.T) {
 	assert := assert.New(t)
 
