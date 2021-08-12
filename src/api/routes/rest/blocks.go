@@ -2,6 +2,7 @@ package rest
 
 import (
 	"encoding/json"
+	"regexp"
 	"strconv"
 
 	fiber "github.com/gofiber/fiber/v2"
@@ -17,6 +18,7 @@ func BlocksAddHandlers(app *fiber.App) {
 	prefix := config.Config.RestPrefix + "/blocks"
 
 	app.Get(prefix+"/", handlerGetBlocks)
+	app.Get(prefix+"/:id", handlerGetBlockDetails)
 }
 
 // Parameters for handlerGetBlocks
@@ -45,7 +47,7 @@ type paramsGetBlocks struct {
 // @Param hash query string false "find by block hash"
 // @Param created_by query string false "find by block creator"
 // @Router /api/v1/blocks [get]
-// @Success 200 {object} []models.Block
+// @Success 200 {object} []models.BlockAPI
 // @Failure 422 {object} map[string]interface{}
 func handlerGetBlocks(c *fiber.Ctx) error {
 	params := &paramsGetBlocks{}
@@ -61,7 +63,7 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 		params.Limit = 1
 	}
 
-	blocks := crud.GetBlockModel().SelectMany(
+	blocks, err := crud.GetBlockModel().SelectMany(
 		params.Limit,
 		params.Skip,
 		params.Number,
@@ -70,10 +72,77 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 		params.Hash,
 		params.CreatedBy,
 	)
+	if err != nil {
+		c.Status(500)
+		return c.SendString(`{"error": "could retrieve blocks"}`)
+	}
+	if len(blocks) == 0 {
+		// No Content
+		c.Status(204)
+	}
 
 	// Set headers
 	c.Append("X-TOTAL-COUNT", strconv.FormatInt(crud.GetBlockModel().CountAll(), 10))
 
 	body, _ := json.Marshal(&blocks)
 	return c.SendString(string(body))
+}
+
+// Block Details
+// @Summary Get Block Details
+// @Description get details of a block
+// @Tags Blocks
+// @BasePath /api/v1
+// @Accept */*
+// @Produce json
+// @Param id path string true "block hash or number"
+// @Router /api/v1/blocks/{id} [get]
+// @Success 200 {object} models.Block
+// @Failure 422 {object} map[string]interface{}
+func handlerGetBlockDetails(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	if id == "" {
+		c.Status(422)
+		return c.SendString(`{"error": "hash or number required"}`)
+	}
+
+	// Is hash?
+	isHash, err := regexp.Match("0x([0-9a-fA-F]*)", []byte(id))
+	if err != nil {
+		c.Status(422)
+		return c.SendString(`{"error": "invalid hash or number"}`)
+	}
+	if isHash == true {
+		// ID is Hash
+		block, err := crud.GetBlockModel().SelectOne(0, id)
+		if err != nil {
+			c.Status(404)
+			return c.SendString(`{"error": "no block found"}`)
+		}
+
+		body, _ := json.Marshal(&block)
+		return c.SendString(string(body))
+	}
+
+	// Is number?
+	number, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		c.Status(422)
+		return c.SendString(`{"error": "invalid hash or number"}`)
+	}
+	if number != 0 {
+		// ID is number
+		block, err := crud.GetBlockModel().SelectOne(uint32(number), "")
+		if err != nil {
+			c.Status(404)
+			return c.SendString(`{"error": "no block found"}`)
+		}
+
+		body, _ := json.Marshal(&block)
+		return c.SendString(string(body))
+	}
+
+	c.Status(422)
+	return c.SendString(`{"error": "invalid hash or number"}`)
 }

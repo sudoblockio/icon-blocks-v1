@@ -68,7 +68,7 @@ func (m *BlockModel) Insert(block *models.Block) error {
 	return err
 }
 
-// Select - select from blocks table
+// SelectMany - select from blocks table
 func (m *BlockModel) SelectMany(
 	limit int,
 	skip int,
@@ -77,7 +77,7 @@ func (m *BlockModel) SelectMany(
 	endNumber uint32,
 	hash string,
 	createdBy string,
-) []models.BlockAPI {
+) ([]models.BlockAPI, error) {
 	db := m.db
 
 	// Latest blocks first
@@ -107,7 +107,7 @@ func (m *BlockModel) SelectMany(
 
 	// Hash
 	if hash != "" {
-		db = db.Where("hash = ?", hash)
+		db = db.Where("hash = ?", hash[2:])
 	}
 
 	// Created By (peer id)
@@ -119,9 +119,32 @@ func (m *BlockModel) SelectMany(
 	db = db.Model(&[]models.Block{})
 
 	blocks := []models.BlockAPI{}
-	db.Find(&blocks)
+	db = db.Find(&blocks)
 
-	return blocks
+	return blocks, db.Error
+}
+
+// SelectOne - select from blocks table
+func (m *BlockModel) SelectOne(
+	number uint32,
+	hash string,
+) (models.Block, error) {
+	db := m.db
+
+	// Height
+	if number != 0 {
+		db = db.Where("number = ?", number)
+	}
+
+	// Hash
+	if hash != "" {
+		db = db.Where("hash = ?", hash[2:])
+	}
+
+	block := models.Block{}
+	db = db.First(&block)
+
+	return block, db.Error
 }
 
 func (m *BlockModel) CountAll() int64 {
