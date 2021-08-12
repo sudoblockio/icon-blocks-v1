@@ -69,7 +69,7 @@ func (m *BlockModel) Insert(block *models.Block) error {
 }
 
 // Select - select from blocks table
-func (m *BlockModel) Select(
+func (m *BlockModel) SelectMany(
 	limit int,
 	skip int,
 	number uint32,
@@ -77,7 +77,7 @@ func (m *BlockModel) Select(
 	endNumber uint32,
 	hash string,
 	createdBy string,
-) []models.Block {
+) []models.BlockAPI {
 	db := m.db
 
 	// Latest blocks first
@@ -115,7 +115,10 @@ func (m *BlockModel) Select(
 		db = db.Where("peer_id = ?", createdBy)
 	}
 
-	blocks := []models.Block{}
+	// Set table
+	db = db.Model(&[]models.Block{})
+
+	blocks := []models.BlockAPI{}
 	db.Find(&blocks)
 
 	return blocks

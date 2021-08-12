@@ -1,8 +1,8 @@
 package rest
 
 import (
-  "strconv"
 	"encoding/json"
+	"strconv"
 
 	fiber "github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
@@ -61,7 +61,7 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 		params.Limit = 1
 	}
 
-	blocks := crud.GetBlockModel().Select(
+	blocks := crud.GetBlockModel().SelectMany(
 		params.Limit,
 		params.Skip,
 		params.Number,
@@ -71,8 +71,8 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 		params.CreatedBy,
 	)
 
-  // Set headers
-  c.Append("X-TOTAL-COUNT", strconv.FormatInt(crud.GetBlockModel().CountAll(), 10))
+	// Set headers
+	c.Append("X-TOTAL-COUNT", strconv.FormatInt(crud.GetBlockModel().CountAll(), 10))
 
 	body, _ := json.Marshal(&blocks)
 	return c.SendString(string(body))
