@@ -1,6 +1,9 @@
 package crud
 
 import (
+	"errors"
+	"fmt"
+	"math/big"
 	"strings"
 	"sync"
 
@@ -127,7 +130,6 @@ func (m *BlockModel) SelectMany(
 // SelectOne - select from blocks table
 func (m *BlockModel) SelectOne(
 	number uint32,
-	hash string,
 ) (models.Block, error) {
 	db := m.db
 
@@ -136,15 +138,23 @@ func (m *BlockModel) SelectOne(
 		db = db.Where("number = ?", number)
 	}
 
-	// Hash
-	if hash != "" {
-		db = db.Where("hash = ?", hash[2:])
-	}
-
 	block := models.Block{}
 	db = db.First(&block)
 
 	return block, db.Error
+}
+
+// UpdateOne - select from blocks table
+func (m *BlockModel) UpdateOne(
+	block *models.Block,
+) error {
+	db := m.db
+
+	db = db.Where("number = ?", block.Number)
+
+	db = db.Save(&block)
+
+	return db.Error
 }
 
 func (m *BlockModel) CountAll() int64 {
@@ -159,17 +169,94 @@ func (m *BlockModel) CountAll() int64 {
 // StartBlockLoader starts loader
 func StartBlockLoader() {
 	go func() {
-		var block *models.Block
-		postgresLoaderChan := GetBlockModel().WriteChan
 
 		for {
 			// Read block
-			block = <-postgresLoaderChan
+			newBlock := <-GetBlockModel().WriteChan
 
-			// Load block to database
-			GetBlockModel().Insert(block)
+			// Select
+			currentBlock, err := GetBlockModel().SelectOne(newBlock.Number)
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				// No entry; Load block to database
+				GetBlockModel().Insert(newBlock)
 
-			zap.S().Debugf("Loader Block: Loaded in postgres table Blocks, Block Number %d", block.Number)
+				zap.S().Debugf("Loader Block: Loaded in postgres table Blocks, Block Number %d", newBlock.Number)
+				continue
+			} else if err != nil {
+				// Postgres error
+				zap.S().Fatal("Loader Block ERROR: ", err.Error())
+			}
+
+			//  exists; update current entry
+			var sumBlock *models.Block
+			if newBlock.Type == "block" {
+				// New entry has all feilds
+				sumBlock = createSumBlock(newBlock, &currentBlock)
+			} else if currentBlock.Type == "block" {
+				// Current entry has all fields
+				sumBlock = createSumBlock(&currentBlock, newBlock)
+			} else {
+				// No entries have all fields
+				sumBlock = createSumBlock(newBlock, &currentBlock)
+			}
+
+			// Update current entry
+			GetBlockModel().UpdateOne(sumBlock)
 		}
 	}()
+}
+
+func createSumBlock(baseBlock, newBlock *models.Block) *models.Block {
+	//////////////////////
+	// Transaction Fees //
+	//////////////////////
+	transactionFees := baseBlock.TransactionFees + newBlock.TransactionFees
+
+	////////////////////////
+	// Transaction Amount //
+	////////////////////////
+	newAmount := new(big.Int)
+	curAmount := new(big.Int)
+
+	newAmount.SetString(baseBlock.TransactionAmount, 16)
+	curAmount.SetString(newBlock.TransactionAmount, 16)
+
+	// big.Int
+	sumAmount := new(big.Int)
+	sumAmount.Add(newAmount, curAmount)
+
+	// Hex string
+	transactionAmount := fmt.Sprintf("%x", sumAmount)
+
+	//////////////////////////
+	// Internal Transaction //
+	//////////////////////////
+	internalTransactionCount := baseBlock.InternalTransactionCount + newBlock.InternalTransactionCount
+
+	//////////////////////////////
+	// Failed Transaction Count //
+	//////////////////////////////
+	failedTransactionCount := baseBlock.FailedTransactionCount + newBlock.FailedTransactionCount
+
+	sumBlock := &models.Block{
+		Signature:                baseBlock.Signature,
+		ItemId:                   baseBlock.ItemId,
+		NextLeader:               baseBlock.NextLeader,
+		TransactionCount:         baseBlock.TransactionCount,
+		Type:                     baseBlock.Type,
+		Version:                  baseBlock.Version,
+		PeerId:                   baseBlock.PeerId,
+		Number:                   baseBlock.Number,
+		MerkleRootHash:           baseBlock.MerkleRootHash,
+		ItemTimestamp:            baseBlock.ItemTimestamp,
+		Hash:                     baseBlock.Hash,
+		ParentHash:               baseBlock.ParentHash,
+		Timestamp:                baseBlock.Timestamp,
+		TransactionFees:          transactionFees,
+		TransactionAmount:        transactionAmount,
+		InternalTransactionCount: internalTransactionCount,
+		FailedTransactionCount:   failedTransactionCount,
+	}
+
+	return sumBlock
 }

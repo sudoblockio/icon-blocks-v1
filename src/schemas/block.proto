@@ -20,4 +20,8 @@ message Block {
   string hash = 11 [(gorm.field).tag = {primary_key: true}];
   string parent_hash = 12;
   uint64 timestamp = 13;
+  uint64 transaction_fees = 14;
+  string transaction_amount = 15;
+  uint32 internal_transaction_count = 16;
+  uint32 failed_transaction_count = 17;
 }

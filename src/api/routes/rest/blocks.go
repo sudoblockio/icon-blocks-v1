@@ -2,7 +2,6 @@ package rest
 
 import (
 	"encoding/json"
-	"regexp"
 	"strconv"
 
 	fiber "github.com/gofiber/fiber/v2"
@@ -18,7 +17,7 @@ func BlocksAddHandlers(app *fiber.App) {
 	prefix := config.Config.RestPrefix + "/blocks"
 
 	app.Get(prefix+"/", handlerGetBlocks)
-	app.Get(prefix+"/:id", handlerGetBlockDetails)
+	app.Get(prefix+"/:number", handlerGetBlockDetails)
 }
 
 // Parameters for handlerGetBlocks
@@ -95,54 +94,31 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 // @BasePath /api/v1
 // @Accept */*
 // @Produce json
-// @Param id path string true "block hash or number"
-// @Router /api/v1/blocks/{id} [get]
+// @Param number path int true "block number"
+// @Router /api/v1/blocks/{number} [get]
 // @Success 200 {object} models.Block
 // @Failure 422 {object} map[string]interface{}
 func handlerGetBlockDetails(c *fiber.Ctx) error {
-	id := c.Params("id")
+	numberRaw := c.Params("number")
 
-	if id == "" {
+	if numberRaw == "" {
 		c.Status(422)
-		return c.SendString(`{"error": "hash or number required"}`)
-	}
-
-	// Is hash?
-	isHash, err := regexp.Match("0x([0-9a-fA-F]*)", []byte(id))
-	if err != nil {
-		c.Status(422)
-		return c.SendString(`{"error": "invalid hash or number"}`)
-	}
-	if isHash == true {
-		// ID is Hash
-		block, err := crud.GetBlockModel().SelectOne(0, id)
-		if err != nil {
-			c.Status(404)
-			return c.SendString(`{"error": "no block found"}`)
-		}
-
-		body, _ := json.Marshal(&block)
-		return c.SendString(string(body))
+		return c.SendString(`{"error": "number required"}`)
 	}
 
 	// Is number?
-	number, err := strconv.ParseUint(id, 10, 32)
+	number, err := strconv.ParseUint(numberRaw, 10, 32)
 	if err != nil {
 		c.Status(422)
-		return c.SendString(`{"error": "invalid hash or number"}`)
-	}
-	if number != 0 {
-		// ID is number
-		block, err := crud.GetBlockModel().SelectOne(uint32(number), "")
-		if err != nil {
-			c.Status(404)
-			return c.SendString(`{"error": "no block found"}`)
-		}
-
-		body, _ := json.Marshal(&block)
-		return c.SendString(string(body))
+		return c.SendString(`{"error": "invalid number"}`)
 	}
 
-	c.Status(422)
-	return c.SendString(`{"error": "invalid hash or number"}`)
+	block, err := crud.GetBlockModel().SelectOne(uint32(number))
+	if err != nil {
+		c.Status(404)
+		return c.SendString(`{"error": "no block found"}`)
+	}
+
+	body, _ := json.Marshal(&block)
+	return c.SendString(string(body))
 }

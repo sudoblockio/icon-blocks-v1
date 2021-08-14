@@ -31,8 +31,6 @@ x-env: &env
 
   # Topics
   CONSUMER_GROUP: "blocks-consumer-group"
-  CONSUMER_TOPICS: "blocks"
-  PRODUCER_TOPICS: "blocks-ws"
   SCHEMA_NAME_TOPICS: "blocks-ws:block"
   SCHEMA_FOLDER_PATH: "/app/schemas/"
 
@@ -70,6 +68,7 @@ services:
       - ${BLOCKS_CONTEXT:-.}/src:/app
     environment:
       <<: *env
+      CONSUMER_TOPICS: "blocks-ws"
 
   blocks-worker:
     build:
@@ -93,3 +92,5 @@ services:
       - ${BLOCKS_CONTEXT:-.}/src:/app
     environment:
       <<: *env
+      CONSUMER_TOPICS: "blocks,transactions,logs"
+      PRODUCER_TOPICS: "blocks-ws"
