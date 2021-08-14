@@ -133,13 +133,8 @@ func TestBlockModelSelectOne(t *testing.T) {
 		assert.Equal(nil, insertErr)
 	}
 
-	// Test hash
-	block, err := blockModel.SelectOne(0, "0xf2934304af91a2cecca184162dda895ab9929c28eddaee104cda988000824019")
-	assert.Equal(nil, err)
-	assert.NotEqual(nil, block)
-
 	// Test number
-	block, err = blockModel.SelectOne(33788433, "")
+	block, err := blockModel.SelectOne(33788433)
 	assert.Equal(nil, err)
 	assert.NotEqual(nil, block)
 }
