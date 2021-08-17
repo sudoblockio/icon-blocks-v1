@@ -89,8 +89,6 @@ func blocksTransformer() {
 			// Create partial block from transaction
 			block = transformTransaction(transactionRaw)
 
-			zap.S().Info("BlockValue=", block.TransactionAmount)
-
 		case consumerTopicMsg = <-consumerTopicChanLogs:
 			// Transaction message from ETL
 			// Internal Transactions
@@ -168,7 +166,7 @@ func transformBlock(blockRaw *models.BlockRaw) *models.Block {
 		ParentHash:               blockRaw.ParentHash,
 		Timestamp:                blockRaw.Timestamp,
 		TransactionFees:          0,
-		TransactionAmount:        "",
+		TransactionAmount:        "0x0",
 		InternalTransactionCount: 0,
 		FailedTransactionCount:   0,
 	}
@@ -183,7 +181,7 @@ func transformTransaction(transactionRaw *models.TransactionRaw) *models.Block {
 	}
 
 	// Transaction fee calculation
-	transactionFee := transactionRaw.ReceiptStepPrice * transactionRaw.ReceiptCumulativeStepUsed
+	transactionFee := transactionRaw.ReceiptStepPrice * transactionRaw.ReceiptStepUsed
 
 	// Represents a change of state
 	// Linked by BlockNumber
