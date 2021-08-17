@@ -206,52 +206,59 @@ func StartBlockLoader() {
 	}()
 }
 
-func createSumBlock(baseBlock, newBlock *models.Block) *models.Block {
+func createSumBlock(curBlock, newBlock *models.Block) *models.Block {
 	//////////////////////
 	// Transaction Fees //
 	//////////////////////
-	transactionFees := baseBlock.TransactionFees + newBlock.TransactionFees
+	transactionFees := curBlock.TransactionFees + newBlock.TransactionFees
 
 	////////////////////////
 	// Transaction Amount //
 	////////////////////////
-	newAmount := new(big.Int)
 	curAmount := new(big.Int)
+	newAmount := new(big.Int)
 
-	newAmount.SetString(baseBlock.TransactionAmount, 16)
-	curAmount.SetString(newBlock.TransactionAmount, 16)
+	if len(curBlock.TransactionAmount) < 3 {
+		curBlock.TransactionAmount = "0x0"
+	}
+	if len(newBlock.TransactionAmount) < 0 {
+		newBlock.TransactionAmount = "0x0"
+	}
+
+	curAmount.SetString(curBlock.TransactionAmount[2:], 16)
+	newAmount.SetString(newBlock.TransactionAmount[2:], 16)
 
 	// big.Int
 	sumAmount := new(big.Int)
 	sumAmount.Add(newAmount, curAmount)
 
 	// Hex string
-	transactionAmount := fmt.Sprintf("%x", sumAmount)
+	transactionAmount := fmt.Sprintf("0x%x", sumAmount)
 
 	//////////////////////////
 	// Internal Transaction //
 	//////////////////////////
-	internalTransactionCount := baseBlock.InternalTransactionCount + newBlock.InternalTransactionCount
+	internalTransactionCount := curBlock.InternalTransactionCount + newBlock.InternalTransactionCount
 
 	//////////////////////////////
 	// Failed Transaction Count //
 	//////////////////////////////
-	failedTransactionCount := baseBlock.FailedTransactionCount + newBlock.FailedTransactionCount
+	failedTransactionCount := curBlock.FailedTransactionCount + newBlock.FailedTransactionCount
 
 	sumBlock := &models.Block{
-		Signature:                baseBlock.Signature,
-		ItemId:                   baseBlock.ItemId,
-		NextLeader:               baseBlock.NextLeader,
-		TransactionCount:         baseBlock.TransactionCount,
-		Type:                     baseBlock.Type,
-		Version:                  baseBlock.Version,
-		PeerId:                   baseBlock.PeerId,
-		Number:                   baseBlock.Number,
-		MerkleRootHash:           baseBlock.MerkleRootHash,
-		ItemTimestamp:            baseBlock.ItemTimestamp,
-		Hash:                     baseBlock.Hash,
-		ParentHash:               baseBlock.ParentHash,
-		Timestamp:                baseBlock.Timestamp,
+		Signature:                curBlock.Signature,
+		ItemId:                   curBlock.ItemId,
+		NextLeader:               curBlock.NextLeader,
+		TransactionCount:         curBlock.TransactionCount,
+		Type:                     curBlock.Type,
+		Version:                  curBlock.Version,
+		PeerId:                   curBlock.PeerId,
+		Number:                   curBlock.Number,
+		MerkleRootHash:           curBlock.MerkleRootHash,
+		ItemTimestamp:            curBlock.ItemTimestamp,
+		Hash:                     curBlock.Hash,
+		ParentHash:               curBlock.ParentHash,
+		Timestamp:                curBlock.Timestamp,
 		TransactionFees:          transactionFees,
 		TransactionAmount:        transactionAmount,
 		InternalTransactionCount: internalTransactionCount,
