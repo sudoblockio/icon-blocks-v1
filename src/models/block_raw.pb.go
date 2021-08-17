@@ -25,19 +25,19 @@ type BlockRaw struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Signature        string `protobuf:"bytes,1,opt,name=signature,proto3" json:"signature,omitempty"`
-	ItemId           string `protobuf:"bytes,2,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
-	NextLeader       string `protobuf:"bytes,3,opt,name=next_leader,json=nextLeader,proto3" json:"next_leader,omitempty"`
-	TransactionCount uint32 `protobuf:"varint,4,opt,name=transaction_count,json=transactionCount,proto3" json:"transaction_count,omitempty"`
-	Type             string `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
-	Version          string `protobuf:"bytes,6,opt,name=version,proto3" json:"version,omitempty"`
-	PeerId           string `protobuf:"bytes,7,opt,name=peer_id,json=peerId,proto3" json:"peer_id,omitempty"`
-	Number           uint32 `protobuf:"varint,8,opt,name=number,proto3" json:"number,omitempty"`
-	MerkleRootHash   string `protobuf:"bytes,9,opt,name=merkle_root_hash,json=merkleRootHash,proto3" json:"merkle_root_hash,omitempty"`
-	ItemTimestamp    string `protobuf:"bytes,10,opt,name=item_timestamp,json=itemTimestamp,proto3" json:"item_timestamp,omitempty"`
-	Hash             string `protobuf:"bytes,11,opt,name=hash,proto3" json:"hash,omitempty"`
-	ParentHash       string `protobuf:"bytes,12,opt,name=parent_hash,json=parentHash,proto3" json:"parent_hash,omitempty"`
-	Timestamp        uint64 `protobuf:"varint,13,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Signature        string `protobuf:"bytes,1,opt,name=signature,proto3" json:"signature"`
+	ItemId           string `protobuf:"bytes,2,opt,name=item_id,json=itemId,proto3" json:"item_id"`
+	NextLeader       string `protobuf:"bytes,3,opt,name=next_leader,json=nextLeader,proto3" json:"next_leader"`
+	TransactionCount uint32 `protobuf:"varint,4,opt,name=transaction_count,json=transactionCount,proto3" json:"transaction_count"`
+	Type             string `protobuf:"bytes,5,opt,name=type,proto3" json:"type"`
+	Version          string `protobuf:"bytes,6,opt,name=version,proto3" json:"version"`
+	PeerId           string `protobuf:"bytes,7,opt,name=peer_id,json=peerId,proto3" json:"peer_id"`
+	Number           uint32 `protobuf:"varint,8,opt,name=number,proto3" json:"number"`
+	MerkleRootHash   string `protobuf:"bytes,9,opt,name=merkle_root_hash,json=merkleRootHash,proto3" json:"merkle_root_hash"`
+	ItemTimestamp    string `protobuf:"bytes,10,opt,name=item_timestamp,json=itemTimestamp,proto3" json:"item_timestamp"`
+	Hash             string `protobuf:"bytes,11,opt,name=hash,proto3" json:"hash"`
+	ParentHash       string `protobuf:"bytes,12,opt,name=parent_hash,json=parentHash,proto3" json:"parent_hash"`
+	Timestamp        uint64 `protobuf:"varint,13,opt,name=timestamp,proto3" json:"timestamp"`
 }
 
 func (x *BlockRaw) Reset() {

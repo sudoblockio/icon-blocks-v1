@@ -221,7 +221,7 @@ func createSumBlock(curBlock, newBlock *models.Block) *models.Block {
 	if len(curBlock.TransactionAmount) < 3 {
 		curBlock.TransactionAmount = "0x0"
 	}
-	if len(newBlock.TransactionAmount) < 0 {
+	if len(newBlock.TransactionAmount) < 3 {
 		newBlock.TransactionAmount = "0x0"
 	}
 

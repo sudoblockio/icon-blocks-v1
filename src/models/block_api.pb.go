@@ -25,10 +25,10 @@ type BlockAPI struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TransactionCount uint32 `protobuf:"varint,1,opt,name=transaction_count,json=transactionCount,proto3" json:"transaction_count,omitempty"`
-	Number           uint32 `protobuf:"varint,2,opt,name=number,proto3" json:"number,omitempty"`
-	Hash             string `protobuf:"bytes,3,opt,name=hash,proto3" json:"hash,omitempty"`
-	Timestamp        uint64 `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	TransactionCount uint32 `protobuf:"varint,1,opt,name=transaction_count,json=transactionCount,proto3" json:"transaction_count"`
+	Number           uint32 `protobuf:"varint,2,opt,name=number,proto3" json:"number"`
+	Hash             string `protobuf:"bytes,3,opt,name=hash,proto3" json:"hash"`
+	Timestamp        uint64 `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp"`
 }
 
 func (x *BlockAPI) Reset() {

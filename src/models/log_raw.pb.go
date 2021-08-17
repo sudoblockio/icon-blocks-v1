@@ -25,18 +25,18 @@ type LogRaw struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Type             string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
-	LogIndex         uint64 `protobuf:"varint,2,opt,name=log_index,json=logIndex,proto3" json:"log_index,omitempty"`
-	TransactionHash  string `protobuf:"bytes,3,opt,name=transaction_hash,json=transactionHash,proto3" json:"transaction_hash,omitempty"`
-	TransactionIndex uint32 `protobuf:"varint,4,opt,name=transaction_index,json=transactionIndex,proto3" json:"transaction_index,omitempty"`
-	Address          string `protobuf:"bytes,5,opt,name=address,proto3" json:"address,omitempty"`
-	Data             string `protobuf:"bytes,6,opt,name=data,proto3" json:"data,omitempty"`
-	Indexed          string `protobuf:"bytes,7,opt,name=indexed,proto3" json:"indexed,omitempty"`
-	BlockNumber      uint64 `protobuf:"varint,8,opt,name=block_number,json=blockNumber,proto3" json:"block_number,omitempty"`
-	BlockTimestamp   uint64 `protobuf:"varint,9,opt,name=block_timestamp,json=blockTimestamp,proto3" json:"block_timestamp,omitempty"`
-	BlockHash        string `protobuf:"bytes,10,opt,name=block_hash,json=blockHash,proto3" json:"block_hash,omitempty"`
-	ItemId           string `protobuf:"bytes,11,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
-	ItemTimestamp    string `protobuf:"bytes,12,opt,name=item_timestamp,json=itemTimestamp,proto3" json:"item_timestamp,omitempty"`
+	Type             string `protobuf:"bytes,1,opt,name=type,proto3" json:"type"`
+	LogIndex         uint64 `protobuf:"varint,2,opt,name=log_index,json=logIndex,proto3" json:"log_index"`
+	TransactionHash  string `protobuf:"bytes,3,opt,name=transaction_hash,json=transactionHash,proto3" json:"transaction_hash"`
+	TransactionIndex uint32 `protobuf:"varint,4,opt,name=transaction_index,json=transactionIndex,proto3" json:"transaction_index"`
+	Address          string `protobuf:"bytes,5,opt,name=address,proto3" json:"address"`
+	Data             string `protobuf:"bytes,6,opt,name=data,proto3" json:"data"`
+	Indexed          string `protobuf:"bytes,7,opt,name=indexed,proto3" json:"indexed"`
+	BlockNumber      uint64 `protobuf:"varint,8,opt,name=block_number,json=blockNumber,proto3" json:"block_number"`
+	BlockTimestamp   uint64 `protobuf:"varint,9,opt,name=block_timestamp,json=blockTimestamp,proto3" json:"block_timestamp"`
+	BlockHash        string `protobuf:"bytes,10,opt,name=block_hash,json=blockHash,proto3" json:"block_hash"`
+	ItemId           string `protobuf:"bytes,11,opt,name=item_id,json=itemId,proto3" json:"item_id"`
+	ItemTimestamp    string `protobuf:"bytes,12,opt,name=item_timestamp,json=itemTimestamp,proto3" json:"item_timestamp"`
 }
 
 func (x *LogRaw) Reset() {

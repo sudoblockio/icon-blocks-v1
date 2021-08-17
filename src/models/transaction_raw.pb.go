@@ -25,32 +25,32 @@ type TransactionRaw struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Type                      string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
-	Version                   string `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
-	FromAddress               string `protobuf:"bytes,3,opt,name=from_address,json=fromAddress,proto3" json:"from_address,omitempty"`
-	ToAddress                 string `protobuf:"bytes,4,opt,name=to_address,json=toAddress,proto3" json:"to_address,omitempty"`
-	Value                     string `protobuf:"bytes,5,opt,name=value,proto3" json:"value,omitempty"`
-	StepLimit                 uint64 `protobuf:"varint,6,opt,name=step_limit,json=stepLimit,proto3" json:"step_limit,omitempty"`
-	Timestamp                 string `protobuf:"bytes,7,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	BlockTimestamp            uint64 `protobuf:"varint,8,opt,name=block_timestamp,json=blockTimestamp,proto3" json:"block_timestamp,omitempty"`
-	Nid                       uint32 `protobuf:"varint,9,opt,name=nid,proto3" json:"nid,omitempty"`
-	Nonce                     uint64 `protobuf:"varint,10,opt,name=nonce,proto3" json:"nonce,omitempty"`
-	Hash                      string `protobuf:"bytes,11,opt,name=hash,proto3" json:"hash,omitempty"`
-	TransactionIndex          uint32 `protobuf:"varint,12,opt,name=transaction_index,json=transactionIndex,proto3" json:"transaction_index,omitempty"`
-	BlockHash                 string `protobuf:"bytes,13,opt,name=block_hash,json=blockHash,proto3" json:"block_hash,omitempty"`
-	BlockNumber               uint64 `protobuf:"varint,14,opt,name=block_number,json=blockNumber,proto3" json:"block_number,omitempty"`
-	Fee                       uint64 `protobuf:"varint,15,opt,name=fee,proto3" json:"fee,omitempty"`
-	Signature                 string `protobuf:"bytes,16,opt,name=signature,proto3" json:"signature,omitempty"`
-	DataType                  string `protobuf:"bytes,17,opt,name=data_type,json=dataType,proto3" json:"data_type,omitempty"`
-	Data                      string `protobuf:"bytes,18,opt,name=data,proto3" json:"data,omitempty"`
-	ReceiptCumulativeStepUsed uint64 `protobuf:"varint,19,opt,name=receipt_cumulative_step_used,json=receiptCumulativeStepUsed,proto3" json:"receipt_cumulative_step_used,omitempty"`
-	ReceiptStepUsed           uint64 `protobuf:"varint,20,opt,name=receipt_step_used,json=receiptStepUsed,proto3" json:"receipt_step_used,omitempty"`
-	ReceiptStepPrice          uint64 `protobuf:"varint,21,opt,name=receipt_step_price,json=receiptStepPrice,proto3" json:"receipt_step_price,omitempty"`
-	ReceiptScoreAddress       string `protobuf:"bytes,22,opt,name=receipt_score_address,json=receiptScoreAddress,proto3" json:"receipt_score_address,omitempty"`
-	ReceiptLogs               string `protobuf:"bytes,23,opt,name=receipt_logs,json=receiptLogs,proto3" json:"receipt_logs,omitempty"`
-	ReceiptStatus             uint32 `protobuf:"varint,24,opt,name=receipt_status,json=receiptStatus,proto3" json:"receipt_status,omitempty"`
-	ItemId                    string `protobuf:"bytes,25,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
-	ItemTimestamp             string `protobuf:"bytes,26,opt,name=item_timestamp,json=itemTimestamp,proto3" json:"item_timestamp,omitempty"`
+	Type                      string `protobuf:"bytes,1,opt,name=type,proto3" json:"type"`
+	Version                   string `protobuf:"bytes,2,opt,name=version,proto3" json:"version"`
+	FromAddress               string `protobuf:"bytes,3,opt,name=from_address,json=fromAddress,proto3" json:"from_address"`
+	ToAddress                 string `protobuf:"bytes,4,opt,name=to_address,json=toAddress,proto3" json:"to_address"`
+	Value                     string `protobuf:"bytes,5,opt,name=value,proto3" json:"value"`
+	StepLimit                 uint64 `protobuf:"varint,6,opt,name=step_limit,json=stepLimit,proto3" json:"step_limit"`
+	Timestamp                 string `protobuf:"bytes,7,opt,name=timestamp,proto3" json:"timestamp"`
+	BlockTimestamp            uint64 `protobuf:"varint,8,opt,name=block_timestamp,json=blockTimestamp,proto3" json:"block_timestamp"`
+	Nid                       uint32 `protobuf:"varint,9,opt,name=nid,proto3" json:"nid"`
+	Nonce                     uint64 `protobuf:"varint,10,opt,name=nonce,proto3" json:"nonce"`
+	Hash                      string `protobuf:"bytes,11,opt,name=hash,proto3" json:"hash"`
+	TransactionIndex          uint32 `protobuf:"varint,12,opt,name=transaction_index,json=transactionIndex,proto3" json:"transaction_index"`
+	BlockHash                 string `protobuf:"bytes,13,opt,name=block_hash,json=blockHash,proto3" json:"block_hash"`
+	BlockNumber               uint64 `protobuf:"varint,14,opt,name=block_number,json=blockNumber,proto3" json:"block_number"`
+	Fee                       uint64 `protobuf:"varint,15,opt,name=fee,proto3" json:"fee"`
+	Signature                 string `protobuf:"bytes,16,opt,name=signature,proto3" json:"signature"`
+	DataType                  string `protobuf:"bytes,17,opt,name=data_type,json=dataType,proto3" json:"data_type"`
+	Data                      string `protobuf:"bytes,18,opt,name=data,proto3" json:"data"`
+	ReceiptCumulativeStepUsed uint64 `protobuf:"varint,19,opt,name=receipt_cumulative_step_used,json=receiptCumulativeStepUsed,proto3" json:"receipt_cumulative_step_used"`
+	ReceiptStepUsed           uint64 `protobuf:"varint,20,opt,name=receipt_step_used,json=receiptStepUsed,proto3" json:"receipt_step_used"`
+	ReceiptStepPrice          uint64 `protobuf:"varint,21,opt,name=receipt_step_price,json=receiptStepPrice,proto3" json:"receipt_step_price"`
+	ReceiptScoreAddress       string `protobuf:"bytes,22,opt,name=receipt_score_address,json=receiptScoreAddress,proto3" json:"receipt_score_address"`
+	ReceiptLogs               string `protobuf:"bytes,23,opt,name=receipt_logs,json=receiptLogs,proto3" json:"receipt_logs"`
+	ReceiptStatus             uint32 `protobuf:"varint,24,opt,name=receipt_status,json=receiptStatus,proto3" json:"receipt_status"`
+	ItemId                    string `protobuf:"bytes,25,opt,name=item_id,json=itemId,proto3" json:"item_id"`
+	ItemTimestamp             string `protobuf:"bytes,26,opt,name=item_timestamp,json=itemTimestamp,proto3" json:"item_timestamp"`
 }
 
 func (x *TransactionRaw) Reset() {
