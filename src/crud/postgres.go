@@ -7,7 +7,6 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 
 	"github.com/geometry-labs/icon-blocks/config"
 )
@@ -39,9 +38,7 @@ func getPostgresConn() *gorm.DB {
 }
 
 func createSession(dsn string) (*gorm.DB, error) {
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Silent),
-	})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		zap.S().Info("err:", err)
 	}
