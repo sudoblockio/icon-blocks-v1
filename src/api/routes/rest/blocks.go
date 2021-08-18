@@ -9,6 +9,7 @@ import (
 
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/crud"
+	"github.com/geometry-labs/icon-blocks/models"
 )
 
 // BlocksAddHandlers - add blocks endpoints to fiber router
@@ -80,8 +81,16 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 		c.Status(204)
 	}
 
-	// Set headers
-	c.Append("X-TOTAL-COUNT", strconv.FormatInt(crud.GetBlockModel().CountAll(), 10))
+	// Set X-TOTAL-COUNT
+	counter, err := crud.GetBlockCountModel().Select()
+	if err != nil {
+		counter = models.BlockCount{
+			Count: 0,
+			Id:    0,
+		}
+		zap.S().Warn("Could not retrieve block count: ", err.Error())
+	}
+	c.Append("X-TOTAL-COUNT", strconv.FormatUint(counter.Count, 10))
 
 	body, _ := json.Marshal(&blocks)
 	return c.SendString(string(body))

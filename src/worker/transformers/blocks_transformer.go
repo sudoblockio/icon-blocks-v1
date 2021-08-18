@@ -45,7 +45,8 @@ func blocksTransformer() {
 	consumerTopicChanTransactions := make(chan *sarama.ConsumerMessage)
 	consumerTopicChanLogs := make(chan *sarama.ConsumerMessage)
 	producerTopicChan := kafka.KafkaTopicProducers[producerTopicName].TopicChan
-	postgresLoaderChan := crud.GetBlockModel().WriteChan
+	blockLoaderChan := crud.GetBlockModel().WriteChan
+	blockCountLoaderChan := crud.GetBlockCountModel().WriteChan
 
 	// Register consumer channel
 	broadcasterOutputChanIDBlocks := kafka.Broadcasters[consumerTopicNameBlocks].AddBroadcastChannel(consumerTopicChanBlocks)
@@ -78,6 +79,13 @@ func blocksTransformer() {
 			// Transform logic
 			block = transformBlock(blockRaw)
 
+			// TODO split transformer
+			// Load log counter to Postgres
+			blockCount := &models.BlockCount{
+				Count: 1, // Adds with current
+				Id:    1, // Only one row
+			}
+			blockCountLoaderChan <- blockCount
 		case consumerTopicMsg = <-consumerTopicChanTransactions:
 			// Transaction message from ETL
 			// Regular transactions
@@ -113,7 +121,7 @@ func blocksTransformer() {
 		producerTopicChan <- producerTopicMsg
 
 		// Load to Postgres
-		postgresLoaderChan <- block
+		blockLoaderChan <- block
 
 		zap.S().Debug("Blocks worker: last seen block #", string(consumerTopicMsg.Key))
 	}

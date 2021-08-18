@@ -25,9 +25,10 @@ func main() {
 	// 3
 	kafka.StartProducers()
 
-	// Start Postgres loader
+	// Start Postgres loaders
 	// 4
 	crud.StartBlockLoader()
+	crud.StartBlockCountLoader()
 
 	// Start kafka consumer
 	// 1

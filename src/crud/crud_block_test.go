@@ -172,7 +172,7 @@ func TestBlockModelLoader(t *testing.T) {
 	blockFixtures := fixtures.LoadBlockFixtures()
 
 	// Start loader
-	go StartBlockLoader()
+	StartBlockLoader()
 
 	// Write to loader channel
 	go func() {

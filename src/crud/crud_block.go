@@ -157,15 +157,6 @@ func (m *BlockModel) UpdateOne(
 	return db.Error
 }
 
-func (m *BlockModel) CountAll() int64 {
-	db := m.db
-
-	var count int64
-	db.Model(&[]models.Block{}).Count(&count)
-
-	return count
-}
-
 // StartBlockLoader starts loader
 func StartBlockLoader() {
 	go func() {
