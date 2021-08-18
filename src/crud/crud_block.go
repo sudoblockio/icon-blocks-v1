@@ -72,6 +72,7 @@ func (m *BlockModel) Insert(block *models.Block) error {
 }
 
 // SelectMany - select from blocks table
+// Returns: models, total count (if filters), error (if present)
 func (m *BlockModel) SelectMany(
 	limit int,
 	skip int,
@@ -80,51 +81,67 @@ func (m *BlockModel) SelectMany(
 	endNumber uint32,
 	hash string,
 	createdBy string,
-) ([]models.BlockAPI, error) {
+) ([]models.BlockAPI, int64, error) {
 	db := m.db
+	computeCount := false
 
 	// Latest blocks first
 	db = db.Order("number desc")
 
-	// Limit is required and defaulted to 1
-	db = db.Limit(limit)
-
-	// Skip
-	if skip != 0 {
-		db = db.Offset(skip)
-	}
+	// Set table
+	db = db.Model(&[]models.Block{})
 
 	// Height
 	if number != 0 {
+		computeCount = true
 		db = db.Where("number = ?", number)
 	}
 
 	// Start number and end number
+	// NOTE: computing count with these filters may cause perfomance issues
 	if startNumber != 0 && endNumber != 0 {
+		computeCount = true
 		db = db.Where("number BETWEEN ? AND ?", startNumber, endNumber)
 	} else if startNumber != 0 {
+		computeCount = true
 		db = db.Where("number > ?", startNumber)
 	} else if endNumber != 0 {
+		computeCount = true
 		db = db.Where("number < ?", endNumber)
 	}
 
 	// Hash
 	if hash != "" {
+		computeCount = true
 		db = db.Where("hash = ?", hash[2:])
 	}
 
 	// Created By (peer id)
 	if createdBy != "" {
+		computeCount = true
 		db = db.Where("peer_id = ?", createdBy)
 	}
 
-	// Set table
-	db = db.Model(&[]models.Block{})
+	// Count, if needed
+	count := int64(-1)
+	if computeCount {
+		db.Count(&count)
+	}
+
+	// Limit is required and defaulted to 1
+	// NOTE: Count before setting limit
+	db = db.Limit(limit)
+
+	// Skip
+	// NOTE: Count before setting skip
+	if skip != 0 {
+		db = db.Offset(skip)
+	}
 
 	blocks := []models.BlockAPI{}
 	db = db.Find(&blocks)
 
-	return blocks, db.Error
+	return blocks, count, db.Error
 }
 
 // SelectOne - select from blocks table

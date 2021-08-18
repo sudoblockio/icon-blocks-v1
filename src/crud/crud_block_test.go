@@ -72,47 +72,47 @@ func TestBlockModelSelectMany(t *testing.T) {
 	}
 
 	// Select all blocks
-	blocks, err := blockModel.SelectMany(len(blockFixtures), 0, 0, 0, 0, "", "")
+	blocks, _, err := blockModel.SelectMany(len(blockFixtures), 0, 0, 0, 0, "", "")
 	assert.Equal(nil, err)
 	assert.Equal(len(blockFixtures), len(blocks))
 
 	// Test limit
-	blocks, err = blockModel.SelectMany(1, 0, 0, 0, 0, "", "")
+	blocks, _, err = blockModel.SelectMany(1, 0, 0, 0, 0, "", "")
 	assert.Equal(nil, err)
 	assert.Equal(1, len(blocks))
 
 	// Test skip
-	blocks, err = blockModel.SelectMany(1, 1, 0, 0, 0, "", "")
+	blocks, _, err = blockModel.SelectMany(1, 1, 0, 0, 0, "", "")
 	assert.Equal(nil, err)
 	assert.Equal(1, len(blocks))
 
 	// Test number
-	blocks, err = blockModel.SelectMany(1, 0, 33788433, 0, 0, "", "")
+	blocks, _, err = blockModel.SelectMany(1, 0, 33788433, 0, 0, "", "")
 	assert.Equal(nil, err)
 	assert.Equal(1, len(blocks))
 
 	// Test start_number
-	blocks, err = blockModel.SelectMany(1, 0, 0, 8150, 0, "", "")
+	blocks, _, err = blockModel.SelectMany(1, 0, 0, 8150, 0, "", "")
 	assert.Equal(nil, err)
 	assert.Equal(1, len(blocks))
 
 	// Test end_number
-	blocks, err = blockModel.SelectMany(1, 0, 0, 0, 8160, "", "")
+	blocks, _, err = blockModel.SelectMany(1, 0, 0, 0, 8160, "", "")
 	assert.Equal(nil, err)
 	assert.Equal(1, len(blocks))
 
 	// Test start_number <-> end_number
-	blocks, err = blockModel.SelectMany(1, 0, 0, 8150, 8160, "", "")
+	blocks, _, err = blockModel.SelectMany(1, 0, 0, 8150, 8160, "", "")
 	assert.Equal(nil, err)
 	assert.Equal(1, len(blocks))
 
 	// Test hash
-	blocks, err = blockModel.SelectMany(1, 0, 0, 0, 0, "0xf2934304af91a2cecca184162dda895ab9929c28eddaee104cda988000824019", "")
+	blocks, _, err = blockModel.SelectMany(1, 0, 0, 0, 0, "0xf2934304af91a2cecca184162dda895ab9929c28eddaee104cda988000824019", "")
 	assert.Equal(nil, err)
 	assert.Equal(1, len(blocks))
 
 	// Test created_by (peer_id)
-	blocks, err = blockModel.SelectMany(1, 0, 0, 0, 0, "", "hx116e5ea176419cd990c2f39b0eda21b946728a38")
+	blocks, _, err = blockModel.SelectMany(1, 0, 0, 0, 0, "", "hx116e5ea176419cd990c2f39b0eda21b946728a38")
 	assert.Equal(nil, err)
 	assert.Equal(1, len(blocks))
 }
@@ -165,7 +165,7 @@ func TestBlockModelLoader(t *testing.T) {
 	time.Sleep(5)
 
 	// Select all blocks
-	blocks, err := blockModel.SelectMany(len(blockFixtures), 0, 0, 0, 0, "", "")
+	blocks, _, err := blockModel.SelectMany(len(blockFixtures), 0, 0, 0, 0, "", "")
 	assert.Equal(nil, err)
 	assert.Equal(len(blockFixtures), len(blocks))
 }

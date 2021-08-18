@@ -63,7 +63,7 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 		params.Limit = 1
 	}
 
-	blocks, err := crud.GetBlockModel().SelectMany(
+	blocks, count, err := crud.GetBlockModel().SelectMany(
 		params.Limit,
 		params.Skip,
 		params.Number,
@@ -82,15 +82,22 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 	}
 
 	// Set X-TOTAL-COUNT
-	counter, err := crud.GetBlockCountModel().Select()
-	if err != nil {
-		counter = models.BlockCount{
-			Count: 0,
-			Id:    0,
+	if count != -1 {
+		// Filters given, count some
+		c.Append("X-TOTAL-COUNT", strconv.FormatInt(count, 10))
+	} else {
+		// No filters given, count all
+		// Total count in the block_counts table
+		counter, err := crud.GetBlockCountModel().Select()
+		if err != nil {
+			counter = models.BlockCount{
+				Count: 0,
+				Id:    0,
+			}
+			zap.S().Warn("Could not retrieve block count: ", err.Error())
 		}
-		zap.S().Warn("Could not retrieve block count: ", err.Error())
+		c.Append("X-TOTAL-COUNT", strconv.FormatUint(counter.Count, 10))
 	}
-	c.Append("X-TOTAL-COUNT", strconv.FormatUint(counter.Count, 10))
 
 	body, _ := json.Marshal(&blocks)
 	return c.SendString(string(body))
