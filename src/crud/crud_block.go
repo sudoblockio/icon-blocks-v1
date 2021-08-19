@@ -99,6 +99,7 @@ func (m *BlockModel) SelectMany(
 
 	// Start number and end number
 	// NOTE: computing count with these filters may cause perfomance issues
+	// TODO limit in endpoint to range
 	if startNumber != 0 && endNumber != 0 {
 		computeCount = true
 		db = db.Where("number BETWEEN ? AND ?", startNumber, endNumber)

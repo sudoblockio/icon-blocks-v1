@@ -1,7 +1,6 @@
 package transformers
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"strings"
 
@@ -79,7 +78,6 @@ func blocksTransformer() {
 			// Transform logic
 			block = transformBlock(blockRaw)
 
-			// TODO split transformer
 			// Load log counter to Postgres
 			blockCount := &models.BlockCount{
 				Count: 1, // Adds with current
@@ -132,7 +130,6 @@ func convertToBlockRawProtoBuf(value []byte) (*models.BlockRaw, error) {
 	err := proto.Unmarshal(value[6:], &block)
 	if err != nil {
 		zap.S().Error("Error: ", err.Error())
-		zap.S().Error("Value=", hex.Dump(value[6:]))
 	}
 	return &block, err
 }
@@ -142,7 +139,6 @@ func convertBytesToTransactionRawProtoBuf(value []byte) (*models.TransactionRaw,
 	err := proto.Unmarshal(value[6:], &tx)
 	if err != nil {
 		zap.S().Error("Error: ", err.Error())
-		zap.S().Error("Value=", hex.Dump(value[6:]))
 	}
 	return &tx, err
 }
@@ -152,7 +148,6 @@ func convertBytesToLogRawProtoBuf(value []byte) (*models.LogRaw, error) {
 	err := proto.Unmarshal(value[6:], &log)
 	if err != nil {
 		zap.S().Error("Error: ", err.Error())
-		zap.S().Error("Value=", hex.Dump(value[6:]))
 	}
 	return &log, err
 }
@@ -173,10 +168,10 @@ func transformBlock(blockRaw *models.BlockRaw) *models.Block {
 		Hash:                     blockRaw.Hash,
 		ParentHash:               blockRaw.ParentHash,
 		Timestamp:                blockRaw.Timestamp,
-		TransactionFees:          0,
-		TransactionAmount:        "0x0",
-		InternalTransactionCount: 0,
-		FailedTransactionCount:   0,
+		TransactionFees:          0,     // Adds in loader
+		TransactionAmount:        "0x0", // Adds in loader
+		InternalTransactionCount: 0,     // Adds in loader
+		FailedTransactionCount:   0,     // Adds in loader
 	}
 }
 
@@ -207,10 +202,10 @@ func transformTransaction(transactionRaw *models.TransactionRaw) *models.Block {
 		Hash:                     transactionRaw.BlockHash,
 		ParentHash:               "",
 		Timestamp:                0,
-		TransactionFees:          transactionFee,
-		TransactionAmount:        transactionRaw.Value,
-		InternalTransactionCount: 0,
-		FailedTransactionCount:   uint32(failedTransationCount),
+		TransactionFees:          transactionFee,                // Adds in loader
+		TransactionAmount:        transactionRaw.Value,          // Adds in loader
+		InternalTransactionCount: 0,                             // Adds in loader
+		FailedTransactionCount:   uint32(failedTransationCount), // Adds in loader
 	}
 }
 
@@ -246,9 +241,9 @@ func transformLog(logRaw *models.LogRaw) *models.Block {
 		Hash:                     logRaw.BlockHash,
 		ParentHash:               "",
 		Timestamp:                0,
-		TransactionFees:          0,
-		TransactionAmount:        indexed[3],
-		InternalTransactionCount: 1,
-		FailedTransactionCount:   0,
+		TransactionFees:          0,          // Adds in loader
+		TransactionAmount:        indexed[3], // Adds in loader
+		InternalTransactionCount: 1,          // Adds in loader
+		FailedTransactionCount:   0,          // Adds in loader
 	}
 }
