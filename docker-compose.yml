@@ -44,6 +44,11 @@ x-env: &env
   DB_SSLMODE: "disable"
   DB_TIMEZONE: "UTC"
 
+  # Redis
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: ""
+
 services:
   blocks-api:
     build:

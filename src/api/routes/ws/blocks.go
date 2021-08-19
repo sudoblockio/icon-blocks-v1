@@ -1,12 +1,12 @@
 package ws
 
 import (
-	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
-	"gopkg.in/Shopify/sarama.v1"
 
+	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/kafka"
+	"github.com/geometry-labs/icon-blocks/redis"
 )
 
 // BlocksAddHandlers - add fiber endpoint handlers for websocket connections
@@ -31,13 +31,7 @@ func handlerGetBlocks(broadcaster *kafka.TopicBroadcaster) func(c *websocket.Con
 
 	return func(c *websocket.Conn) {
 
-		// Add broadcaster
-		topicChan := make(chan *sarama.ConsumerMessage)
-		id := broadcaster.AddBroadcastChannel(topicChan)
-		defer func() {
-			// Remove broadcaster
-			broadcaster.RemoveBroadcastChannel(id)
-		}()
+		redisChan := redis.GetRedisClient().GetSubscriberChannel()
 
 		// Read for close
 		clientCloseSig := make(chan bool)
@@ -53,10 +47,10 @@ func handlerGetBlocks(broadcaster *kafka.TopicBroadcaster) func(c *websocket.Con
 
 		for {
 			// Read
-			msg := <-topicChan
+			msg := <-redisChan
 
 			// Broadcast
-			err := c.WriteMessage(websocket.TextMessage, msg.Value)
+			err := c.WriteMessage(websocket.TextMessage, []byte(msg.Payload))
 			if err != nil {
 				break
 			}

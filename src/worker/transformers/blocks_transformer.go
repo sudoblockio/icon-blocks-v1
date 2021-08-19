@@ -12,6 +12,7 @@ import (
 	"github.com/geometry-labs/icon-blocks/crud"
 	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/models"
+	"github.com/geometry-labs/icon-blocks/redis"
 	"github.com/geometry-labs/icon-blocks/worker/utils"
 )
 
@@ -40,14 +41,18 @@ func blocksTransformer() {
 		zap.S().Panic("Blocks Worker: no ", producerTopicName, " topic found in PRODUCER_TOPICS=", config.Config.ConsumerTopics)
 	}
 
+	// Input channels
 	consumerTopicChanBlocks := make(chan *sarama.ConsumerMessage)
 	consumerTopicChanTransactions := make(chan *sarama.ConsumerMessage)
 	consumerTopicChanLogs := make(chan *sarama.ConsumerMessage)
+
+	// Output channels
 	producerTopicChan := kafka.KafkaTopicProducers[producerTopicName].TopicChan
 	blockLoaderChan := crud.GetBlockModel().WriteChan
 	blockCountLoaderChan := crud.GetBlockCountModel().WriteChan
+	redisClient := redis.GetRedisClient()
 
-	// Register consumer channel
+	// Register Input channel
 	broadcasterOutputChanIDBlocks := kafka.Broadcasters[consumerTopicNameBlocks].AddBroadcastChannel(consumerTopicChanBlocks)
 	defer func() {
 		kafka.Broadcasters[consumerTopicNameBlocks].RemoveBroadcastChannel(broadcasterOutputChanIDBlocks)
@@ -84,6 +89,10 @@ func blocksTransformer() {
 				Id:    1, // Only one row
 			}
 			blockCountLoaderChan <- blockCount
+
+			// Push to redis
+			blockJSON, _ := convertBlockToJSON(block)
+			redisClient.Publish(blockJSON)
 		case consumerTopicMsg = <-consumerTopicChanTransactions:
 			// Transaction message from ETL
 			// Regular transactions
@@ -150,6 +159,15 @@ func convertBytesToLogRawProtoBuf(value []byte) (*models.LogRaw, error) {
 		zap.S().Error("Error: ", err.Error())
 	}
 	return &log, err
+}
+
+func convertBlockToJSON(block *models.Block) ([]byte, error) {
+	data, err := json.Marshal(block)
+	if err != nil {
+		zap.S().Error("ConvertBlockToBytes ERROR:", err.Error())
+	}
+
+	return data, err
 }
 
 func transformBlock(blockRaw *models.BlockRaw) *models.Block {
