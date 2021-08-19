@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   etl:
-    image: icon-etl:${ICON_ETL_TAG:-latest}
+    image: geometrylabs/iconetl:${ICON_ETL_TAG:-latest}
     command: [
       "stream",
       # "-s", "34000000",
