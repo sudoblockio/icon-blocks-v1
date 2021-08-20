@@ -49,8 +49,6 @@ func StartWorkerConsumers() {
 	consumerTopics := config.Config.ConsumerTopics
 	consumerGroup := config.Config.ConsumerGroup
 
-	zap.S().Info("Start Consumer Group: kafkaBroker=", kafkaBroker, " consumerTopics=", consumerTopics, " consumerGroup=", consumerGroup)
-
 	for _, t := range consumerTopics {
 		// Starts go routine
 		newBroadcaster(t, nil)
@@ -62,8 +60,9 @@ func StartWorkerConsumers() {
 		}
 
 		// One routine per topic
-		zap.S().Debug("Start Consumers: Starting ", t, " consumer...")
 		go topicConsumer.consumeGroup(consumerGroup)
+
+		zap.S().Info("Start Consumer: kafkaBroker=", kafkaBroker, " consumerTopics=", t, " consumerGroup=", consumerGroup)
 	}
 }
 
@@ -87,7 +86,7 @@ func (k *kafkaTopicConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, clai
 			continue
 		}
 
-		zap.S().Info("New Kafka Consumer Group Message: offset=", topicMsg.Offset, " key=", string(topicMsg.Key))
+		zap.S().Debug("New Kafka Consumer Group Message: offset=", topicMsg.Offset, " key=", string(topicMsg.Key))
 
 		// Commit offset
 		sess.MarkMessage(topicMsg, "")
@@ -163,7 +162,7 @@ func (k *kafkaTopicConsumer) consumeTopic() {
 		zap.S().Panic("KAFKA CONSUMER NEWCONSUMER PANIC: ", err.Error())
 	}
 
-	zap.S().Info("Kakfa Consumer: Broker connection established")
+	zap.S().Debug("Kakfa Consumer: Broker connection established")
 	defer func() {
 		if err := consumer.Close(); err != nil {
 			zap.S().Warn("KAFKA CONSUMER CLOSE: ", err.Error())

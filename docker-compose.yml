@@ -19,7 +19,7 @@ x-env: &env
   HEALTH_POLLING_INTERVAL: "60"
 
   # Logging
-  LOG_LEVEL: "INFO"
+  LOG_LEVEL: "DEBUG"
   LOG_TO_FILE: "false"
   LOG_FILE_NAME: "blocks.log"
   LOG_FORMAT: "string"
@@ -48,6 +48,9 @@ x-env: &env
   REDIS_HOST: "redis"
   REDIS_PORT: "6379"
   REDIS_PASSWORD: ""
+
+  # GORM
+  GORM_SILENT_LOGGING: "false"
 
 services:
   blocks-api:

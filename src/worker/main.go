@@ -37,6 +37,8 @@ func main() {
 	// Start transformers
 	// 2
 	transformers.StartBlocksTransformer()
+	transformers.StartTransactionsTransformer()
+	transformers.StartLogsTransformer()
 
 	global.WaitShutdownSig()
 }

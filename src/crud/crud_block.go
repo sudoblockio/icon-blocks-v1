@@ -1,6 +1,7 @@
 package crud
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
@@ -150,10 +151,9 @@ func (m *BlockModel) SelectOne(
 ) (models.Block, error) {
 	db := m.db
 
-	// Height
-	if number != 0 {
-		db = db.Where("number = ?", number)
-	}
+	db = db.Order("number desc")
+
+	db = db.Where("number = ?", number)
 
 	block := models.Block{}
 	db = db.First(&block)
@@ -166,6 +166,8 @@ func (m *BlockModel) UpdateOne(
 	block *models.Block,
 ) error {
 	db := m.db
+
+	db = db.Order("number desc")
 
 	db = db.Where("number = ?", block.Number)
 
@@ -186,7 +188,7 @@ func StartBlockLoader() {
 			var sumBlock *models.Block
 
 			// Select
-			currentBlock, err := GetBlockModel().SelectOne(newBlock.Number)
+			curBlock, err := GetBlockModel().SelectOne(newBlock.Number)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// No entry; Load block to database
 				GetBlockModel().Insert(newBlock)
@@ -203,13 +205,13 @@ func StartBlockLoader() {
 
 				if newBlock.Type == "block" {
 					// New entry has all feilds
-					sumBlock = createSumBlock(newBlock, &currentBlock)
-				} else if currentBlock.Type == "block" {
+					sumBlock = createSumBlock(newBlock, &curBlock)
+				} else if curBlock.Type == "block" {
 					// Current entry has all fields
-					sumBlock = createSumBlock(&currentBlock, newBlock)
+					sumBlock = createSumBlock(&curBlock, newBlock)
 				} else {
 					// No entries have all fields
-					sumBlock = createSumBlock(newBlock, &currentBlock)
+					sumBlock = createSumBlock(newBlock, &curBlock)
 				}
 
 				// Update current entry
@@ -250,6 +252,18 @@ func StartBlockLoader() {
 					break
 				} else {
 					// Wait
+
+					// DEBUG
+					newBlockJSON, _ := json.Marshal(newBlock)
+					curBlockJSON, _ := json.Marshal(curBlock)
+					sumBlockJSON, _ := json.Marshal(sumBlock)
+					checkSumBlockJSON, _ := json.Marshal(checkSumBlock)
+
+					zap.S().Debug("newBlock: ", string(newBlockJSON))
+					zap.S().Debug("curBlock: ", string(curBlockJSON))
+					zap.S().Debug("sumBlock: ", string(sumBlockJSON))
+					zap.S().Debug("cheBlock: ", string(checkSumBlockJSON))
+
 					zap.S().Warn("Models did not match")
 					zap.S().Warn("Waiting 100ms...")
 					time.Sleep(100 * time.Millisecond)

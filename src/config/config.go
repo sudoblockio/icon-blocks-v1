@@ -61,6 +61,9 @@ type configType struct {
 	RedisPort     string `envconfig:"REDIS_PORT" required:"false" default:"6380"`
 	RedisPassword string `envconfig:"REDIS_PASSWORD" required:"false" default:""`
 	RedisChannel  string `envconfig:"REDIS_CHANNEL" required:"false" default:"blocks"`
+
+	// GORM
+	GormSilentLogging bool `envconfig:"GORM_SILENT_LOGGING" required:"false" default:"false"`
 }
 
 // Config - runtime config struct

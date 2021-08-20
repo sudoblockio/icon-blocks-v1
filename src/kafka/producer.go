@@ -24,7 +24,7 @@ func StartProducers() {
 	kafkaBrokerURL := config.Config.KafkaBrokerURL
 	producerTopics := config.Config.ProducerTopics
 
-	zap.S().Info("Start Producer: kafkaBrokerURL=", kafkaBrokerURL, " producerTopics=", producerTopics)
+	zap.S().Debug("Start Producer: kafkaBrokerURL=", kafkaBrokerURL, " producerTopics=", producerTopics)
 
 	for _, t := range producerTopics {
 		// Todo: parameterize schema
@@ -34,7 +34,7 @@ func StartProducers() {
 			zap.S().Error(fmt.Sprintf("Error in registering schema: %s for topic: %s", schema, t))
 			continue
 		}
-		zap.S().Info(fmt.Sprintf("Registered schema: %s for topic: %s", schema, t))
+		zap.S().Debug(fmt.Sprintf("Registered schema: %s for topic: %s", schema, t))
 
 		KafkaTopicProducers[t] = &kafkaTopicProducer{
 			kafkaBrokerURL,
@@ -54,9 +54,9 @@ func (k *kafkaTopicProducer) produceTopic() {
 
 	producer, err := getProducer(k, saramaConfig)
 	if err != nil {
-		zap.S().Info("KAFKA PRODUCER NEWSYNCPRODUCER: Finally Connection cannot be established")
+		zap.S().Debug("KAFKA PRODUCER NEWSYNCPRODUCER: Finally Connection cannot be established")
 	} else {
-		zap.S().Info("KAFKA PRODUCER NEWSYNCPRODUCER: Finally Connection established")
+		zap.S().Debug("KAFKA PRODUCER NEWSYNCPRODUCER: Finally Connection established")
 	}
 	defer func() {
 		if err := producer.Close(); err != nil {
@@ -82,7 +82,7 @@ func getProducer(k *kafkaTopicProducer, saramaConfig *sarama.Config) (sarama.Syn
 	operation := func() error {
 		pro, err := sarama.NewSyncProducer([]string{k.brokerURL}, saramaConfig)
 		if err != nil {
-			zap.S().Info("KAFKA PRODUCER NEWSYNCPRODUCER PANIC: ", err.Error())
+			zap.S().Debug("KAFKA PRODUCER NEWSYNCPRODUCER PANIC: ", err.Error())
 		} else {
 			producer = pro
 		}
