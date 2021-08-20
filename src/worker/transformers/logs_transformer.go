@@ -108,7 +108,7 @@ func transformLog(logRaw *models.LogRaw) *models.Block {
 		Hash:                     logRaw.BlockHash,
 		ParentHash:               "",
 		Timestamp:                0,
-		TransactionFees:          0,          // Adds in loader
+		TransactionFees:          "0x0",      // Adds in loader
 		TransactionAmount:        indexed[3], // Adds in loader
 		InternalTransactionCount: 1,          // Adds in loader
 		FailedTransactionCount:   0,          // Adds in loader

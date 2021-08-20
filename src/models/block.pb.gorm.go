@@ -35,7 +35,7 @@ type BlockORM struct {
 	Timestamp                uint64
 	TransactionAmount        string
 	TransactionCount         uint32
-	TransactionFees          uint64
+	TransactionFees          string
 	Type                     string
 	Version                  string
 }

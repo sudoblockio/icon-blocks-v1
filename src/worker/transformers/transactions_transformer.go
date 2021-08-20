@@ -1,6 +1,9 @@
 package transformers
 
 import (
+	"fmt"
+	"math/big"
+
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/Shopify/sarama.v1"
@@ -78,10 +81,14 @@ func transformTransaction(transactionRaw *models.TransactionRaw) *models.Block {
 	}
 
 	// Transaction fee calculation
-	transactionFee := transactionRaw.ReceiptStepPrice * transactionRaw.ReceiptStepUsed
+	// Use big int
+	// NOTE: transaction fees, once calculated (price*used) may be too large for postgres
+	receiptStepPriceBig := big.NewInt(int64(transactionRaw.ReceiptStepPrice))
+	receiptStepUsedBig := big.NewInt(int64(transactionRaw.ReceiptStepUsed))
+	transactionFeesBig := receiptStepUsedBig.Mul(receiptStepUsedBig, receiptStepPriceBig)
 
-	// DEBUG
-	zap.S().Debug("HASH: ", transactionRaw.Hash)
+	// to hex
+	transactionFees := fmt.Sprintf("0x%x", transactionFeesBig)
 
 	// Represents a change of state
 	// Linked by BlockNumber
@@ -99,7 +106,7 @@ func transformTransaction(transactionRaw *models.TransactionRaw) *models.Block {
 		Hash:                     transactionRaw.BlockHash,
 		ParentHash:               "",
 		Timestamp:                0,
-		TransactionFees:          transactionFee,                // Adds in loader
+		TransactionFees:          transactionFees,               // Adds in loader
 		TransactionAmount:        transactionRaw.Value,          // Adds in loader
 		InternalTransactionCount: 0,                             // Adds in loader
 		FailedTransactionCount:   uint32(failedTransationCount), // Adds in loader

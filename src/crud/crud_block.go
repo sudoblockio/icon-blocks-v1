@@ -278,7 +278,25 @@ func createSumBlock(curBlock, newBlock *models.Block) *models.Block {
 	//////////////////////
 	// Transaction Fees //
 	//////////////////////
-	transactionFees := curBlock.TransactionFees + newBlock.TransactionFees
+	curTransactionFees := new(big.Int)
+	newTransactionFees := new(big.Int)
+
+	// if empty string, set to 0
+	if len(curBlock.TransactionFees) < 3 {
+		curBlock.TransactionFees = "0x0"
+	}
+	if len(newBlock.TransactionFees) < 3 {
+		newBlock.TransactionFees = "0x0"
+	}
+
+	curTransactionFees.SetString(curBlock.TransactionFees[2:], 16)
+	newTransactionFees.SetString(newBlock.TransactionFees[2:], 16)
+
+	sumTransactionFees := new(big.Int)
+	sumTransactionFees.Add(newTransactionFees, curTransactionFees)
+
+	// Hex string
+	transactionFees := fmt.Sprintf("0x%x", sumTransactionFees)
 
 	////////////////////////
 	// Transaction Amount //
@@ -286,6 +304,7 @@ func createSumBlock(curBlock, newBlock *models.Block) *models.Block {
 	curAmount := new(big.Int)
 	newAmount := new(big.Int)
 
+	// if empty string, set to 0
 	if len(curBlock.TransactionAmount) < 3 {
 		curBlock.TransactionAmount = "0x0"
 	}
@@ -296,7 +315,6 @@ func createSumBlock(curBlock, newBlock *models.Block) *models.Block {
 	curAmount.SetString(curBlock.TransactionAmount[2:], 16)
 	newAmount.SetString(newBlock.TransactionAmount[2:], 16)
 
-	// big.Int
 	sumAmount := new(big.Int)
 	sumAmount.Add(newAmount, curAmount)
 
