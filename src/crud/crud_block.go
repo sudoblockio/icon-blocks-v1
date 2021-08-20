@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cenkalti/backoff/v4"
 	"go.uber.org/zap"
@@ -181,34 +182,80 @@ func StartBlockLoader() {
 			// Read block
 			newBlock := <-GetBlockModel().WriteChan
 
+			// Block to insert/update
+			var sumBlock *models.Block
+
 			// Select
 			currentBlock, err := GetBlockModel().SelectOne(newBlock.Number)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// No entry; Load block to database
 				GetBlockModel().Insert(newBlock)
 
-				zap.S().Debugf("Loader Block: Loaded in postgres table Blocks, Block Number %d", newBlock.Number)
-				continue
+				// Set for checking later
+				sumBlock = newBlock
+
+				zap.S().Debugf("Inserted block number %d", newBlock.Number)
 			} else if err != nil {
 				// Postgres error
-				zap.S().Fatal("Loader Block ERROR: ", err.Error())
-			}
-
-			//  exists; update current entry
-			var sumBlock *models.Block
-			if newBlock.Type == "block" {
-				// New entry has all feilds
-				sumBlock = createSumBlock(newBlock, &currentBlock)
-			} else if currentBlock.Type == "block" {
-				// Current entry has all fields
-				sumBlock = createSumBlock(&currentBlock, newBlock)
+				zap.S().Fatal(err.Error())
 			} else {
-				// No entries have all fields
-				sumBlock = createSumBlock(newBlock, &currentBlock)
+				// Exists; update current entry
+
+				if newBlock.Type == "block" {
+					// New entry has all feilds
+					sumBlock = createSumBlock(newBlock, &currentBlock)
+				} else if currentBlock.Type == "block" {
+					// Current entry has all fields
+					sumBlock = createSumBlock(&currentBlock, newBlock)
+				} else {
+					// No entries have all fields
+					sumBlock = createSumBlock(newBlock, &currentBlock)
+				}
+
+				// Update current entry
+				GetBlockModel().UpdateOne(sumBlock)
 			}
 
-			// Update current entry
-			GetBlockModel().UpdateOne(sumBlock)
+			// Check current state
+			for {
+				// Wait for postgres to set state before processing more messages
+
+				checkSumBlock, err := GetBlockModel().SelectOne(newBlock.Number)
+				if err != nil {
+					zap.S().Warn("State check error: ", err.Error())
+					zap.S().Warn("Waiting 100ms...")
+					time.Sleep(100 * time.Millisecond)
+					continue
+				}
+
+				// check all fields
+				if sumBlock.Signature == checkSumBlock.Signature &&
+					sumBlock.ItemId == checkSumBlock.ItemId &&
+					sumBlock.NextLeader == checkSumBlock.NextLeader &&
+					sumBlock.TransactionCount == checkSumBlock.TransactionCount &&
+					sumBlock.Type == checkSumBlock.Type &&
+					sumBlock.Version == checkSumBlock.Version &&
+					sumBlock.PeerId == checkSumBlock.PeerId &&
+					sumBlock.Number == checkSumBlock.Number &&
+					sumBlock.MerkleRootHash == checkSumBlock.MerkleRootHash &&
+					sumBlock.ItemTimestamp == checkSumBlock.ItemTimestamp &&
+					sumBlock.Hash == checkSumBlock.Hash &&
+					sumBlock.ParentHash == checkSumBlock.ParentHash &&
+					sumBlock.Timestamp == checkSumBlock.Timestamp &&
+					sumBlock.TransactionFees == checkSumBlock.TransactionFees &&
+					sumBlock.TransactionAmount == checkSumBlock.TransactionAmount &&
+					sumBlock.InternalTransactionCount == checkSumBlock.InternalTransactionCount &&
+					sumBlock.FailedTransactionCount == checkSumBlock.FailedTransactionCount {
+					// Success
+					break
+				} else {
+					// Wait
+					zap.S().Warn("Models did not match")
+					zap.S().Warn("Waiting 100ms...")
+					time.Sleep(100 * time.Millisecond)
+					continue
+				}
+			}
 		}
 	}()
 }

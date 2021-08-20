@@ -25,6 +25,9 @@ up:  ## Bring everything up as containers
 down:  ## Take down all the containers
 	docker-compose -f docker-compose.db.yml -f docker-compose.yml down
 
+clean:
+	docker volume rm $(docker volume ls -q)
+
 build-swagger:  ## Build the swagger docs
 	go get github.com/swaggo/swag/cmd/swag; \
     go get github.com/alecthomas/template; \
