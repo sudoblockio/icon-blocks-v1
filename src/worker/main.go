@@ -21,12 +21,8 @@ func main() {
 	// Start Prometheus client
 	metrics.WorkerStart()
 
-	// Start kafka Producer
-	// 3
-	kafka.StartProducers()
-
 	// Start Postgres loaders
-	// 4
+	// 3
 	crud.StartBlockLoader()
 	crud.StartBlockCountLoader()
 
