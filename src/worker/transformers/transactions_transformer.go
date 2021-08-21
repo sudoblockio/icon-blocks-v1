@@ -29,16 +29,10 @@ func transactionsTransformer() {
 	}
 
 	// Input channels
-	consumerTopicChanTransactions := make(chan *sarama.ConsumerMessage)
+	consumerTopicChanTransactions := kafka.KafkaTopicConsumers[consumerTopicNameTransactions].TopicChan
 
 	// Output channels
 	blockLoaderChan := crud.GetBlockModel().WriteChan
-
-	// Register Input channel
-	broadcasterOutputChanIDTransactions := kafka.Broadcasters[consumerTopicNameTransactions].AddBroadcastChannel(consumerTopicChanTransactions)
-	defer func() {
-		kafka.Broadcasters[consumerTopicNameTransactions].RemoveBroadcastChannel(broadcasterOutputChanIDTransactions)
-	}()
 
 	zap.S().Debug("Transactions Transformer: started working")
 	for {

@@ -29,18 +29,12 @@ func blocksTransformer() {
 	}
 
 	// Input channels
-	consumerTopicChanBlocks := make(chan *sarama.ConsumerMessage)
+	consumerTopicChanBlocks := kafka.KafkaTopicConsumers[consumerTopicNameBlocks].TopicChan
 
 	// Output channels
 	blockLoaderChan := crud.GetBlockModel().WriteChan
 	blockCountLoaderChan := crud.GetBlockCountModel().WriteChan
 	redisClient := redis.GetRedisClient()
-
-	// Register Input channel
-	broadcasterOutputChanIDBlocks := kafka.Broadcasters[consumerTopicNameBlocks].AddBroadcastChannel(consumerTopicChanBlocks)
-	defer func() {
-		kafka.Broadcasters[consumerTopicNameBlocks].RemoveBroadcastChannel(broadcasterOutputChanIDBlocks)
-	}()
 
 	zap.S().Debug("Blocks transformer: started working")
 	for {

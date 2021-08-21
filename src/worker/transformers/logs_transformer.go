@@ -29,16 +29,10 @@ func logsTransformer() {
 	}
 
 	// Input channels
-	consumerTopicChanLogs := make(chan *sarama.ConsumerMessage)
+	consumerTopicChanLogs := kafka.KafkaTopicConsumers[consumerTopicNameLogs].TopicChan
 
 	// Output channels
 	blockLoaderChan := crud.GetBlockModel().WriteChan
-
-	// Register Input channel
-	broadcasterOutputChanIDLogs := kafka.Broadcasters[consumerTopicNameLogs].AddBroadcastChannel(consumerTopicChanLogs)
-	defer func() {
-		kafka.Broadcasters[consumerTopicNameLogs].RemoveBroadcastChannel(broadcasterOutputChanIDLogs)
-	}()
 
 	zap.S().Debug("Logs Transformer: started working")
 	for {

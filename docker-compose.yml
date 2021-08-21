@@ -19,7 +19,7 @@ x-env: &env
   HEALTH_POLLING_INTERVAL: "60"
 
   # Logging
-  LOG_LEVEL: "DEBUG"
+  LOG_LEVEL: "INFO"
   LOG_TO_FILE: "false"
   LOG_FILE_NAME: "blocks.log"
   LOG_FORMAT: "string"

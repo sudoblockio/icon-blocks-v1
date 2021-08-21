@@ -77,6 +77,16 @@ func (c *Client) Publish(data []byte) {
 	}
 }
 
-func (c *Client) GetSubscriberChannel() <-chan *redis.Message {
-	return c.pubsub.Channel()
+func (c *Client) StartSubscriber() {
+
+	go func() {
+		subscriberChannel := c.pubsub.Channel()
+		inputChannel := GetBroadcaster().InputChannel
+
+		for {
+			redisMsg := <-subscriberChannel
+
+			inputChannel <- []byte(redisMsg.Payload)
+		}
+	}()
 }
