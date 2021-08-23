@@ -54,7 +54,6 @@ type configType struct {
 
 	// Endpoints
 	MaxPageSize int `envconfig:"MAX_PAGE_SIZE" required:"false" default:"100"`
-	MinPageSize int `envconfig:"MIN_PAGE_SIZE" required:"false" default:"10"`
 
 	// Redis
 	RedisHost                     string `envconfig:"REDIS_HOST" required:"false" default:"redis"`
