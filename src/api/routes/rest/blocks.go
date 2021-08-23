@@ -62,6 +62,12 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 	if params.Limit == 0 {
 		params.Limit = 1
 	}
+
+	// Check params
+	if params.Limit < 1 || params.Limit > 100 {
+		c.Status(422)
+		return c.SendString(`{"error": "limit must be greater than 0 and less than 101"}`)
+	}
 	if params.EndNumber < params.StartNumber {
 		c.Status(422)
 		return c.SendString(`{"error": "end_number is less than start_number"}`)
