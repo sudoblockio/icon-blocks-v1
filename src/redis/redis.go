@@ -26,13 +26,23 @@ func GetRedisClient() *Client {
 		redisClient = new(Client)
 
 		// Init connection
-		redisClient.client = redis.NewClient(&redis.Options{
-			Addr:     addr,
-			Password: config.Config.RedisPassword,
-			DB:       0,
-		})
-		if redisClient == nil {
-			zap.S().Fatal("RedisClient: Unadle to create to redis client")
+		if config.Config.RedisSentinelClientMode == false {
+			// Use default client
+			redisClient.client = redis.NewClient(&redis.Options{
+				Addr:     addr,
+				Password: config.Config.RedisPassword,
+				DB:       0,
+			})
+		} else {
+			// Use sentinel client
+			redisClient.client = redis.NewFailoverClient(&redis.FailoverOptions{
+				MasterName:    config.Config.RedisSentinelClientMasterName,
+				SentinelAddrs: []string{addr},
+			})
+		}
+
+		if redisClient.client == nil {
+			zap.S().Fatal("RedisClient: Unable to create to redis client")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

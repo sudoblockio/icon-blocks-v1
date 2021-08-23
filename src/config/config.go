@@ -57,10 +57,12 @@ type configType struct {
 	MinPageSize int `envconfig:"MIN_PAGE_SIZE" required:"false" default:"10"`
 
 	// Redis
-	RedisHost     string `envconfig:"REDIS_HOST" required:"false" default:"redis"`
-	RedisPort     string `envconfig:"REDIS_PORT" required:"false" default:"6380"`
-	RedisPassword string `envconfig:"REDIS_PASSWORD" required:"false" default:""`
-	RedisChannel  string `envconfig:"REDIS_CHANNEL" required:"false" default:"blocks"`
+	RedisHost                     string `envconfig:"REDIS_HOST" required:"false" default:"redis"`
+	RedisPort                     string `envconfig:"REDIS_PORT" required:"false" default:"6380"`
+	RedisPassword                 string `envconfig:"REDIS_PASSWORD" required:"false" default:""`
+	RedisChannel                  string `envconfig:"REDIS_CHANNEL" required:"false" default:"blocks"`
+	RedisSentinelClientMode       bool   `envconfig:"REDIS_SENTINEL_CLIENT_MODE" required:"false" default:"false"`
+	RedisSentinelClientMasterName string `envconfig:"REDIS_SENTINEL_CLIENT_MASTER_NAME" required:"false" default:"master"`
 
 	// GORM
 	GormSilentLogging bool `envconfig:"GORM_SILENT_LOGGING" required:"false" default:"false"`

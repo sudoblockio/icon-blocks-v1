@@ -48,6 +48,9 @@ x-env: &env
   REDIS_HOST: "redis"
   REDIS_PORT: "6379"
   REDIS_PASSWORD: ""
+  REDIS_CHANNEL: "blocks"
+  REDIS_SENTINEL_CLIENT_MODE: "false"
+  REDIS_SENTINEL_CLIENT_MASTER_NAME: "master"
 
   # GORM
   GORM_SILENT_LOGGING: "false"
