@@ -1,35 +1,32 @@
 package main
 
 import (
-	"os"
-	"os/signal"
-	"syscall"
-
-	"go.uber.org/zap"
+	"log"
 
 	"github.com/geometry-labs/icon-blocks/api/healthcheck"
 	"github.com/geometry-labs/icon-blocks/api/routes"
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/global"
-	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/logging"
 	"github.com/geometry-labs/icon-blocks/metrics"
 	_ "github.com/geometry-labs/icon-blocks/models" // for swagger docs
+	"github.com/geometry-labs/icon-blocks/redis"
 )
 
 func main() {
 	config.ReadEnvironment()
 
 	logging.Init()
-	zap.S().Debug("Main: Starting logging with level ", config.Config.LogLevel)
-
-	// Start kafka consumers
-	// Go routines start in function
-	kafka.StartAPIConsumers()
+	log.Printf("Main: Starting logging with level %s", config.Config.LogLevel)
 
 	// Start Prometheus client
 	// Go routine starts in function
 	metrics.APIStart()
+
+	// Start Redis Client
+	// NOTE: redis is used for websockets
+	redis.GetBroadcaster().Start()
+	redis.GetRedisClient().StartSubscriber()
 
 	// Start API server
 	// Go routine starts in function
@@ -39,17 +36,5 @@ func main() {
 	// Go routine starts in function
 	healthcheck.Start()
 
-	//create a notification channel to shutdown
-	sigChan := make(chan os.Signal, 1)
-
-	// Listen for close sig
-	// Register for interupt (Ctrl+C) and SIGTERM (docker)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-sigChan
-		zap.S().Info("Main: Shutting down...")
-		global.ShutdownChan <- 1
-	}()
-
-	<-global.ShutdownChan
+	global.WaitShutdownSig()
 }

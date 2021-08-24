@@ -1,0 +1,15 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+message BlockCount {
+  option (gorm.opts) = {ormable: true};
+
+  // Number of entries in logs table
+  uint64 count = 1;
+
+  // Postgres primary key
+  uint64 id = 2;
+}

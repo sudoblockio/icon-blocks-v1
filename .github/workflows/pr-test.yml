@@ -1,4 +1,7 @@
-name: PR Tests
+name: pr-test
+
+# 1. Runs tests
+# 2. Upload coverage
 
 on:
   pull_request:
@@ -22,15 +25,24 @@ jobs:
         run: docker-compose -f docker-compose.db.yml up -d
 
       - name: Run unit tests
-        run: cd src && go test ./... -v
+        run: cd src && go test -v -covermode=atomic -coverprofile=coverage.out ./...
+
+      - uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.out
+          flags: unit
+          fail_ci_if_error: true
 
       - name: Bring up stack
         run: make up
 
       - name: Run integration tests
-        run: cd tests && go test ./... -v
+        run: cd tests && go test -v -covermode=atomic -coverprofile=coverage.out ./...
 
-      - name: Upload coverage to Codecov
-        run: |
-          make test-coverage
-          bash <(curl -s https://codecov.io/bash)
+      - uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.out
+          flags: integration
+          fail_ci_if_error: true

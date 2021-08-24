@@ -1,12 +1,11 @@
 package ws
 
 import (
-	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
-	"gopkg.in/Shopify/sarama.v1"
 
-	"github.com/geometry-labs/icon-blocks/kafka"
+	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/redis"
 )
 
 // BlocksAddHandlers - add fiber endpoint handlers for websocket connections
@@ -24,50 +23,47 @@ func BlocksAddHandlers(app *fiber.App) {
 		return fiber.ErrUpgradeRequired
 	})
 
-	app.Get(prefix+"/", websocket.New(handlerGetBlocks(kafka.Broadcasters["blocks"])))
+	app.Get(prefix+"/", websocket.New(handlerGetBlocks))
 }
 
-func handlerGetBlocks(broadcaster *kafka.TopicBroadcaster) func(c *websocket.Conn) {
+func handlerGetBlocks(c *websocket.Conn) {
 
-	return func(c *websocket.Conn) {
+	// Add broadcaster
+	msgChan := make(chan []byte)
+	id := redis.GetBroadcaster().AddBroadcastChannel(msgChan)
+	defer func() {
+		// Remove broadcaster
+		redis.GetBroadcaster().RemoveBroadcastChannel(id)
+	}()
 
-		// Add broadcaster
-		topicChan := make(chan *sarama.ConsumerMessage)
-		id := broadcaster.AddBroadcastChannel(topicChan)
-		defer func() {
-			// Remove broadcaster
-			broadcaster.RemoveBroadcastChannel(id)
-		}()
-
-		// Read for close
-		clientCloseSig := make(chan bool)
-		go func() {
-			for {
-				_, _, err := c.ReadMessage()
-				if err != nil {
-					clientCloseSig <- true
-					break
-				}
-			}
-		}()
-
+	// Read for close
+	clientCloseSig := make(chan bool)
+	go func() {
 		for {
-			// Read
-			msg := <-topicChan
-
-			// Broadcast
-			err := c.WriteMessage(websocket.TextMessage, msg.Value)
+			_, _, err := c.ReadMessage()
 			if err != nil {
+				clientCloseSig <- true
 				break
 			}
+		}
+	}()
 
-			// check for client close
-			select {
-			case _ = <-clientCloseSig:
-				break
-			default:
-				continue
-			}
+	for {
+		// Read
+		msg := <-msgChan
+
+		// Broadcast
+		err := c.WriteMessage(websocket.TextMessage, msg)
+		if err != nil {
+			break
+		}
+
+		// check for client close
+		select {
+		case _ = <-clientCloseSig:
+			break
+		default:
+			continue
 		}
 	}
 }

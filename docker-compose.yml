@@ -22,6 +22,7 @@ x-env: &env
   LOG_LEVEL: "INFO"
   LOG_TO_FILE: "false"
   LOG_FILE_NAME: "blocks.log"
+  LOG_FORMAT: "string"
 
   # Kafka
   KAFKA_BROKER_URL: "kafka:9092"
@@ -30,10 +31,12 @@ x-env: &env
 
   # Topics
   CONSUMER_GROUP: "blocks-consumer-group"
-  CONSUMER_TOPICS: "blocks"
-  PRODUCER_TOPICS: "blocks-ws"
   SCHEMA_NAME_TOPICS: "blocks-ws:block"
   SCHEMA_FOLDER_PATH: "/app/schemas/"
+
+  CONSUMER_TOPIC_NAME_BLOCKS: "blocks"
+  CONSUMER_TOPIC_NAME_TRANSACTIONS: "transactions"
+  CONSUMER_TOPIC_NAME_LOGS: "logs"
 
   # DB
   DB_DRIVER: "postgres"
@@ -44,6 +47,20 @@ x-env: &env
   DB_DBNAME: "postgres"
   DB_SSLMODE: "disable"
   DB_TIMEZONE: "UTC"
+
+  # Endpoints
+  MAX_PAGE_SIZE: 100
+
+  # Redis
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: ""
+  REDIS_CHANNEL: "blocks"
+  REDIS_SENTINEL_CLIENT_MODE: "false"
+  REDIS_SENTINEL_CLIENT_MASTER_NAME: "master"
+
+  # GORM
+  GORM_SILENT_LOGGING: "false"
 
 services:
   blocks-api:

@@ -5,17 +5,21 @@ services:
     image: geometrylabs/iconetl:${ICON_ETL_TAG:-latest}
     command: [
       "stream",
-      "-s", "1",
+      # "-s", "34000000",
       "-o", "kafka:9092",
       "--period-seconds", "1",
-      "--values-as-hex", "True",
+      #"--values-as-hex", "True",
       "--provider-uri", "http://34.218.244.40:9000/api/v3",
       "-b", "100",
       "-B", "100",
+      "--kafka-schema-registry-url", "http://schemaregistry:8081",
+      "--kafka-use-schema-registry", "true",
     ]
     restart: on-failure
     depends_on:
       - kafka
+    volumes:
+      - "./volumes/etl/last_synced_block.txt:/icon-etl/last_synced_block.txt"
 
   ############
   # Database #
@@ -27,6 +31,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
     ports:
       - "5432:5432"
+    volumes:
+      - "./volumes/postgres:/var/lib/postgresql"
 
   pgadmin:
     image: dpage/pgadmin4
@@ -76,7 +82,6 @@ services:
   schemaregistry:
     image: confluentinc/cp-schema-registry:${CP_SCHEMA_REGISTRY_TAG:-latest}
     hostname: schemaregistry
-    container_name: schemaregistry
     depends_on:
       - zookeeper
       - kafka
@@ -120,3 +125,14 @@ services:
     networks:
       - default
     restart: always
+
+  #########
+  # Redis #
+  #########
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - "./volumes/redis-data:/var/lib/redis"
+      - "./volumes/redis.conf:/usr/local/etc/redis/redis.conf"

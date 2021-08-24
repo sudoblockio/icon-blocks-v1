@@ -1,4 +1,8 @@
-name: Release to Prod
+name: release
+
+# 1. Run unit and integration tests
+# 2. Push containers to AWS ECR and dockerhub tagged with release
+# 3. Recommit an update to the chart's deployments with the updated build number in the `deployment` branch
 
 on:
   release:
@@ -11,6 +15,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Tag name
+        id: source
+        run: |
+          echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
 
       - name: Bring up DBs
         run: docker-compose -f docker-compose.db.yml up -d
@@ -44,9 +53,9 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr-worker.outputs.registry }}
           ECR_REPOSITORY: icon-blocks-worker
-          IMAGE_TAG: ${{ github.run_number }}
+          IMAGE_TAG: ${{ steps.source.outputs.TAG }}
         run: |
-          docker build --build-arg SERVICE_NAME=worker -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build --target prod --build-arg SERVICE_NAME=worker -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Configure AWS credentials
@@ -64,9 +73,9 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr-api.outputs.registry }}
           ECR_REPOSITORY: icon-blocks-api
-          IMAGE_TAG: ${{ github.run_number }}
+          IMAGE_TAG: ${{ steps.source.outputs.TAG }}
         run: |
-          docker build --build-arg SERVICE_NAME=api -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build --target prod --build-arg SERVICE_NAME=api -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Login to DockerHub
@@ -74,11 +83,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Tag name
-        id: source
-        run: |
-          echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
 
       - name: Build and push
         uses: docker/build-push-action@v2
@@ -106,26 +110,50 @@ jobs:
             geometrylabs/icon-blocks-worker:latest
             geometrylabs/icon-blocks-worker:${{ steps.source.outputs.TAG }}
 
-      - name: Update prod-mainnet deployment values file and re-commit
+      - name: Update dev-mainnet deployment values file (API) and re-commit
         uses: fjogeleit/yaml-update-action@master
         with:
-          valueFile: 'chart/deployments/prod-mainnet/values.test.yaml'
-          propertyPath: 'deployment.image.tag'
+          valueFile: 'chart/deployments/dev-mainnet/values.dev.yaml'
+          propertyPath: 'api.image.tag'
           value: ${{ github.run_number }}
-          branch: main
+          branch: deployment
           targetBranch: main
           createPR: 'false'
-          message: 'Update prod deployment image version to ${{ github.run_number }}'
+          message: 'Update prod deployment (API) image version to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Update prod-sejong deployment values file and re-commit
+      - name: Update dev-mainnet deployment values file (WORKER) and re-commit
         uses: fjogeleit/yaml-update-action@master
         with:
-          valueFile: 'chart/deployments/prod-sejong/values.test.yaml'
-          propertyPath: 'deployment.image.tag'
+          valueFile: 'chart/deployments/dev-mainnet/values.dev.yaml'
+          propertyPath: 'worker.image.tag'
           value: ${{ github.run_number }}
-          branch: main
+          branch: deployment
           targetBranch: main
           createPR: 'false'
-          message: 'Update prod deployment image version to ${{ github.run_number }}'
+          message: 'Update prod deployment (WORKER) image version to ${{ github.run_number }}'
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update dev-mainnet deployment values file (API) and re-commit
+        uses: fjogeleit/yaml-update-action@master
+        with:
+          valueFile: 'chart/deployments/dev-sejong/values.dev.yaml'
+          propertyPath: 'api.image.tag'
+          value: ${{ github.run_number }}
+          branch: deployment
+          targetBranch: main
+          createPR: 'false'
+          message: 'Update prod deployment (API) image version to ${{ github.run_number }}'
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update dev-mainnet deployment values file (WORKER) and re-commit
+        uses: fjogeleit/yaml-update-action@master
+        with:
+          valueFile: 'chart/deployments/dev-sejong/values.dev.yaml'
+          propertyPath: 'worker.image.tag'
+          value: ${{ github.run_number }}
+          branch: deployment
+          targetBranch: main
+          createPR: 'false'
+          message: 'Update prod deployment (WORKER) image version to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}

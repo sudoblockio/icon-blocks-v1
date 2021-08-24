@@ -12,18 +12,14 @@ import (
 )
 
 const (
-	// BlockRawFixturesPath - path to block-raw fixtures
-	BlockRawFixturesPath = "block_raws.json"
+	blockRawFixturesPath = "blocks_raw.json"
 )
 
 // Fixtures - slice of Fixture
 type Fixtures []Fixture
 
 // Fixture - loaded from fixture file
-type Fixture struct {
-	Input    map[string]interface{}
-	Expected map[string]interface{}
-}
+type Fixture map[string]interface{}
 
 func check(e error) {
 	if e != nil {
@@ -31,18 +27,35 @@ func check(e error) {
 	}
 }
 
-// LoadTestFixtures - load fixture into memory
-func LoadTestFixtures(file string) (Fixtures, error) {
+// LoadBlockFixtures - load block fixtures from disk
+func LoadBlockFixtures() []*models.Block {
+	blocks := make([]*models.Block, 0)
+
+	fixtures, err := loadFixtures(blockRawFixturesPath)
+	check(err)
+
+	for _, fixture := range fixtures {
+		blocks = append(blocks, parseFixtureToBlock(fixture))
+	}
+
+	return blocks
+}
+
+func loadFixtures(file string) (Fixtures, error) {
 	var fs Fixtures
+
 	dat, err := ioutil.ReadFile(getFixtureDir() + file)
 	check(err)
 	err = json.Unmarshal(dat, &fs)
+
 	return fs, err
 }
 
 func getFixtureDir() string {
+
 	callDir, _ := os.Getwd()
 	callDirSplit := strings.Split(callDir, "/")
+
 	for i := len(callDirSplit) - 1; i >= 0; i-- {
 		if callDirSplit[i] != "src" {
 			callDirSplit = callDirSplit[:len(callDirSplit)-1]
@@ -50,30 +63,18 @@ func getFixtureDir() string {
 			break
 		}
 	}
+
 	callDirSplit = append(callDirSplit, "fixtures")
 	fixtureDir := strings.Join(callDirSplit, "/")
 	fixtureDir = fixtureDir + "/"
 	zap.S().Info(fixtureDir)
+
 	return fixtureDir
 }
 
-// ReadCurrentDir - read current dir
-func ReadCurrentDir() {
-	file, err := os.Open(".")
-	if err != nil {
-		zap.S().Fatalf("failed opening directory: %s", err)
-	}
-	defer file.Close()
+func parseFixtureToBlock(data map[string]interface{}) *models.Block {
 
-	list, _ := file.Readdirnames(0) // 0 to read all files and folders
-	for _, name := range list {
-		zap.S().Info(name)
-	}
-}
-
-// GetBlock - interface -> models.Block
-func (f *Fixture) GetBlock(data map[string]interface{}) *models.Block {
-	block := models.Block{
+	return &models.Block{
 		Signature:        data["signature"].(string),
 		ItemId:           data["item_id"].(string),
 		NextLeader:       data["next_leader"].(string),
@@ -88,5 +89,4 @@ func (f *Fixture) GetBlock(data map[string]interface{}) *models.Block {
 		ParentHash:       data["parent_hash"].(string),
 		Timestamp:        uint64(data["timestamp"].(float64)),
 	}
-	return &block
 }

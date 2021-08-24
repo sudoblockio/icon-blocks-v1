@@ -1,5 +1,3 @@
-//+build unit
-
 package kafka
 
 import (
@@ -32,19 +30,19 @@ func TestKafkaTopicProducer(t *testing.T) {
 		"ProduceRequest": sarama.NewMockProduceResponse(t),
 	})
 
-	kafkaTopicProducers[topicName] = &kafkaTopicProducer{
+	KafkaTopicProducers[topicName] = &kafkaTopicProducer{
 		mockBroker.Addr(),
 		topicName,
 		make(chan *sarama.ProducerMessage),
 	}
 
-	go kafkaTopicProducers[topicName].produceTopic()
+	go KafkaTopicProducers[topicName].produceTopic()
 
 	msgKey := "KEY"
 	msgValue := "VALUE"
 	go func() {
 		for {
-			kafkaTopicProducers[topicName].TopicChan <- &sarama.ProducerMessage{
+			KafkaTopicProducers[topicName].TopicChan <- &sarama.ProducerMessage{
 				Topic:     topicName,
 				Partition: -1,
 				Key:       sarama.StringEncoder(msgKey),

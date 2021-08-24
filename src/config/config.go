@@ -22,10 +22,13 @@ type configType struct {
 	MetricsPrefix   string `envconfig:"METRICS_PREFIX" required:"false" default:"/metrics"`
 
 	// Monitoring
-	HealthPollingInterval int    `envconfig:"HEALTH_POLLING_INTERVAL" required:"false" default:"10"`
-	LogLevel              string `envconfig:"LOG_LEVEL" required:"false" default:"INFO"`
-	LogToFile             bool   `envconfig:"LOG_TO_FILE" required:"false" default:"false"`
-	LogFileName           string `envconfig:"LOG_FILE_NAME" required:"false" default:"blocks-service.log"`
+	HealthPollingInterval int `envconfig:"HEALTH_POLLING_INTERVAL" required:"false" default:"10"`
+
+	// Logging
+	LogLevel    string `envconfig:"LOG_LEVEL" required:"false" default:"INFO"`
+	LogToFile   bool   `envconfig:"LOG_TO_FILE" required:"false" default:"false"`
+	LogFileName string `envconfig:"LOG_FILE_NAME" required:"false" default:"blocks-service.log"`
+	LogFormat   string `envconfig:"LOG_FORMAT" required:"false" default:"json"`
 
 	// Kafka
 	KafkaBrokerURL    string `envconfig:"KAFKA_BROKER_URL" required:"false" default:"kafka:9092"`
@@ -33,11 +36,13 @@ type configType struct {
 	KafkaGroupID      string `envconfig:"KAFKA_GROUP_ID" required:"false" default:"blocks-service"`
 
 	// Topics
-	ConsumerGroup    string            `envconfig:"CONSUMER_GROUP" required:"false" default:"blocks-consumer-group"`
-	ConsumerTopics   []string          `envconfig:"CONSUMER_TOPICS" required:"false" default:"blocks"`
-	ProducerTopics   []string          `envconfig:"PRODUCER_TOPICS" required:"false" default:"blocks-ws"`
-	SchemaNameTopics map[string]string `envconfig:"SCHEMA_NAME_TOPICS" required:"false" default:"blocks-ws:block"`
-	SchemaFolderPath string            `envconfig:"SCHEMA_FOLDER_PATH" required:"false" default:"/app/schemas/"`
+	ConsumerGroup                 string            `envconfig:"CONSUMER_GROUP" required:"false" default:"blocks-consumer-group"`
+	ConsumerTopicNameBlocks       string            `envconfig:"CONSUMER_TOPIC_NAME_BLOCKS" required:"false" default:"blocks"`
+	ConsumerTopicNameTransactions string            `envconfig:"CONSUMER_TOPIC_NAME_TRANSACTIONS" required:"false" default:"transactions"`
+	ConsumerTopicNameLogs         string            `envconfig:"CONSUMER_TOPIC_NAME_LOGS" required:"false" default:"logs"`
+	ProducerTopics                []string          `envconfig:"CONSUMER_TOPIC_NAME_LOGS" required:"false" default:""`
+	SchemaNameTopics              map[string]string `envconfig:"SCHEMA_NAME_TOPICS" required:"false" default:"blocks-ws:block"`
+	SchemaFolderPath              string            `envconfig:"SCHEMA_FOLDER_PATH" required:"false" default:"/app/schemas/"`
 
 	// DB
 	DbDriver   string `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
@@ -51,7 +56,17 @@ type configType struct {
 
 	// Endpoints
 	MaxPageSize int `envconfig:"MAX_PAGE_SIZE" required:"false" default:"100"`
-	MinPageSize int `envconfig:"MIN_PAGE_SIZE" required:"false" default:"10"`
+
+	// Redis
+	RedisHost                     string `envconfig:"REDIS_HOST" required:"false" default:"redis"`
+	RedisPort                     string `envconfig:"REDIS_PORT" required:"false" default:"6380"`
+	RedisPassword                 string `envconfig:"REDIS_PASSWORD" required:"false" default:""`
+	RedisChannel                  string `envconfig:"REDIS_CHANNEL" required:"false" default:"blocks"`
+	RedisSentinelClientMode       bool   `envconfig:"REDIS_SENTINEL_CLIENT_MODE" required:"false" default:"false"`
+	RedisSentinelClientMasterName string `envconfig:"REDIS_SENTINEL_CLIENT_MASTER_NAME" required:"false" default:"master"`
+
+	// GORM
+	GormSilentLogging bool `envconfig:"GORM_SILENT_LOGGING" required:"false" default:"false"`
 }
 
 // Config - runtime config struct
@@ -63,7 +78,4 @@ func ReadEnvironment() {
 	if err != nil {
 		log.Fatalf("ERROR: envconfig - %s\n", err.Error())
 	}
-
-	//vars, _ := json.Marshal(Config)
-	//log.Printf("Config Vars: " + string(vars))
 }

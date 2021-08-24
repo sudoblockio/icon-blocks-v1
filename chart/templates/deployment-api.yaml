@@ -1,91 +1,132 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Release.Name }}-api
   labels:
 {{ include "labels" . | indent 6 }}
-
 spec:
   selector:
     matchLabels:
 {{ include "selectorLabels" . | indent 6 }}
-  replicas: {{ .Values.worker.replicaCount }}
+  replicas: {{ .Values.api.replicas }}
   template:
     metadata:
-      {{- if .Values.deployment.annotations }}
+      {{- if .Values.api.annotations }}
       annotations:
-{{ tpl .Values.deployment.annotations . | indent 8 }}
+{{ tpl .Values.api.annotations . | indent 8 }}
       {{- end }}
       labels:
 {{ include "labels" . | indent 8 }}
     spec:
+    {{- if .Values.api.affinity }}
+      affinity:
+        {{ tpl .Values.api.affinity . | nindent 8 | trim }}
+    {{- end }}
+    {{- if .Values.api.tolerations }}
+      tolerations:
+        {{ tpl .Values.api.tolerations . | nindent 8 | trim }}
+    {{- end }}
+      {{- if .Values.api.priorityClassName }}
+      priorityClassName: {{ .Values.api.priorityClassName | quote }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}-api
-          image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
-          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.api.internalPort }}
+            - containerPort: {{ .Values.api.internal.port }}
+            - containerPort: {{ .Values.api.health.port }}
           livenessProbe:
             httpGet:
-              path: {{ .Values.worker.healthPrefix }}
-              port: {{ .Values.worker.healthPort }}
+              path: {{ .Values.api.health.prefix }}
+              port: {{ .Values.api.health.port }}
+            initialDelaySeconds: 60
           readinessProbe:
             httpGet:
-              path: {{ .Values.worker.healthPrefix }}
-              port: {{ .Values.worker.healthPort }}
+              path: {{ .Values.api.health.prefix }}
+              port: {{ .Values.api.health.port }}
+            initialDelaySeconds: 60
           env:
             - name: NAME
               value: {{ .Values.networkName }}
             - name: NETWORK_NAME
               value: {{ .Values.networkName }}
             - name: PORT
-              value: {{ .Values.api.internalPort }}
+              value: {{ .Values.api.internal.port | quote }}
             - name: HEALTH_PORT
-              value: {{ .Values.api.healthPort }}
-            - name: REST_PREFIX
-              value: {{ .Values.api.restPrefix }}
+              value: {{ .Values.api.health.port | quote }}
             - name: METRICS_PORT
-              value: {{ .Values.api.metricsPort }}
+              value: {{ .Values.api.metrics.port | quote }}
+            - name: REST_PREFIX
+              value: {{ .Values.api.rest.prefix }}
+            - name: WEBSOCKET_PREFIX
+              value: {{ .Values.api.websocket.prefix }}
             - name: HEALTH_PREFIX
-              value: {{ .Values.api.healthPrefix }}
+              value: {{ .Values.api.health.prefix }}
             - name: METRICS_PREFIX
-              value: {{ .Values.api.metricsPrefix }}
+              value: {{ .Values.api.metrics.prefix }}
+            - name: HEALTH_POLLING_INTERVAL
+              value: {{ .Values.api.health.pollingInterval | quote }}
             - name: LOG_LEVEL
-              value: {{ .Values.api.logLevel }}
+              value: {{ .Values.api.logging.level }}
             - name: LOG_TO_FILE
-              value: {{ .Values.api.logToFile }}
+              value: {{ .Values.api.logging.toFile | quote }}
+            - name: LOG_FILE_NAME
+              value: {{ .Values.api.logging.filename }}
+            - name: LOG_FORMAT
+              value: {{ .Values.api.logging.format }}
             - name: KAFKA_BROKER_URL
               value: {{ .Values.kafka.kafkaBrokerURL }}
             - name: SCHEMA_REGISTRY_URL
               value: {{ .Values.kafka.schemaRegistryURL }}
             - name: KAFKA_GROUP_ID
               value: {{ .Values.kafka.kafkaGroupID }}
-            - name: CONSUMER_TOPICS
-              value: {{ .Values.kafka.consumerTopics }}
-            - name: PRODUCER_TOPICS
-              value: {{ .Values.kafka.producerTopics }}
+            - name: CONSUMER_GROUP
+              value: {{ .Values.kafka.consumerGroup }}
+            - name: CONSUMER_TOPIC_NAME_BLOCKS
+              value: {{ .Values.api.kafka.topics.blocks }}
+            - name: CONSUMER_TOPIC_NAME_TRANSACTIONS
+              value: {{ .Values.api.kafka.topics.transactions }}
+            - name: CONSUMER_TOPIC_NAME_LOGS
+              value: {{ .Values.api.kafka.topics.logs }}
             - name: SCHEMA_NAME_TOPICS
               value: {{ .Values.kafka.schemaNameTopics }}
             - name: DB_DRIVER
-              value: {{ .Values.db.dbDriver }}
+              value: {{ .Values.db.driver }}
             - name: DB_HOST
-              value: {{ .Values.db.dbHost }}
+              value: {{ .Values.db.host }}
             - name: DB_PORT
-              value: {{ .Values.db.dbPort }}
+              value: {{ .Values.db.port | quote }}
             - name: DB_USER
-              value: {{ .Values.api.dbUser }}
+              value: {{ .Values.api.db.user }}
             - name: DB_PASSWORD
-              value: {{ .Values.api.dbPassword }}
+              value: {{ .Values.api.db.password }}
             - name: DB_DBNAME
-              value: {{ .Values.db.dbName }}
+              value: {{ .Values.db.name }}
             - name: DB_SSLMODE
-              value: {{ .Values.db.dbSslmode }}
+              value: {{ .Values.db.sslMode }}
             - name: DB_TIMEZONE
-              value: {{ .Values.db.dbTimezone }}
+              value: {{ .Values.db.timezone }}
+            - name: REDIS_HOST
+              value: {{ .Values.redis.host }}
+            - name: REDIS_PORT
+              value: {{ .Values.redis.port | quote }}
+            - name: REDIS_PASSWORD
+              value: {{ .Values.redis.password }}
+            - name: REDIS_CHANNEL
+              value: {{ .Values.redis.channel }}
+            - name: REDIS_SENTINEL_CLIENT_MODE
+              value: {{ .Values.redis.sentinel.clientMode | quote }}
+            - name: REDIS_SENTINEL_CLIENT_MASTER_NAME
+              value: {{ .Values.redis.sentinel.clientMasterName }}
           resources:
             requests:
-              cpu: {{ .Values.deployment.resources.requests.cpu }}
-              memory: {{ .Values.deployment.resources.requests.memory }}
+              cpu: {{ .Values.api.resources.requests.cpu }}
+              memory: {{ .Values.api.resources.requests.memory }}
             limits:
-              cpu: {{ .Values.deployment.resources.limits.cpu }}
-              memory: {{ .Values.deployment.resources.limits.memory }}
+              cpu: {{ .Values.api.resources.limits.cpu }}
+              memory: {{ .Values.api.resources.limits.memory }}
+      {{- if .Values.api.nodeSelector }}
+      nodeSelector:
+        {{ tpl .Values.api.nodeSelector . | indent 8 | trim }}
+      {{- end }}
