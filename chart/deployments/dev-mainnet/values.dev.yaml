@@ -2,7 +2,7 @@ ingress:
   enabled: false
 api:
   image:
-    tag: '46'
+    tag: '52'
   annotations: |
     "consul.hashicorp.com/connect-inject": "true"
     "consul.hashicorp.com/transparent-proxy": "false"
@@ -21,3 +21,8 @@ worker:
       logs: logs-raw
 db:
   sslMode: require
+
+redis:
+  sentinel:
+    clientMasterName: mymaster
+    clientMode: true
