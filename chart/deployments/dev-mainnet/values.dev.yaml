@@ -24,3 +24,8 @@ worker:
 
 db:
   sslMode: require
+
+redis:
+  sentinel:
+    clientMasterName: mymaster
+    clientMode: true
