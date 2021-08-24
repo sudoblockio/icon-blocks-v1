@@ -1,9 +1,8 @@
 ingress:
   enabled: false
-
 api:
   image:
-    tag: '46'
+    tag: '52'
   annotations: |
     "consul.hashicorp.com/connect-inject": "true"
     "consul.hashicorp.com/transparent-proxy": "false"
@@ -12,7 +11,6 @@ api:
       blocks: blocks-raw
       transactions: transactions-raw
       logs: logs-raw
-
 worker:
   image:
     tag: '46'
@@ -21,6 +19,5 @@ worker:
       blocks: blocks-raw
       transactions: transactions-raw
       logs: logs-raw
-
 db:
   sslMode: require
