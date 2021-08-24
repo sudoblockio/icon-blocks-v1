@@ -28,8 +28,6 @@ func TestEnvironment(t *testing.T) {
 		"KAFKA_BROKER_URL":        "kafka_broker_url",
 		"SCHEMA_REGISTRY_URL":     "schema_registry_url",
 		"KAFKA_GROUP_ID":          "kafka_group_id",
-		"CONSUMER_TOPICS":         "topic_1,topic_2",
-		"PRODUCER_TOPICS":         "topic_1,topic_2,topic_3",
 		"SCHEMA_NAME_TOPICS":      "schema_1:schema_1,schema_2:schema_2",
 	}
 
@@ -56,8 +54,6 @@ func TestEnvironment(t *testing.T) {
 	assert.Equal(envMap["KAFKA_BROKER_URL"], Config.KafkaBrokerURL)
 	assert.Equal(envMap["SCHEMA_REGISTRY_URL"], Config.SchemaRegistryURL)
 	assert.Equal(envMap["KAFKA_GROUP_ID"], Config.KafkaGroupID)
-	assert.Equal(2, len(Config.ConsumerTopics))
-	assert.Equal(3, len(Config.ProducerTopics))
 	assert.Equal("schema_1", Config.SchemaNameTopics["schema_1"])
 	assert.Equal("schema_2", Config.SchemaNameTopics["schema_2"])
 }

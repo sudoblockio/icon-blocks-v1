@@ -34,6 +34,10 @@ x-env: &env
   SCHEMA_NAME_TOPICS: "blocks-ws:block"
   SCHEMA_FOLDER_PATH: "/app/schemas/"
 
+  CONSUMER_TOPIC_NAME_BLOCKS: "blocks"
+  CONSUMER_TOPIC_NAME_TRANSACTIONS: "transactions"
+  CONSUMER_TOPIC_NAME_LOGS: "logs"
+
   # DB
   DB_DRIVER: "postgres"
   DB_HOST: "postgres"
@@ -82,7 +86,6 @@ services:
       - ${BLOCKS_CONTEXT:-.}/src:/app
     environment:
       <<: *env
-      CONSUMER_TOPICS: "blocks-ws"
 
   blocks-worker:
     build:
@@ -106,5 +109,3 @@ services:
       - ${BLOCKS_CONTEXT:-.}/src:/app
     environment:
       <<: *env
-      CONSUMER_TOPICS: "blocks,transactions,logs"
-      PRODUCER_TOPICS: "blocks-ws"

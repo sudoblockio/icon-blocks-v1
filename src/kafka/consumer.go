@@ -20,26 +20,34 @@ var KafkaTopicConsumers map[string]*kafkaTopicConsumer
 
 // StartWorkerConsumers - start consumer goroutines for Worker config
 func StartWorkerConsumers() {
+
+	consumerTopicNameBlocks := config.Config.ConsumerTopicNameBlocks
+	consumerTopicNameTransactions := config.Config.ConsumerTopicNameTransactions
+	consumerTopicNameLogs := config.Config.ConsumerTopicNameLogs
+
+	startKafkaTopicConsumer(consumerTopicNameBlocks)
+	startKafkaTopicConsumer(consumerTopicNameTransactions)
+	startKafkaTopicConsumer(consumerTopicNameLogs)
+}
+
+func startKafkaTopicConsumer(topicName string) {
 	kafkaBroker := config.Config.KafkaBrokerURL
-	consumerTopics := config.Config.ConsumerTopics
 	consumerGroup := config.Config.ConsumerGroup
 
-	// Init KafkaBrokerURL
-	KafkaTopicConsumers = make(map[string]*kafkaTopicConsumer)
-
-	for _, t := range consumerTopics {
-
-		KafkaTopicConsumers[t] = &kafkaTopicConsumer{
-			kafkaBroker,
-			t,
-			make(chan *sarama.ConsumerMessage),
-		}
-
-		// One routine per topic
-		go KafkaTopicConsumers[t].consumeGroup(consumerGroup)
-
-		zap.S().Info("Start Consumer: kafkaBroker=", kafkaBroker, " consumerTopics=", t, " consumerGroup=", consumerGroup)
+	if KafkaTopicConsumers == nil {
+		KafkaTopicConsumers = make(map[string]*kafkaTopicConsumer)
 	}
+
+	KafkaTopicConsumers[topicName] = &kafkaTopicConsumer{
+		kafkaBroker,
+		topicName,
+		make(chan *sarama.ConsumerMessage),
+	}
+
+	// One routine per topic
+	go KafkaTopicConsumers[topicName].consumeGroup(consumerGroup)
+
+	zap.S().Info("Start Consumer: kafkaBroker=", kafkaBroker, " consumerTopics=", topicName, " consumerGroup=", consumerGroup)
 }
 
 // Used internally by Sarama
@@ -80,10 +88,17 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 	saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
 	saramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
 
+	var consumerGroup sarama.ConsumerGroup
 	ctx, cancel := context.WithCancel(context.Background())
-	client, err := sarama.NewConsumerGroup([]string{k.brokerURL}, group, saramaConfig)
-	if err != nil {
-		zap.S().Panic("CONSUME GROUP ERROR: creating consumer group client: ", err.Error())
+	for {
+		consumerGroup, err = sarama.NewConsumerGroup([]string{k.brokerURL}, group, saramaConfig)
+		if err != nil {
+			zap.S().Warn("Creating consumer group consumerGroup err: ", err.Error())
+			zap.S().Info("Retrying in 3 seconds...")
+			time.Sleep(3 * time.Second)
+			continue
+		}
+		break
 	}
 
 	// From example: /sarama/blob/master/examples/consumergroup/main.go
@@ -92,7 +107,7 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 			// `Consume` should be called inside an infinite loop, when a
 			// server-side rebalance happens, the consumer session will need to be
 			// recreated to get the new claims
-			err := client.Consume(ctx, []string{k.topicName}, k)
+			err := consumerGroup.Consume(ctx, []string{k.topicName}, k)
 			if err != nil {
 				zap.S().Warn("CONSUME GROUP ERROR: from consumer: ", err.Error())
 			}
@@ -104,7 +119,7 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 		}
 	}()
 
-	// Waiting, so that client remains alive
+	// Waiting, so that consumerGroup remains alive
 	ch := make(chan int, 1)
 	<-ch
 	cancel()

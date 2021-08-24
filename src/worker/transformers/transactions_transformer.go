@@ -12,7 +12,6 @@ import (
 	"github.com/geometry-labs/icon-blocks/crud"
 	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/models"
-	"github.com/geometry-labs/icon-blocks/worker/utils"
 )
 
 // StartTransactionsTransformer - start block transformer go routine
@@ -21,12 +20,7 @@ func StartTransactionsTransformer() {
 }
 
 func transactionsTransformer() {
-	consumerTopicNameTransactions := "transactions"
-
-	// Check topic names
-	if utils.StringInSlice(consumerTopicNameTransactions, config.Config.ConsumerTopics) == false {
-		zap.S().Panic("No ", consumerTopicNameTransactions, " topic found in CONSUMER_TOPICS=", config.Config.ConsumerTopics)
-	}
+	consumerTopicNameTransactions := config.Config.ConsumerTopicNameTransactions
 
 	// Input channels
 	consumerTopicChanTransactions := kafka.KafkaTopicConsumers[consumerTopicNameTransactions].TopicChan
