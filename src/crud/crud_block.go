@@ -259,10 +259,10 @@ func StartBlockLoader() {
 					sumBlockJSON, _ := json.Marshal(sumBlock)
 					checkSumBlockJSON, _ := json.Marshal(checkSumBlock)
 
-					zap.S().Debug("newBlock: ", string(newBlockJSON))
-					zap.S().Debug("curBlock: ", string(curBlockJSON))
-					zap.S().Debug("sumBlock: ", string(sumBlockJSON))
-					zap.S().Debug("cheBlock: ", string(checkSumBlockJSON))
+					zap.S().Info("newBlock: ", string(newBlockJSON))
+					zap.S().Info("curBlock: ", string(curBlockJSON))
+					zap.S().Info("sumBlock: ", string(sumBlockJSON))
+					zap.S().Info("cheBlock: ", string(checkSumBlockJSON))
 
 					zap.S().Warn("Models did not match")
 					zap.S().Warn("Waiting 100ms...")
