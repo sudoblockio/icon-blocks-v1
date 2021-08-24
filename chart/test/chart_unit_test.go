@@ -19,13 +19,21 @@ func TestIconBlocksUnit(t *testing.T) {
 	}
 
 	// Run RenderTemplate to render the template and capture the output.
-	output := helm.RenderTemplate(t, options, helmChartPath, "deployment-icon-blocks*", []string{"templates/deployment-api.yaml"})
+	apiOutput := helm.RenderTemplate(t, options, helmChartPath, "deployment-icon-blocks*", []string{"templates/deployment-api.yaml"})
+	workerOutput := helm.RenderTemplate(t, options, helmChartPath, "deployment-icon-blocks*", []string{"templates/deployment-worker.yaml"})
 
 	// Now we use kubernetes/client-go library to render the template output into the Pod struct.
-	var pod corev1.Pod
-	helm.UnmarshalK8SYaml(t, output, &pod)
+	var apiPod corev1.Pod
+	helm.UnmarshalK8SYaml(t, apiOutput, &apiPod)
 
-	if pod.TypeMeta.Kind != "Deployment" {
-		t.Fatalf("Failed to render service.")
+	if apiPod.TypeMeta.Kind != "Deployment" {
+		t.Fatalf("Failed to render API service.")
+	}
+
+	var workerPod corev1.Pod
+	helm.UnmarshalK8SYaml(t, workerOutput, &workerPod)
+
+	if workerPod.TypeMeta.Kind != "Deployment" {
+		t.Fatalf("Failed to render worker service.")
 	}
 }
