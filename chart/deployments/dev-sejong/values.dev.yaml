@@ -1,33 +1,26 @@
-networkName: sejong
-deployment:
+ingress:
+  enabled: false
+
+api:
   image:
-    repository: 868027517775.dkr.ecr.us-west-2.amazonaws.com/icon-blocks
-    tag: '45'
-    pullPolicy: IfNotPresent
-  replicaCount: 1
+    tag: '46'
   annotations: |
     "consul.hashicorp.com/connect-inject": "true"
-    "consul.hashicorp.com/connect-service-upstreams": "icon-blocks-db:5432"
-  resources:
-    requests:
-      cpu: '0.25'
-      memory: 256Mi
-    limits:
-      cpu: '1'
-      memory: 1024Mi
-  backendAPIRoot: icon.geometry-dev.net
-autoscaler:
-  enabled: true
-  maxReplicas: 25
-  averageCPU: 50
-service:
-  name: icon-blocks
-  type: ClusterIP
-  externalPort: 80
-  internalPort: 8080
-ingress:
-  enabled: true
-  regionalHost: sejong.icon.us-west-2.aws.geometry-dev.net
-  apexHost: sejong.icon.geometry-dev.net
-  annotations: |
-    "cert-manager.io/cluster-issuer": "letsencrypt"
+    "consul.hashicorp.com/transparent-proxy": "false"
+  kafka:
+    topics:
+      blocks: blocks-raw
+      transactions: transactions-raw
+      logs: logs-raw
+
+worker:
+  image:
+    tag: '46'
+  kafka:
+    topics:
+      blocks: blocks-raw
+      transactions: transactions-raw
+      logs: logs-raw
+
+db:
+  sslMode: require
