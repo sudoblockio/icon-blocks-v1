@@ -106,8 +106,9 @@ jobs:
           value: ${{ github.run_number }}
           branch: deployment-dev
           createPR: 'false'
-          message: 'Update dev deployment (API) image version to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
+          updateFile: true
+          commitChange: false
 
       - name: Update dev-mainnet deployment values file (WORKER) and re-commit
         uses: fjogeleit/yaml-update-action@master
@@ -117,8 +118,9 @@ jobs:
           value: ${{ github.run_number }}
           branch: deployment-dev
           createPR: 'false'
-          message: 'Update dev deployment (WORKER) image version to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
+          updateFile: true
+          commitChange: false
 
       - name: Update dev-mainnet deployment values file (API) and re-commit
         uses: fjogeleit/yaml-update-action@master
@@ -128,8 +130,9 @@ jobs:
           value: ${{ github.run_number }}
           branch: deployment-dev
           createPR: 'false'
-          message: 'Update dev deployment (API) image version to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
+          updateFile: true
+          commitChange: false
 
       - name: Update dev-mainnet deployment values file (WORKER) and re-commit
         uses: fjogeleit/yaml-update-action@master
@@ -139,5 +142,6 @@ jobs:
           value: ${{ github.run_number }}
           branch: deployment-dev
           createPR: 'false'
-          message: 'Update dev deployment (WORKER) image version to ${{ github.run_number }}'
+          message: 'Update dev deployment image versions to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
+          updateFile: true
