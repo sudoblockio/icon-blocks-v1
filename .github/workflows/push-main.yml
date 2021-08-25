@@ -98,6 +98,12 @@ jobs:
           target_branch: deployment-dev
           github_token: ${{ github.token }}
 
+      - name: Checkout dev deployment
+        uses: actions/checkout@v2
+        with:
+          ref: deployment-dev
+          path: deployment-dev
+
       - name: Update dev-mainnet deployment values file (API) and re-commit
         uses: fjogeleit/yaml-update-action@master
         with:
@@ -109,6 +115,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           updateFile: true
           commitChange: false
+          workDir: deployment-dev
 
       - name: Update dev-mainnet deployment values file (WORKER) and re-commit
         uses: fjogeleit/yaml-update-action@master
@@ -121,6 +128,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           updateFile: true
           commitChange: false
+          workDir: deployment-dev
 
       - name: Update dev-mainnet deployment values file (API) and re-commit
         uses: fjogeleit/yaml-update-action@master
@@ -133,6 +141,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           updateFile: true
           commitChange: false
+          workDir: deployment-dev
 
       - name: Update dev-mainnet deployment values file (WORKER) and re-commit
         uses: fjogeleit/yaml-update-action@master
@@ -145,3 +154,4 @@ jobs:
           message: 'Update dev deployment image versions to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
           updateFile: true
+          workDir: deployment-dev
