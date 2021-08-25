@@ -80,11 +80,11 @@ spec:
               value: {{ .Values.kafka.kafkaGroupID }}
             - name: CONSUMER_GROUP
               value: {{ .Values.kafka.consumerGroup }}
-            - name: CONSUMER_TOPIC_NAME_BLOCKS
+            - name: CONSUMER_TOPIC_BLOCKS
               value: {{ .Values.api.kafka.topics.blocks }}
-            - name: CONSUMER_TOPIC_NAME_TRANSACTIONS
+            - name: CONSUMER_TOPIC_TRANSACTIONS
               value: {{ .Values.api.kafka.topics.transactions }}
-            - name: CONSUMER_TOPIC_NAME_LOGS
+            - name: CONSUMER_TOPIC_LOGS
               value: {{ .Values.api.kafka.topics.logs }}
             - name: SCHEMA_NAME_TOPICS
               value: {{ .Values.kafka.schemaNameTopics }}
