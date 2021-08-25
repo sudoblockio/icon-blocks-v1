@@ -125,9 +125,9 @@ jobs:
           value: ${{ github.run_number }}
           branch: deployment-dev
           createPR: 'false'
+          message: 'Update dev deployment (mainnet) image versions to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
           updateFile: true
-          commitChange: false
           workDir: deployment-dev
 
       - name: Update dev-mainnet deployment values file (API) and re-commit
@@ -151,7 +151,7 @@ jobs:
           value: ${{ github.run_number }}
           branch: deployment-dev
           createPR: 'false'
-          message: 'Update dev deployment image versions to ${{ github.run_number }}'
+          message: 'Update dev deployment (sejong) image versions to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
           updateFile: true
           workDir: deployment-dev
