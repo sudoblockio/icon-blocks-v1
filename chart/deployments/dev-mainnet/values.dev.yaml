@@ -2,7 +2,7 @@ ingress:
   enabled: false
 api:
   image:
-    tag: '52'
+    tag: '56'
   annotations: |
     "consul.hashicorp.com/connect-inject": "true"
     "consul.hashicorp.com/transparent-proxy": "false"
@@ -13,7 +13,7 @@ api:
       logs: logs-raw
 worker:
   image:
-    tag: '52'
+    tag: '56'
   kafka:
     topics:
       blocks: blocks-raw
@@ -21,7 +21,6 @@ worker:
       logs: logs-raw
 db:
   sslMode: require
-
 redis:
   sentinel:
     clientMasterName: mymaster
