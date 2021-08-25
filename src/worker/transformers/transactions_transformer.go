@@ -20,7 +20,7 @@ func StartTransactionsTransformer() {
 }
 
 func transactionsTransformer() {
-	consumerTopicNameTransactions := config.Config.ConsumerTopicNameTransactions
+	consumerTopicNameTransactions := config.Config.ConsumerTopicTransactions
 
 	// Input channels
 	consumerTopicChanTransactions := kafka.KafkaTopicConsumers[consumerTopicNameTransactions].TopicChan

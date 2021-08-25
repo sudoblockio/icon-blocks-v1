@@ -36,13 +36,13 @@ type configType struct {
 	KafkaGroupID      string `envconfig:"KAFKA_GROUP_ID" required:"false" default:"blocks-service"`
 
 	// Topics
-	ConsumerGroup                 string            `envconfig:"CONSUMER_GROUP" required:"false" default:"blocks-consumer-group"`
-	ConsumerTopicNameBlocks       string            `envconfig:"CONSUMER_TOPIC_NAME_BLOCKS" required:"false" default:"blocks"`
-	ConsumerTopicNameTransactions string            `envconfig:"CONSUMER_TOPIC_NAME_TRANSACTIONS" required:"false" default:"transactions"`
-	ConsumerTopicNameLogs         string            `envconfig:"CONSUMER_TOPIC_NAME_LOGS" required:"false" default:"logs"`
-	ProducerTopics                []string          `envconfig:"CONSUMER_TOPIC_NAME_LOGS" required:"false" default:""`
-	SchemaNameTopics              map[string]string `envconfig:"SCHEMA_NAME_TOPICS" required:"false" default:"blocks-ws:block"`
-	SchemaFolderPath              string            `envconfig:"SCHEMA_FOLDER_PATH" required:"false" default:"/app/schemas/"`
+	ConsumerGroup             string            `envconfig:"CONSUMER_GROUP" required:"false" default:"blocks-consumer-group"`
+	ConsumerTopicBlocks       string            `envconfig:"CONSUMER_TOPIC_BLOCKS" required:"false" default:"blocks"`
+	ConsumerTopicTransactions string            `envconfig:"CONSUMER_TOPIC_TRANSACTIONS" required:"false" default:"transactions"`
+	ConsumerTopicLogs         string            `envconfig:"CONSUMER_TOPIC_LOGS" required:"false" default:"logs"`
+	ProducerTopics            []string          `envconfig:"CONSUMER_TOPIC_NAME_LOGS" required:"false" default:""`
+	SchemaNameTopics          map[string]string `envconfig:"SCHEMA_NAME_TOPICS" required:"false" default:"blocks-ws:block"`
+	SchemaFolderPath          string            `envconfig:"SCHEMA_FOLDER_PATH" required:"false" default:"/app/schemas/"`
 
 	// DB
 	DbDriver   string `envconfig:"DB_DRIVER" required:"false" default:"postgres"`

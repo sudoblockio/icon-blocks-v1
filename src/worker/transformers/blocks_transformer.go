@@ -20,7 +20,7 @@ func StartBlocksTransformer() {
 }
 
 func blocksTransformer() {
-	consumerTopicNameBlocks := config.Config.ConsumerTopicNameBlocks
+	consumerTopicNameBlocks := config.Config.ConsumerTopicBlocks
 
 	// Input channels
 	consumerTopicChanBlocks := kafka.KafkaTopicConsumers[consumerTopicNameBlocks].TopicChan

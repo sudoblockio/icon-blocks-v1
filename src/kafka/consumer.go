@@ -21,9 +21,9 @@ var KafkaTopicConsumers map[string]*kafkaTopicConsumer
 // StartWorkerConsumers - start consumer goroutines for Worker config
 func StartWorkerConsumers() {
 
-	consumerTopicNameBlocks := config.Config.ConsumerTopicNameBlocks
-	consumerTopicNameTransactions := config.Config.ConsumerTopicNameTransactions
-	consumerTopicNameLogs := config.Config.ConsumerTopicNameLogs
+	consumerTopicNameBlocks := config.Config.ConsumerTopicBlocks
+	consumerTopicNameTransactions := config.Config.ConsumerTopicTransactions
+	consumerTopicNameLogs := config.Config.ConsumerTopicLogs
 
 	startKafkaTopicConsumer(consumerTopicNameBlocks)
 	startKafkaTopicConsumer(consumerTopicNameTransactions)
