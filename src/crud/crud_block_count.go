@@ -1,8 +1,10 @@
 package crud
 
 import (
+	"errors"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cenkalti/backoff/v4"
 	"go.uber.org/zap"
@@ -117,13 +119,44 @@ func StartBlockCountLoader() {
 
 			// Load blockCount to database
 			curCount, err := GetBlockCountModel().Select()
-			if err == nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				// New entry
+				GetBlockCountModel().Insert(blockCount)
+			} else if err == nil {
+				// Update existing entry
 				blockCount.Count = blockCount.Count + curCount.Count
 				GetBlockCountModel().Update(blockCount)
 			} else {
-				GetBlockCountModel().Insert(blockCount)
+				// Postgres error
+				zap.S().Fatal(err.Error())
 			}
 
+			// Check current state
+			for {
+				// Wait for postgres to set state before processing more messages
+
+				checkCount, err := GetBlockCountModel().Select()
+				if err != nil {
+					zap.S().Warn("State check error: ", err.Error())
+					zap.S().Warn("Waiting 100ms...")
+					time.Sleep(100 * time.Millisecond)
+					continue
+				}
+
+				// check all fields
+				if checkCount.Count == blockCount.Count &&
+					checkCount.Id == blockCount.Id {
+					// Success
+					break
+				} else {
+					// Wait
+
+					zap.S().Warn("Models did not match")
+					zap.S().Warn("Waiting 100ms...")
+					time.Sleep(100 * time.Millisecond)
+					continue
+				}
+			}
 		}
 	}()
 }
