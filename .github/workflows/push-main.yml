@@ -95,13 +95,13 @@ jobs:
         with:
           type: now
           from_branch: main
-          target_branch: deployment-dev
+          target_branch: deployment/dev
           github_token: ${{ github.token }}
 
       - name: Checkout dev deployment
         uses: actions/checkout@v2
         with:
-          ref: deployment-dev
+          ref: deployment/dev
           path: deployment-dev
 
       - name: Update dev-mainnet deployment values file (API) and re-commit
@@ -110,7 +110,7 @@ jobs:
           valueFile: 'chart/deployments/dev-mainnet/values.dev.yaml'
           propertyPath: 'api.image.tag'
           value: ${{ github.run_number }}
-          branch: deployment-dev
+          branch: deployment/dev
           createPR: 'false'
           token: ${{ secrets.GITHUB_TOKEN }}
           updateFile: true
@@ -123,7 +123,7 @@ jobs:
           valueFile: 'chart/deployments/dev-mainnet/values.dev.yaml'
           propertyPath: 'worker.image.tag'
           value: ${{ github.run_number }}
-          branch: deployment-dev
+          branch: deployment/dev
           createPR: 'false'
           message: 'Update dev deployment (mainnet) image versions to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -136,7 +136,7 @@ jobs:
           valueFile: 'chart/deployments/dev-sejong/values.dev.yaml'
           propertyPath: 'api.image.tag'
           value: ${{ github.run_number }}
-          branch: deployment-dev
+          branch: deployment/dev
           createPR: 'false'
           token: ${{ secrets.GITHUB_TOKEN }}
           updateFile: true
@@ -149,7 +149,7 @@ jobs:
           valueFile: 'chart/deployments/dev-sejong/values.dev.yaml'
           propertyPath: 'worker.image.tag'
           value: ${{ github.run_number }}
-          branch: deployment-dev
+          branch: deployment/dev
           createPR: 'false'
           message: 'Update dev deployment (sejong) image versions to ${{ github.run_number }}'
           token: ${{ secrets.GITHUB_TOKEN }}
