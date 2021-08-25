@@ -20,7 +20,7 @@ func StartLogsTransformer() {
 }
 
 func logsTransformer() {
-	consumerTopicNameLogs := config.Config.ConsumerTopicNameLogs
+	consumerTopicNameLogs := config.Config.ConsumerTopicLogs
 
 	// Input channels
 	consumerTopicChanLogs := kafka.KafkaTopicConsumers[consumerTopicNameLogs].TopicChan
