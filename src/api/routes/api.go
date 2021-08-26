@@ -9,6 +9,7 @@ import (
 
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	fiber "github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 
 	_ "github.com/geometry-labs/icon-blocks/api/docs" // import for swagger docs
 	"github.com/geometry-labs/icon-blocks/api/routes/rest"
@@ -25,13 +26,18 @@ func Start() {
 
 	app := fiber.New()
 
+	// Logging middleware
 	app.Use(func(c *fiber.Ctx) error {
-		// logging
 		zap.S().Info(c.Method(), " ", c.Path())
 
 		// Go to next middleware:
 		return c.Next()
 	})
+
+	// CORS Middleware
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: config.Config.CORSAllowOrigins,
+	}))
 
 	// Swagger docs
 	app.Get("/docs/*", swagger.Handler)

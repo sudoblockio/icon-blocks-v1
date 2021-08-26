@@ -21,6 +21,9 @@ type configType struct {
 	HealthPrefix    string `envconfig:"HEALTH_PREFIX" required:"false" default:"/health"`
 	MetricsPrefix   string `envconfig:"METRICS_PREFIX" required:"false" default:"/metrics"`
 
+	// CORS
+	CORSAllowOrigins string `envconfig:"CORS_ALLOW_ORIGINS" required:"false" default:"*"`
+
 	// Monitoring
 	HealthPollingInterval int `envconfig:"HEALTH_POLLING_INTERVAL" required:"false" default:"10"`
 
