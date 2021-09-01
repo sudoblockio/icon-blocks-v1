@@ -8,4 +8,6 @@ message BlockAPI {
   uint32 number = 2;
   string hash = 3;
   uint64 timestamp = 4;
+  string transaction_fees = 5;
+  string transaction_amount = 6;
 }
