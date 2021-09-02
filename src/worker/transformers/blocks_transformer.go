@@ -45,7 +45,7 @@ func blocksTransformer() {
 		}
 
 		// Transform logic
-		block = transformBlock(blockRaw)
+		block = transformBlockRawToBlock(blockRaw)
 
 		// Load block counter to Postgres
 		blockCount := &models.BlockCount{
@@ -55,12 +55,12 @@ func blocksTransformer() {
 		blockCountLoaderChan <- blockCount
 
 		// Push to redis
-		blockJSON, _ := convertBlockToJSON(block)
-		redisClient.Publish(blockJSON)
+		blockWebsocket := transformBlockToBlockWS(block)
+		blockWebsocketJSON, _ := json.Marshal(blockWebsocket)
+		redisClient.Publish(blockWebsocketJSON)
 
 		// Load to Postgres
 		blockLoaderChan <- block
-
 	}
 }
 
@@ -73,16 +73,7 @@ func convertToBlockRawProtoBuf(value []byte) (*models.BlockRaw, error) {
 	return &block, err
 }
 
-func convertBlockToJSON(block *models.Block) ([]byte, error) {
-	data, err := json.Marshal(block)
-	if err != nil {
-		zap.S().Error("ConvertBlockToBytes ERROR:", err.Error())
-	}
-
-	return data, err
-}
-
-func transformBlock(blockRaw *models.BlockRaw) *models.Block {
+func transformBlockRawToBlock(blockRaw *models.BlockRaw) *models.Block {
 
 	return &models.Block{
 		Signature:                blockRaw.Signature,
@@ -102,5 +93,15 @@ func transformBlock(blockRaw *models.BlockRaw) *models.Block {
 		TransactionAmount:        "0x0", // Adds in loader
 		InternalTransactionCount: 0,     // Adds in loader
 		FailedTransactionCount:   0,     // Adds in loader
+	}
+}
+
+func transformBlockToBlockWS(block *models.Block) *models.BlockWebsocket {
+
+	return &models.BlockWebsocket{
+		TransactionCount: block.TransactionCount,
+		Number:           block.Number,
+		Hash:             block.Hash,
+		Timestamp:        block.Timestamp,
 	}
 }
