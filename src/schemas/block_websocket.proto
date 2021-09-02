@@ -1,0 +1,11 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+message BlockWebsocket {
+
+  uint32 number = 1;
+  string hash = 2;
+  uint32 transaction_count = 3;
+  uint64 timestamp = 4;
+}
