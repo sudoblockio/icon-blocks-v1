@@ -94,9 +94,9 @@ spec:
             - name: DB_DRIVER
               value: {{ .Values.db.driver }}
             - name: DB_HOST
-              value: {{ .Values.db.host }}
+              value: {{ .Values.api.db.host }}
             - name: DB_PORT
-              value: {{ .Values.db.port | quote }}
+              value: {{ .Values.api.db.port | quote }}
             - name: DB_USER
               value: {{ .Values.api.db.user }}
             - name: DB_PASSWORD
