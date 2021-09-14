@@ -15,7 +15,6 @@ services:
       "--kafka-schema-registry-url", "http://schemaregistry:8081",
       "--kafka-use-schema-registry", "true",
     ]
-    restart: on-failure
     depends_on:
       - kafka
     volumes:
@@ -124,7 +123,6 @@ services:
       PORT: 9021
     networks:
       - default
-    restart: always
 
   #########
   # Redis #

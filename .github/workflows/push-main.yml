@@ -40,6 +40,15 @@ jobs:
       - name: Check stack
         run: make ps
 
+      - name: Check ETL logs
+        run: docker-compose -f docker-compose.yml -f docker-compose.db.yml logs --tail=100 etl
+
+      - name: Check worker logs
+        run: docker-compose -f docker-compose.yml -f docker-compose.db.yml logs --tail=100 blocks-worker
+
+      - name: Check api logs
+        run: docker-compose -f docker-compose.yml -f docker-compose.db.yml logs --tail=100 blocks-api
+
       - name: Run integration tests
         run: cd tests && go test -v -covermode=atomic -coverprofile=coverage.out ./...
 
