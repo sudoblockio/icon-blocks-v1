@@ -1,0 +1,14 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+message BlockInternalTransaction {
+  option (gorm.opts) = {ormable: true};
+
+  uint64 number = 1 [(gorm.field).tag = {index: "block_internal_transaction_idx_number"}];
+  string transaction_hash = 2 [(gorm.field).tag = {primary_key: true}];
+  uint32 log_index = 3 [(gorm.field).tag = {primary_key: true}];
+  string amount = 4;
+}

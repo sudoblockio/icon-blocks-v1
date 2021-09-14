@@ -1,0 +1,12 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+message BlockFailedTransaction {
+  option (gorm.opts) = {ormable: true};
+
+  uint64 number = 1 [(gorm.field).tag = {index: "block_failed_transaction_idx_number"}];
+  string transaction_hash = 2 [(gorm.field).tag = {primary_key: true}];
+}

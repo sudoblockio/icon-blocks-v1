@@ -7,6 +7,7 @@ import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
 message Block {
   option (gorm.opts) = {ormable: true};
 
+  // Base
   string signature = 1;
   string item_id = 2;
   string next_leader = 3;
@@ -14,14 +15,17 @@ message Block {
   string type = 5;
   string version = 6;
   string peer_id = 7 [(gorm.field).tag = {index: "block_idx_peer_id"}];
-  uint32 number = 8 [(gorm.field).tag = {index: "block_idx_number"}];
+  uint32 number = 8 [(gorm.field).tag = {primary_key: true}];
   string merkle_root_hash = 9;
   string item_timestamp = 10;
-  string hash = 11 [(gorm.field).tag = {primary_key: true}];
+  string hash = 11;
   string parent_hash = 12;
-  uint64 timestamp = 13;
-  string transaction_fees = 14;
-  string transaction_amount = 15;
-  uint32 internal_transaction_count = 16;
-  uint32 failed_transaction_count = 17;
+  uint64 timestamp = 13 [(gorm.field).tag = {index: "block_idx_peer_id"}];
+
+  // Enriched from external tables
+  string transaction_fees = 14;             // block_transactions
+  string transaction_amount = 15;           // block_transactions
+  string internal_transaction_amount = 16;  // block_internal_transactions
+  uint32 internal_transaction_count = 17;   // block_internal_transactions
+  uint32 failed_transaction_count = 18;     // block_failed_transactions
 }
