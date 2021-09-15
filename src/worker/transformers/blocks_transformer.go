@@ -2,10 +2,12 @@ package transformers
 
 import (
 	"encoding/json"
+	"errors"
 
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/Shopify/sarama.v1"
+	"gorm.io/gorm"
 
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/crud"
@@ -48,9 +50,14 @@ func blocksTransformer() {
 		block = transformBlockRawToBlock(blockRaw)
 
 		// Push to redis
-		blockWebsocket := transformBlockToBlockWS(block)
-		blockWebsocketJSON, _ := json.Marshal(blockWebsocket)
-		redisClient.Publish(blockWebsocketJSON)
+		// Check if entry block is in blocks table
+		_, err = crud.GetBlockModel().SelectOne(block.Number)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			blockWebsocket := transformBlockToBlockWS(block)
+			blockWebsocketJSON, _ := json.Marshal(blockWebsocket)
+
+			redisClient.Publish(blockWebsocketJSON)
+		}
 
 		// Load to: block_counts
 		blockCount := transformBlockToBlockCount(block)
