@@ -39,6 +39,8 @@ func GetBlockCountModel() *BlockCountModel {
 		if err != nil {
 			zap.S().Fatal("BlockCountModel: Unable migrate postgres table: ", err.Error())
 		}
+
+		StartBlockCountLoader()
 	})
 
 	return blockCountModel

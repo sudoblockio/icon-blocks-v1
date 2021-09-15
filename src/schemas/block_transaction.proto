@@ -7,7 +7,7 @@ import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
 message BlockTransaction {
   option (gorm.opts) = {ormable: true};
 
-  uint64 number = 1 [(gorm.field).tag = {index: "block_internal_transaction_idx_number"}];
+  uint32 number = 1 [(gorm.field).tag = {index: "block_transaction_idx_number"}];
   string transaction_hash = 2 [(gorm.field).tag = {primary_key: true}];
   string amount = 3;
   string fee = 4;

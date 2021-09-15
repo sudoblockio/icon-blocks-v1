@@ -41,6 +41,8 @@ func GetBlockModel() *BlockModel {
 		if err != nil {
 			zap.S().Fatal("BlockModel: Unable migrate postgres table: ", err.Error())
 		}
+
+		StartBlockLoader()
 	})
 
 	return blockModel

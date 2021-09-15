@@ -23,7 +23,7 @@ var _ = math.Inf
 type BlockInternalTransactionORM struct {
 	Amount          string
 	LogIndex        uint32 `gorm:"primary_key"`
-	Number          uint64 `gorm:"index:block_internal_transaction_idx_number"`
+	Number          uint32 `gorm:"index:block_internal_transaction_idx_number"`
 	TransactionHash string `gorm:"primary_key"`
 }
 

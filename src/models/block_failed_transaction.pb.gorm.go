@@ -21,7 +21,7 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 type BlockFailedTransactionORM struct {
-	Number          uint64 `gorm:"index:block_failed_transaction_idx_number"`
+	Number          uint32 `gorm:"index:block_failed_transaction_idx_number"`
 	TransactionHash string `gorm:"primary_key"`
 }
 
