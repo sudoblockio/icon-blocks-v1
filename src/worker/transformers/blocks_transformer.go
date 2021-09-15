@@ -47,19 +47,16 @@ func blocksTransformer() {
 		// Transform logic
 		block = transformBlockRawToBlock(blockRaw)
 
-		// Load block counter to Postgres
-		blockCount := &models.BlockCount{
-			Count: 1, // Adds with current
-			Id:    1, // Only one row
-		}
-		blockCountLoaderChan <- blockCount
-
 		// Push to redis
 		blockWebsocket := transformBlockToBlockWS(block)
 		blockWebsocketJSON, _ := json.Marshal(blockWebsocket)
 		redisClient.Publish(blockWebsocketJSON)
 
-		// Load to Postgres
+		// Load to: block_counts
+		blockCount := transformBlockToBlockCount(block)
+		blockCountLoaderChan <- blockCount
+
+		// Load to: blocks
 		blockLoaderChan <- block
 	}
 }
@@ -76,23 +73,24 @@ func convertToBlockRawProtoBuf(value []byte) (*models.BlockRaw, error) {
 func transformBlockRawToBlock(blockRaw *models.BlockRaw) *models.Block {
 
 	return &models.Block{
-		Signature:                blockRaw.Signature,
-		ItemId:                   blockRaw.ItemId,
-		NextLeader:               blockRaw.NextLeader,
-		TransactionCount:         blockRaw.TransactionCount,
-		Type:                     blockRaw.Type,
-		Version:                  blockRaw.Version,
-		PeerId:                   blockRaw.PeerId,
-		Number:                   blockRaw.Number,
-		MerkleRootHash:           blockRaw.MerkleRootHash,
-		ItemTimestamp:            blockRaw.ItemTimestamp,
-		Hash:                     blockRaw.Hash,
-		ParentHash:               blockRaw.ParentHash,
-		Timestamp:                blockRaw.Timestamp,
-		TransactionFees:          "0x0", // Adds in loader
-		TransactionAmount:        "0x0", // Adds in loader
-		InternalTransactionCount: 0,     // Adds in loader
-		FailedTransactionCount:   0,     // Adds in loader
+		Signature:                 blockRaw.Signature,
+		ItemId:                    blockRaw.ItemId,
+		NextLeader:                blockRaw.NextLeader,
+		TransactionCount:          blockRaw.TransactionCount,
+		Type:                      blockRaw.Type,
+		Version:                   blockRaw.Version,
+		PeerId:                    blockRaw.PeerId,
+		Number:                    blockRaw.Number,
+		MerkleRootHash:            blockRaw.MerkleRootHash,
+		ItemTimestamp:             blockRaw.ItemTimestamp,
+		Hash:                      blockRaw.Hash,
+		ParentHash:                blockRaw.ParentHash,
+		Timestamp:                 blockRaw.Timestamp,
+		TransactionFees:           "0x0", // Adds in loader
+		TransactionAmount:         "0x0", // Adds in loader
+		InternalTransactionAmount: "0x0", // Adds in loader
+		InternalTransactionCount:  0,     // Adds in loader
+		FailedTransactionCount:    0,     // Adds in loader
 	}
 }
 
@@ -103,5 +101,12 @@ func transformBlockToBlockWS(block *models.Block) *models.BlockWebsocket {
 		Number:           block.Number,
 		Hash:             block.Hash,
 		Timestamp:        block.Timestamp,
+	}
+}
+
+func transformBlockToBlockCount(block *models.Block) *models.BlockCount {
+
+	return &models.BlockCount{
+		Number: block.Number,
 	}
 }

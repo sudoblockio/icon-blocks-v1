@@ -7,7 +7,7 @@ import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
 message BlockCount {
   option (gorm.opts) = {ormable: true};
 
-  uint64 number = 1 [(gorm.field).tag = {index: "block_count_idx_number"}];
+  uint32 number = 1 [(gorm.field).tag = {index: "block_count_idx_number", unique: true}];
 
   // Postgres primary key
   // NOTE: also use as count

@@ -9,7 +9,6 @@ import (
 
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/crud"
-	"github.com/geometry-labs/icon-blocks/models"
 )
 
 // BlocksAddHandlers - add blocks endpoints to fiber router
@@ -90,7 +89,7 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 		c.Status(500)
 		return c.SendString(`{"error": "could retrieve blocks"}`)
 	}
-	if len(blocks) == 0 {
+	if len(*blocks) == 0 {
 		// No Content
 		c.Status(204)
 	}
@@ -102,15 +101,13 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 	} else {
 		// No filters given, count all
 		// Total count in the block_counts table
-		counter, err := crud.GetBlockCountModel().Select()
+		counter, err := crud.GetBlockCountModel().SelectLargestCount()
 		if err != nil {
-			counter = models.BlockCount{
-				Count: 0,
-				Id:    0,
-			}
+			counter = 0
 			zap.S().Warn("Could not retrieve block count: ", err.Error())
 		}
-		c.Append("X-TOTAL-COUNT", strconv.FormatUint(counter.Count, 10))
+
+		c.Append("X-TOTAL-COUNT", strconv.FormatUint(uint64(counter), 10))
 	}
 
 	body, _ := json.Marshal(&blocks)

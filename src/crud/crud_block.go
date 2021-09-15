@@ -1,13 +1,9 @@
 package crud
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
-	"math/big"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/cenkalti/backoff/v4"
 	"go.uber.org/zap"
@@ -83,7 +79,7 @@ func (m *BlockModel) SelectMany(
 	endNumber uint32,
 	hash string,
 	createdBy string,
-) ([]models.BlockAPI, int64, error) {
+) (*[]models.BlockAPI, int64, error) {
 	db := m.db
 	computeCount := false
 
@@ -139,8 +135,8 @@ func (m *BlockModel) SelectMany(
 		db = db.Offset(skip)
 	}
 
-	blocks := []models.BlockAPI{}
-	db = db.Find(&blocks)
+	blocks := &[]models.BlockAPI{}
+	db = db.Find(blocks)
 
 	return blocks, count, db.Error
 }
@@ -148,15 +144,15 @@ func (m *BlockModel) SelectMany(
 // SelectOne - select from blocks table
 func (m *BlockModel) SelectOne(
 	number uint32,
-) (models.Block, error) {
+) (*models.Block, error) {
 	db := m.db
 
 	db = db.Order("number desc")
 
 	db = db.Where("number = ?", number)
 
-	block := models.Block{}
-	db = db.First(&block)
+	block := &models.Block{}
+	db = db.First(block)
 
 	return block, db.Error
 }
@@ -171,7 +167,7 @@ func (m *BlockModel) UpdateOne(
 
 	db = db.Where("number = ?", block.Number)
 
-	db = db.Save(&block)
+	db = db.Save(block)
 
 	return db.Error
 }
@@ -184,172 +180,19 @@ func StartBlockLoader() {
 			// Read block
 			newBlock := <-GetBlockModel().WriteChan
 
-			// Block to insert/update
-			var sumBlock *models.Block
-
-			// Select
-			curBlock, err := GetBlockModel().SelectOne(newBlock.Number)
+			// Update/Insert
+			_, err := GetBlockModel().SelectOne(newBlock.Number)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// No entry; Load block to database
+				// Insert
 				GetBlockModel().Insert(newBlock)
-
-				// Set for checking later
-				sumBlock = newBlock
-
-				zap.S().Debugf("Inserted block number %d", newBlock.Number)
-			} else if err != nil {
-				// Postgres error
-				zap.S().Fatal(err.Error())
+			} else if err == nil {
+				// Update
+				GetBlockModel().UpdateOne(newBlock)
+				zap.S().Debug("Loader=Block, Number=", newBlock.Number, " - Updated")
 			} else {
-				// Exists; update current entry
-
-				if newBlock.Type == "block" {
-					// New entry has all feilds
-					sumBlock = createSumBlock(newBlock, &curBlock)
-				} else if curBlock.Type == "block" {
-					// Current entry has all fields
-					sumBlock = createSumBlock(&curBlock, newBlock)
-				} else {
-					// No entries have all fields
-					sumBlock = createSumBlock(newBlock, &curBlock)
-				}
-
-				// Update current entry
-				GetBlockModel().UpdateOne(sumBlock)
-			}
-
-			// Check current state
-			for {
-				// Wait for postgres to set state before processing more messages
-
-				checkSumBlock, err := GetBlockModel().SelectOne(newBlock.Number)
-				if err != nil {
-					zap.S().Warn("State check error: ", err.Error())
-					zap.S().Warn("Waiting 100ms...")
-					time.Sleep(100 * time.Millisecond)
-					continue
-				}
-
-				// check all fields
-				if sumBlock.Signature == checkSumBlock.Signature &&
-					sumBlock.ItemId == checkSumBlock.ItemId &&
-					sumBlock.NextLeader == checkSumBlock.NextLeader &&
-					sumBlock.TransactionCount == checkSumBlock.TransactionCount &&
-					sumBlock.Type == checkSumBlock.Type &&
-					sumBlock.Version == checkSumBlock.Version &&
-					sumBlock.PeerId == checkSumBlock.PeerId &&
-					sumBlock.Number == checkSumBlock.Number &&
-					sumBlock.MerkleRootHash == checkSumBlock.MerkleRootHash &&
-					sumBlock.ItemTimestamp == checkSumBlock.ItemTimestamp &&
-					sumBlock.Hash == checkSumBlock.Hash &&
-					sumBlock.ParentHash == checkSumBlock.ParentHash &&
-					sumBlock.Timestamp == checkSumBlock.Timestamp &&
-					sumBlock.TransactionFees == checkSumBlock.TransactionFees &&
-					sumBlock.TransactionAmount == checkSumBlock.TransactionAmount &&
-					sumBlock.InternalTransactionCount == checkSumBlock.InternalTransactionCount &&
-					sumBlock.FailedTransactionCount == checkSumBlock.FailedTransactionCount {
-					// Success
-					break
-				} else {
-					// Wait
-
-					// DEBUG
-					newBlockJSON, _ := json.Marshal(newBlock)
-					curBlockJSON, _ := json.Marshal(curBlock)
-					sumBlockJSON, _ := json.Marshal(sumBlock)
-					checkSumBlockJSON, _ := json.Marshal(checkSumBlock)
-
-					zap.S().Info("newBlock: ", string(newBlockJSON))
-					zap.S().Info("curBlock: ", string(curBlockJSON))
-					zap.S().Info("sumBlock: ", string(sumBlockJSON))
-					zap.S().Info("cheBlock: ", string(checkSumBlockJSON))
-
-					zap.S().Warn("Models did not match")
-					zap.S().Warn("Waiting 100ms...")
-					time.Sleep(100 * time.Millisecond)
-					continue
-				}
+				// Postgress error
+				zap.S().Fatal(err.Error())
 			}
 		}
 	}()
-}
-
-func createSumBlock(curBlock, newBlock *models.Block) *models.Block {
-	//////////////////////
-	// Transaction Fees //
-	//////////////////////
-	curTransactionFees := new(big.Int)
-	newTransactionFees := new(big.Int)
-
-	// if empty string, set to 0
-	if len(curBlock.TransactionFees) < 3 {
-		curBlock.TransactionFees = "0x0"
-	}
-	if len(newBlock.TransactionFees) < 3 {
-		newBlock.TransactionFees = "0x0"
-	}
-
-	curTransactionFees.SetString(curBlock.TransactionFees[2:], 16)
-	newTransactionFees.SetString(newBlock.TransactionFees[2:], 16)
-
-	sumTransactionFees := new(big.Int)
-	sumTransactionFees.Add(newTransactionFees, curTransactionFees)
-
-	// Hex string
-	transactionFees := fmt.Sprintf("0x%x", sumTransactionFees)
-
-	////////////////////////
-	// Transaction Amount //
-	////////////////////////
-	curAmount := new(big.Int)
-	newAmount := new(big.Int)
-
-	// if empty string, set to 0
-	if len(curBlock.TransactionAmount) < 3 {
-		curBlock.TransactionAmount = "0x0"
-	}
-	if len(newBlock.TransactionAmount) < 3 {
-		newBlock.TransactionAmount = "0x0"
-	}
-
-	curAmount.SetString(curBlock.TransactionAmount[2:], 16)
-	newAmount.SetString(newBlock.TransactionAmount[2:], 16)
-
-	sumAmount := new(big.Int)
-	sumAmount.Add(newAmount, curAmount)
-
-	// Hex string
-	transactionAmount := fmt.Sprintf("0x%x", sumAmount)
-
-	//////////////////////////
-	// Internal Transaction //
-	//////////////////////////
-	internalTransactionCount := curBlock.InternalTransactionCount + newBlock.InternalTransactionCount
-
-	//////////////////////////////
-	// Failed Transaction Count //
-	//////////////////////////////
-	failedTransactionCount := curBlock.FailedTransactionCount + newBlock.FailedTransactionCount
-
-	sumBlock := &models.Block{
-		Signature:                curBlock.Signature,
-		ItemId:                   curBlock.ItemId,
-		NextLeader:               curBlock.NextLeader,
-		TransactionCount:         curBlock.TransactionCount,
-		Type:                     curBlock.Type,
-		Version:                  curBlock.Version,
-		PeerId:                   curBlock.PeerId,
-		Number:                   curBlock.Number,
-		MerkleRootHash:           curBlock.MerkleRootHash,
-		ItemTimestamp:            curBlock.ItemTimestamp,
-		Hash:                     curBlock.Hash,
-		ParentHash:               curBlock.ParentHash,
-		Timestamp:                curBlock.Timestamp,
-		TransactionFees:          transactionFees,
-		TransactionAmount:        transactionAmount,
-		InternalTransactionCount: internalTransactionCount,
-		FailedTransactionCount:   failedTransactionCount,
-	}
-
-	return sumBlock
 }
