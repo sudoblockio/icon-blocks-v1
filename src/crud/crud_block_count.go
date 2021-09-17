@@ -2,11 +2,8 @@ package crud
 
 import (
 	"errors"
-	"strings"
 	"sync"
-	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
@@ -42,6 +39,8 @@ func GetBlockCountModel() *BlockCountModel {
 		if err != nil {
 			zap.S().Fatal("BlockCountModel: Unable migrate postgres table: ", err.Error())
 		}
+
+		StartBlockCountLoader()
 	})
 
 	return blockCountModel
@@ -56,106 +55,71 @@ func (m *BlockCountModel) Migrate() error {
 
 // Insert - Insert blockCount into table
 func (m *BlockCountModel) Insert(blockCount *models.BlockCount) error {
+	db := m.db
 
-	err := backoff.Retry(func() error {
-		query := m.db.Create(blockCount)
+	// Set table
+	db = db.Model(&models.BlockCount{})
 
-		if query.Error != nil && !strings.Contains(query.Error.Error(), "duplicate key value violates unique constraint") {
-			zap.S().Warn("POSTGRES Insert Error : ", query.Error.Error())
-			return query.Error
-		}
+	db = db.Create(blockCount)
 
-		return nil
-	}, backoff.NewExponentialBackOff())
-
-	return err
-}
-
-// Update - Update blockCount
-func (m *BlockCountModel) Update(blockCount *models.BlockCount) error {
-
-	err := backoff.Retry(func() error {
-		query := m.db.Model(&models.BlockCount{}).Where("id = ?", blockCount.Id).Update("count", blockCount.Count)
-
-		if query.Error != nil && !strings.Contains(query.Error.Error(), "duplicate key value violates unique constraint") {
-			zap.S().Warn("POSTGRES Insert Error : ", query.Error.Error())
-			return query.Error
-		}
-
-		return nil
-	}, backoff.NewExponentialBackOff())
-
-	return err
+	return db.Error
 }
 
 // Select - select from blockCounts table
-func (m *BlockCountModel) Select() (models.BlockCount, error) {
+func (m *BlockCountModel) SelectOne(number uint32) (*models.BlockCount, error) {
 	db := m.db
 
-	blockCount := models.BlockCount{}
-	db = db.First(&blockCount)
+	// Set table
+	db = db.Model(&models.BlockCount{})
+
+	// Number
+	db = db.Where("number = ?", number)
+
+	blockCount := &models.BlockCount{}
+	db = db.First(blockCount)
 
 	return blockCount, db.Error
 }
 
-// Delete - delete from blockCounts table
-func (m *BlockCountModel) Delete(blockCount models.BlockCount) error {
+func (m *BlockCountModel) SelectLargestCount() (uint32, error) {
+
 	db := m.db
+	//computeCount := false
 
-	db = db.Delete(&blockCount)
+	// Set table
+	db = db.Model(&models.BlockCount{})
 
-	return db.Error
+	// Get max id
+	count := uint32(0)
+	row := db.Select("max(id)").Row()
+	row.Scan(&count)
+
+	return count, db.Error
 }
 
 // StartBlockCountLoader starts loader
 func StartBlockCountLoader() {
 	go func() {
-		var blockCount *models.BlockCount
-		postgresLoaderChan := GetBlockCountModel().WriteChan
 
 		for {
-			// Read blockCount
-			blockCount = <-postgresLoaderChan
+			// Read newBlockCount
+			newBlockCount := <-GetBlockCountModel().WriteChan
 
-			// Load blockCount to database
-			curCount, err := GetBlockCountModel().Select()
+			// Insert
+			_, err := GetBlockCountModel().SelectOne(
+				newBlockCount.Number,
+			)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// New entry
-				GetBlockCountModel().Insert(blockCount)
-			} else if err == nil {
-				// Update existing entry
-				blockCount.Count = blockCount.Count + curCount.Count
-				GetBlockCountModel().Update(blockCount)
-			} else {
-				// Postgres error
-				zap.S().Fatal(err.Error())
-			}
-
-			// Check current state
-			for {
-				// Wait for postgres to set state before processing more messages
-
-				checkCount, err := GetBlockCountModel().Select()
+				// Insert
+				err = GetBlockCountModel().Insert(newBlockCount)
 				if err != nil {
-					zap.S().Warn("State check error: ", err.Error())
-					zap.S().Warn("Waiting 100ms...")
-					time.Sleep(100 * time.Millisecond)
-					continue
+					zap.S().Fatal(err.Error())
 				}
 
-				// check all fields
-				if checkCount.Count == blockCount.Count &&
-					checkCount.Id == blockCount.Id {
-					// Success
-					break
-				} else {
-					// Wait
-
-					zap.S().Warn("Models did not match")
-					zap.S().Warn("Waiting 100ms...")
-					time.Sleep(100 * time.Millisecond)
-					continue
-				}
+				zap.S().Debug("Loader=BlockCount, Number=", newBlockCount.Number, " - Insert")
+			} else if err != nil {
+				// Error
+				zap.S().Fatal(err.Error())
 			}
 		}
 	}()

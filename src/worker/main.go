@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/geometry-labs/icon-blocks/config"
-	"github.com/geometry-labs/icon-blocks/crud"
 	"github.com/geometry-labs/icon-blocks/global"
 	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/logging"
@@ -20,11 +19,6 @@ func main() {
 
 	// Start Prometheus client
 	metrics.WorkerStart()
-
-	// Start Postgres loaders
-	// 3
-	crud.StartBlockLoader()
-	crud.StartBlockCountLoader()
 
 	// Start kafka consumer
 	// 1

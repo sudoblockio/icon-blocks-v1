@@ -1,3 +1,6 @@
+echo "Remove old models..."
+rm ../models/*
+
 echo "Starting proto to struct..."
 export GOPATH=$HOME/go
 export GOBIN=$GOPATH/bin
