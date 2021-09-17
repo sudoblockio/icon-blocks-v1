@@ -182,8 +182,33 @@ func StartBlockLoader() {
 			// Read block
 			newBlock := <-GetBlockModel().WriteChan
 
+			/////////////////
+			// Enrichments //
+			/////////////////
+			failedTransactionCount := 0
+			internalTransactionCount := 0
+
+			// Block Failed Transactions
+			allBlockFailedTransactions, err := GetBlockFailedTransactionModel().SelectMany(newBlock.Number)
+			if err != nil {
+				// Postgres error
+				zap.S().Fatal(err.Error())
+			}
+			failedTransactionCount = len(*allBlockFailedTransactions)
+
+			// Block Internal Transactions
+			allBlockInternalTransactions, err := GetBlockInternalTransactionModel().SelectMany(newBlock.Number)
+			if err != nil {
+				// Postgres error
+				zap.S().Fatal(err.Error())
+			}
+			internalTransactionCount = len(*allBlockInternalTransactions)
+
+			newBlock.FailedTransactionCount = uint32(failedTransactionCount)
+			newBlock.InternalTransactionCount = uint32(internalTransactionCount)
+
 			// Update/Insert
-			_, err := GetBlockModel().SelectOne(newBlock.Number)
+			_, err = GetBlockModel().SelectOne(newBlock.Number)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// Insert
 				GetBlockModel().Insert(newBlock)
@@ -192,9 +217,26 @@ func StartBlockLoader() {
 				GetBlockModel().UpdateOne(newBlock)
 				zap.S().Debug("Loader=Block, Number=", newBlock.Number, " - Updated")
 			} else {
-				// Postgress error
+				// Postgres error
 				zap.S().Fatal(err.Error())
 			}
 		}
 	}()
+}
+
+// Send block back to loader for updates
+func reloadBlock(number uint32) error {
+
+	curBlock, err := GetBlockModel().SelectOne(number)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		// Create empty block
+		curBlock = &models.Block{}
+		curBlock.Number = number
+	} else if err != nil {
+		// Postgress error
+		return err
+	}
+	GetBlockModel().WriteChan <- curBlock
+
+	return nil
 }

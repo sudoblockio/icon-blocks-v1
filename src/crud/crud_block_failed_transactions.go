@@ -81,6 +81,22 @@ func (m *BlockFailedTransactionModel) SelectOne(transactionHash string) (*models
 	return blockFailedTransaction, db.Error
 }
 
+// SelectMany - select many from blockFailedTransactions table by block number
+func (m *BlockFailedTransactionModel) SelectMany(number uint32) (*[]models.BlockFailedTransaction, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.BlockFailedTransaction{})
+
+	// Transaction hash
+	db = db.Where("number = ?", number)
+
+	blockFailedTransactions := &[]models.BlockFailedTransaction{}
+	db = db.Find(blockFailedTransactions)
+
+	return blockFailedTransactions, db.Error
+}
+
 // UpdateOne - update in blockFailedTransactions table
 func (m *BlockFailedTransactionModel) UpdateOne(blockFailedTransaction *models.BlockFailedTransaction) error {
 	db := m.db
@@ -126,6 +142,14 @@ func StartBlockFailedTransactionLoader() {
 				zap.S().Debug("Loader=BlockFailedTransaction, Number=", newBlockFailedTransaction.Number, " TransactionHash=", newBlockFailedTransaction.TransactionHash, " - Update")
 			} else if err != nil {
 				// Error
+				zap.S().Fatal(err.Error())
+			}
+
+			///////////////////////
+			// Force enrichments //
+			///////////////////////
+			err = reloadBlock(newBlockFailedTransaction.Number)
+			if err != nil {
 				zap.S().Fatal(err.Error())
 			}
 		}
