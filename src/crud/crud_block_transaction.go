@@ -128,6 +128,15 @@ func StartBlockTransactionLoader() {
 				// Error
 				zap.S().Fatal(err.Error())
 			}
+
+			///////////////////////
+			// Force enrichments //
+			///////////////////////
+			err = reloadBlock(newBlockTransaction.Number)
+			if err != nil {
+				// Postgress error
+				zap.S().Fatal(err.Error())
+			}
 		}
 	}()
 }
