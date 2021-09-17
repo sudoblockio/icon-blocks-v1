@@ -91,7 +91,7 @@ func (m *BlockModel) SelectMany(
 	// Set table
 	db = db.Model(&[]models.Block{})
 
-	// Height
+	// Number
 	if number != 0 {
 		computeCount = true
 		db = db.Where("number = ?", number)

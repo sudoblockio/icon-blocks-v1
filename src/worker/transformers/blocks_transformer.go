@@ -1,19 +1,13 @@
 package transformers
 
 import (
-	"encoding/json"
-	"errors"
-
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
-	"gopkg.in/Shopify/sarama.v1"
-	"gorm.io/gorm"
 
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/crud"
 	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/models"
-	"github.com/geometry-labs/icon-blocks/redis"
 )
 
 // StartBlocksTransformer - start block transformer go routine
@@ -29,16 +23,13 @@ func blocksTransformer() {
 
 	// Output channels
 	blockLoaderChan := crud.GetBlockModel().WriteChan
+	blockWebsocketLoaderChan := crud.GetBlockWebsocketIndexModel().WriteChan
 	blockCountLoaderChan := crud.GetBlockCountModel().WriteChan
-	redisClient := redis.GetRedisClient()
 
 	zap.S().Debug("Blocks transformer: started working")
 	for {
 		// Read from kafka
-		var consumerTopicMsg *sarama.ConsumerMessage
-		var block *models.Block
-
-		consumerTopicMsg = <-consumerTopicChanBlocks
+		consumerTopicMsg := <-consumerTopicChanBlocks
 		// Block message from ETL
 		blockRaw, err := convertToBlockRawProtoBuf(consumerTopicMsg.Value)
 		zap.S().Info("Blocks Transformer: Processing block #", blockRaw.Number)
@@ -46,25 +37,18 @@ func blocksTransformer() {
 			zap.S().Fatal("Blocks transformer: Unable to proceed cannot convert kafka msg value to BlockRaw, err: ", err.Error())
 		}
 
-		// Transform logic
-		block = transformBlockRawToBlock(blockRaw)
+		// Load to: blocks
+		block := transformBlockRawToBlock(blockRaw)
+		blockLoaderChan <- block
 
-		// Push to redis
-		// Check if entry block is in blocks table
-		_, err = crud.GetBlockModel().SelectOne(block.Number)
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			blockWebsocket := transformBlockToBlockWS(block)
-			blockWebsocketJSON, _ := json.Marshal(blockWebsocket)
-
-			redisClient.Publish(blockWebsocketJSON)
-		}
+		// Load to: blocks
+		blockWebsocket := transformBlockToBlockWS(block)
+		blockWebsocketLoaderChan <- blockWebsocket
 
 		// Load to: block_counts
 		blockCount := transformBlockToBlockCount(block)
 		blockCountLoaderChan <- blockCount
 
-		// Load to: blocks
-		blockLoaderChan <- block
 	}
 }
 
