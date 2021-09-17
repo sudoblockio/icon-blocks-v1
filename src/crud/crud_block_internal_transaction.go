@@ -91,7 +91,7 @@ func (m *BlockInternalTransactionModel) SelectMany(number uint32) (*[]models.Blo
 	// Set table
 	db = db.Model(&models.BlockInternalTransaction{})
 
-	// Transaction hash
+	// Number
 	db = db.Where("number = ?", number)
 
 	blockInternalTransactions := &[]models.BlockInternalTransaction{}

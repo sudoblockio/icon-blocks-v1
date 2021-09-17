@@ -193,6 +193,36 @@ func StartBlockLoader() {
 			internalTransactionCount := 0
 			failedTransactionCount := 0
 
+			////////////////////////
+			// Block Transactions //
+			////////////////////////
+			allBlockTransactions, err := GetBlockTransactionModel().SelectMany(newBlock.Number)
+			if err != nil {
+				zap.S().Fatal(err.Error())
+			}
+
+			// transaction fee
+			sumTransactionFeesBig := big.NewInt(0)
+			for _, blockTransaction := range *allBlockTransactions {
+
+				blockTransactionFeesBig := big.NewInt(0)
+				blockTransactionFeesBig.SetString(blockTransaction.Fee[2:], 16)
+
+				sumTransactionFeesBig = sumTransactionFeesBig.Add(sumTransactionFeesBig, blockTransactionFeesBig)
+			}
+			transactionFees = fmt.Sprintf("0x%x", sumTransactionFeesBig) // convert to hex
+
+			// transaction amount
+			sumTransactionAmountBig := big.NewInt(0)
+			for _, blockTransaction := range *allBlockTransactions {
+
+				blockTransactionAmountBig := big.NewInt(0)
+				blockTransactionAmountBig.SetString(blockTransaction.Amount[2:], 16)
+
+				sumTransactionAmountBig = sumTransactionAmountBig.Add(sumTransactionAmountBig, blockTransactionAmountBig)
+			}
+			transactionAmount = fmt.Sprintf("0x%x", sumTransactionAmountBig) // convert to hex
+
 			/////////////////////////////////
 			// Block Internal Transactions //
 			/////////////////////////////////
@@ -230,7 +260,9 @@ func StartBlockLoader() {
 			newBlock.InternalTransactionCount = uint32(internalTransactionCount)
 			newBlock.FailedTransactionCount = uint32(failedTransactionCount)
 
-			// Update/Insert
+			//////////////////////
+			// Load to postgres //
+			//////////////////////
 			_, err = GetBlockModel().SelectOne(newBlock.Number)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// Insert
