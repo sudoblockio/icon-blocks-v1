@@ -84,6 +84,22 @@ func (m *BlockInternalTransactionModel) SelectOne(transactionHash string, logInd
 	return blockInternalTransaction, db.Error
 }
 
+// SelectMany - select many from blockInternalTransaction table by block number
+func (m *BlockInternalTransactionModel) SelectMany(number uint32) (*[]models.BlockInternalTransaction, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.BlockInternalTransaction{})
+
+	// Transaction hash
+	db = db.Where("number = ?", number)
+
+	blockInternalTransactions := &[]models.BlockInternalTransaction{}
+	db = db.Find(blockInternalTransactions)
+
+	return blockInternalTransactions, db.Error
+}
+
 // UpdateOne - update in blockInternalTransactions table
 func (m *BlockInternalTransactionModel) UpdateOne(blockInternalTransaction *models.BlockInternalTransaction) error {
 	db := m.db
@@ -135,6 +151,16 @@ func StartBlockInternalTransactionLoader() {
 				// Error
 				zap.S().Fatal(err.Error())
 			}
+
+			///////////////////////
+			// Force enrichments //
+			///////////////////////
+			err = reloadBlock(newBlockInternalTransaction.Number)
+			if err != nil {
+				// Postgress error
+				zap.S().Fatal(err.Error())
+			}
+
 		}
 	}()
 }
