@@ -6,7 +6,6 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
-	"gopkg.in/Shopify/sarama.v1"
 
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/crud"
@@ -26,15 +25,13 @@ func transactionsTransformer() {
 	consumerTopicChanTransactions := kafka.KafkaTopicConsumers[consumerTopicNameTransactions].TopicChan
 
 	// Output channels
-	blockLoaderChan := crud.GetBlockModel().WriteChan
+	blockTransactionLoaderChan := crud.GetBlockTransactionModel().WriteChan
+	blockFailedTransactionLoaderChan := crud.GetBlockFailedTransactionModel().WriteChan
 
 	zap.S().Debug("Transactions Transformer: started working")
 	for {
 		// Read from kafka
-		var consumerTopicMsg *sarama.ConsumerMessage
-		var block *models.Block
-
-		consumerTopicMsg = <-consumerTopicChanTransactions
+		consumerTopicMsg := <-consumerTopicChanTransactions
 		// Transaction message from ETL
 		// Regular transactions
 		transactionRaw, err := convertBytesToTransactionRawProtoBuf(consumerTopicMsg.Value)
@@ -43,11 +40,17 @@ func transactionsTransformer() {
 			zap.S().Fatal("Unable to proceed cannot convert kafka msg value to TransactionRaw, err: ", err.Error())
 		}
 
-		// Create partial block from transaction
-		block = transformTransaction(transactionRaw)
+		// Loads to: block_transactions
+		blockTransaction := transformTransactionRawToBlockTransaction(transactionRaw)
+		blockTransactionLoaderChan <- blockTransaction
 
-		// Load to Postgres
-		blockLoaderChan <- block
+		// Loads to: block_failed_transactions
+		blockFailedTransaction := transformTransactionRawToBlockFailedTransaction(transactionRaw)
+		if blockFailedTransaction == nil {
+			// Not a failed transaction
+			continue
+		}
+		blockFailedTransactionLoaderChan <- blockFailedTransaction
 	}
 }
 
@@ -60,13 +63,23 @@ func convertBytesToTransactionRawProtoBuf(value []byte) (*models.TransactionRaw,
 	return &tx, err
 }
 
-func transformTransaction(transactionRaw *models.TransactionRaw) *models.Block {
+func transformTransactionRawToBlockFailedTransaction(transactionRaw *models.TransactionRaw) *models.BlockFailedTransaction {
 
-	// Is failed transaction?
-	failedTransationCount := 0
-	if transactionRaw.ReceiptStatus == 0 {
-		failedTransationCount = 1
+	////////////////////////////
+	// Is failed transaction? //
+	////////////////////////////
+	if transactionRaw.ReceiptStatus != 0 {
+		// Not failed transaction
+		return nil
 	}
+
+	return &models.BlockFailedTransaction{
+		Number:          uint32(transactionRaw.BlockNumber),
+		TransactionHash: transactionRaw.Hash,
+	}
+}
+
+func transformTransactionRawToBlockTransaction(transactionRaw *models.TransactionRaw) *models.BlockTransaction {
 
 	// Transaction fee calculation
 	// Use big int
@@ -78,25 +91,10 @@ func transformTransaction(transactionRaw *models.TransactionRaw) *models.Block {
 	// to hex
 	transactionFees := fmt.Sprintf("0x%x", transactionFeesBig)
 
-	// Represents a change of state
-	// Linked by BlockNumber
-	return &models.Block{
-		Signature:                "",
-		ItemId:                   "",
-		NextLeader:               "",
-		TransactionCount:         0,
-		Type:                     "transaction",
-		Version:                  "",
-		PeerId:                   "",
-		Number:                   uint32(transactionRaw.BlockNumber),
-		MerkleRootHash:           "",
-		ItemTimestamp:            "",
-		Hash:                     transactionRaw.BlockHash,
-		ParentHash:               "",
-		Timestamp:                0,
-		TransactionFees:          transactionFees,               // Adds in loader
-		TransactionAmount:        transactionRaw.Value,          // Adds in loader
-		InternalTransactionCount: 0,                             // Adds in loader
-		FailedTransactionCount:   uint32(failedTransationCount), // Adds in loader
+	return &models.BlockTransaction{
+		Number:          uint32(transactionRaw.BlockNumber),
+		TransactionHash: transactionRaw.Hash,
+		Fee:             transactionFees,      // Adds in loader
+		Amount:          transactionRaw.Value, // Adds in loader
 	}
 }

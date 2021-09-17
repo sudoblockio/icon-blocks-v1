@@ -25,12 +25,12 @@ func StartWorkerConsumers() {
 	consumerTopicNameTransactions := config.Config.ConsumerTopicTransactions
 	consumerTopicNameLogs := config.Config.ConsumerTopicLogs
 
-	startKafkaTopicConsumer(consumerTopicNameBlocks)
-	startKafkaTopicConsumer(consumerTopicNameTransactions)
-	startKafkaTopicConsumer(consumerTopicNameLogs)
+	startKafkaTopicConsumers(consumerTopicNameBlocks)
+	startKafkaTopicConsumers(consumerTopicNameTransactions)
+	startKafkaTopicConsumers(consumerTopicNameLogs)
 }
 
-func startKafkaTopicConsumer(topicName string) {
+func startKafkaTopicConsumers(topicName string) {
 	kafkaBroker := config.Config.KafkaBrokerURL
 	consumerGroup := config.Config.ConsumerGroup
 
@@ -44,40 +44,16 @@ func startKafkaTopicConsumer(topicName string) {
 		make(chan *sarama.ConsumerMessage),
 	}
 
-	// One routine per topic
-	go KafkaTopicConsumers[topicName].consumeGroup(consumerGroup)
+	zap.S().Info("kafkaBroker=", kafkaBroker, " consumerTopics=", topicName, " consumerGroup=", consumerGroup, " - Starting Consumers")
 
-	zap.S().Info("Start Consumer: kafkaBroker=", kafkaBroker, " consumerTopics=", topicName, " consumerGroup=", consumerGroup)
+	// Start from last read message
+	go KafkaTopicConsumers[topicName].consumeGroup(consumerGroup+"-HEAD", sarama.OffsetOldest)
+
+	// Start from 0 always
+	go KafkaTopicConsumers[topicName].consumeGroup(consumerGroup+"-TAIL", 0)
 }
 
-// Used internally by Sarama
-func (*kafkaTopicConsumer) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
-func (*kafkaTopicConsumer) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (k *kafkaTopicConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	for {
-		var topicMsg *sarama.ConsumerMessage
-		select {
-		case msg := <-claim.Messages():
-			topicMsg = msg
-		case <-time.After(5 * time.Second):
-			zap.S().Debug("Consumer ", k.topicName, ": No new kafka messages, waited 5 secs")
-			continue
-		}
-
-		zap.S().Debug("New Kafka Consumer Group Message: offset=", topicMsg.Offset, " key=", string(topicMsg.Key))
-
-		// Commit offset
-		sess.MarkMessage(topicMsg, "")
-
-		// Broadcast
-		k.TopicChan <- topicMsg
-
-		zap.S().Debug("Consumer ", k.topicName, ": Broadcasted message key=", string(topicMsg.Key))
-	}
-	return nil
-}
-
-func (k *kafkaTopicConsumer) consumeGroup(group string) {
+func (k *kafkaTopicConsumer) consumeGroup(group string, startOffset int64) {
 	version, err := sarama.ParseKafkaVersion("2.1.1")
 	if err != nil {
 		zap.S().Panic("CONSUME GROUP ERROR: parsing Kafka version: ", err.Error())
@@ -86,7 +62,11 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 	saramaConfig := sarama.NewConfig()
 	saramaConfig.Version = version
 	saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
-	saramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
+	if startOffset != 0 {
+		saramaConfig.Consumer.Offsets.Initial = startOffset
+	} else {
+		saramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
+	}
 
 	var consumerGroup sarama.ConsumerGroup
 	ctx, cancel := context.WithCancel(context.Background())
@@ -103,11 +83,18 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 
 	// From example: /sarama/blob/master/examples/consumergroup/main.go
 	go func() {
+		claimConsumer := &ClaimConsumer{
+			startOffset: startOffset,
+			topicName:   k.topicName,
+			topicChan:   k.TopicChan,
+			group:       group,
+		}
+
 		for {
 			// `Consume` should be called inside an infinite loop, when a
 			// server-side rebalance happens, the consumer session will need to be
 			// recreated to get the new claims
-			err := consumerGroup.Consume(ctx, []string{k.topicName}, k)
+			err := consumerGroup.Consume(ctx, []string{k.topicName}, claimConsumer)
 			if err != nil {
 				zap.S().Warn("CONSUME GROUP ERROR: from consumer: ", err.Error())
 			}
@@ -123,4 +110,41 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 	ch := make(chan int, 1)
 	<-ch
 	cancel()
+}
+
+type ClaimConsumer struct {
+	startOffset int64
+	topicName   string
+	topicChan   chan *sarama.ConsumerMessage
+	group       string
+}
+
+func (*ClaimConsumer) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+func (*ClaimConsumer) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+
+	for {
+		var topicMsg *sarama.ConsumerMessage
+		select {
+		case msg := <-claim.Messages():
+			topicMsg = msg
+		case <-time.After(5 * time.Second):
+			zap.S().Info("GROUP=", c.group, ",TOPIC=", c.topicName, " - No new kafka messages, waited 5 secs...")
+			continue
+		}
+
+		zap.S().Debug("GROUP=", c.group, ",TOPIC=", c.topicName, ",OFFSET=", topicMsg.Offset, " - New message")
+
+		// Commit offset
+		if c.startOffset != 0 {
+			// If startOffset is 0, this is the TAIL consumer
+			// Only head consumer commits offsets
+			zap.S().Debug("GROUP=", c.group, ",TOPIC=", c.topicName, ",OFFSET=", topicMsg.Offset, " - Committing offset")
+			sess.MarkMessage(topicMsg, "")
+		}
+
+		// Broadcast
+		c.topicChan <- topicMsg
+	}
+	return nil
 }

@@ -5,14 +5,15 @@ option go_package = "./models";
 message LogRaw {
   string type = 1;
   uint64 log_index = 2;
-  string transaction_hash = 3;
-  uint32 transaction_index = 4;
-  string address = 5;
-  string data = 6;
-  string indexed = 7;
-  uint64 block_number = 8;
-  uint64 block_timestamp = 9;
-  string block_hash = 10;
-  string item_id = 11;
-  string item_timestamp = 12;
+  uint64 max_log_index = 3;
+  string transaction_hash = 4;
+  uint32 transaction_index = 5;
+  string address = 6;
+  string data = 7;
+  string indexed = 8;
+  uint64 block_number = 9;
+  uint64 block_timestamp = 10;
+  string block_hash = 11;
+  string item_id = 12;
+  string item_timestamp = 13;
 }

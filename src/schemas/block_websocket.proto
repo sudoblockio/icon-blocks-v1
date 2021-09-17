@@ -2,10 +2,20 @@ syntax = "proto3";
 package models;
 option go_package = "./models";
 
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
 message BlockWebsocket {
 
   uint32 number = 1;
   string hash = 2;
   uint32 transaction_count = 3;
   uint64 timestamp = 4;
+}
+
+// GORM table to store all seen websocket messages
+// Used to avoid duplicate messages
+message BlockWebsocketIndex {
+  option (gorm.opts) = {ormable: true};
+
+  uint32 number = 1 [(gorm.field).tag = {primary_key: true}];
 }

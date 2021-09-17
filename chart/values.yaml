@@ -45,6 +45,8 @@ api:
   db:
     user: postgres
     password: changeme
+    host: localhost
+    port: 5432
   kafka:
     topics:
       blocks: blocks
@@ -88,6 +90,8 @@ worker:
   db:
     user: postgres
     password: changeme
+    host: localhost
+    port: 5432
   kafka:
     topics:
       blocks: blocks
@@ -114,8 +118,6 @@ kafka:
 
 db:
   driver: postgres
-  host: localhost
-  port: 5432
   name: blocks
   sslMode: disable
   timezone: UTC

@@ -18,6 +18,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Create last_synced_block.txt
+        run: mkdir ./volumes && mkdir ./volumes/etl && echo "34000000" >> ./volumes/etl/last_synced_block.txt
+
       - name: Bring up DBs
         run: docker-compose -f docker-compose.db.yml up -d && sleep 30
 
@@ -39,6 +42,15 @@ jobs:
 
       - name: Check stack
         run: make ps
+
+      - name: Check ETL logs
+        run: docker-compose -f docker-compose.yml -f docker-compose.db.yml logs --tail=100 etl
+
+      - name: Check worker logs
+        run: docker-compose -f docker-compose.yml -f docker-compose.db.yml logs --tail=100 blocks-worker
+
+      - name: Check api logs
+        run: docker-compose -f docker-compose.yml -f docker-compose.db.yml logs --tail=100 blocks-api
 
       - name: Run integration tests
         run: cd tests && go test -v -covermode=atomic -coverprofile=coverage.out ./...
