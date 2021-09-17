@@ -160,7 +160,6 @@ func StartBlockInternalTransactionLoader() {
 				// Postgress error
 				zap.S().Fatal(err.Error())
 			}
-
 		}
 	}()
 }

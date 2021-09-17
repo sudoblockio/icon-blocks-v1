@@ -2,6 +2,8 @@ package crud
 
 import (
 	"errors"
+	"fmt"
+	"math/big"
 	"strings"
 	"sync"
 
@@ -185,27 +187,48 @@ func StartBlockLoader() {
 			/////////////////
 			// Enrichments //
 			/////////////////
-			failedTransactionCount := 0
+			transactionFees := ""
+			transactionAmount := ""
+			internalTransactionAmount := ""
 			internalTransactionCount := 0
+			failedTransactionCount := 0
 
-			// Block Failed Transactions
+			/////////////////////////////////
+			// Block Internal Transactions //
+			/////////////////////////////////
+			allBlockInternalTransactions, err := GetBlockInternalTransactionModel().SelectMany(newBlock.Number)
+			if err != nil {
+				zap.S().Fatal(err.Error())
+			}
+
+			// internal transaction amount
+			sumInternalTransactionAmountBig := big.NewInt(0)
+			for _, blockInternalTransaction := range *allBlockInternalTransactions {
+
+				blockInternalTransactionAmountBig := big.NewInt(0)
+				blockInternalTransactionAmountBig.SetString(blockInternalTransaction.Amount[2:], 16)
+
+				sumInternalTransactionAmountBig = sumInternalTransactionAmountBig.Add(sumInternalTransactionAmountBig, blockInternalTransactionAmountBig)
+			}
+			internalTransactionAmount = fmt.Sprintf("0x%x", sumInternalTransactionAmountBig) // convert to hex
+
+			// internal transaction count
+			internalTransactionCount = len(*allBlockInternalTransactions)
+
+			///////////////////////////////
+			// Block Failed Transactions //
+			///////////////////////////////
 			allBlockFailedTransactions, err := GetBlockFailedTransactionModel().SelectMany(newBlock.Number)
 			if err != nil {
-				// Postgres error
 				zap.S().Fatal(err.Error())
 			}
 			failedTransactionCount = len(*allBlockFailedTransactions)
 
-			// Block Internal Transactions
-			allBlockInternalTransactions, err := GetBlockInternalTransactionModel().SelectMany(newBlock.Number)
-			if err != nil {
-				// Postgres error
-				zap.S().Fatal(err.Error())
-			}
-			internalTransactionCount = len(*allBlockInternalTransactions)
-
-			newBlock.FailedTransactionCount = uint32(failedTransactionCount)
+			newBlock.TransactionFees = transactionFees
+			newBlock.TransactionAmount = transactionAmount
+			newBlock.InternalTransactionAmount = internalTransactionAmount
 			newBlock.InternalTransactionCount = uint32(internalTransactionCount)
+			newBlock.FailedTransactionCount = uint32(failedTransactionCount)
 
 			// Update/Insert
 			_, err = GetBlockModel().SelectOne(newBlock.Number)
@@ -224,7 +247,7 @@ func StartBlockLoader() {
 	}()
 }
 
-// Send block back to loader for updates
+// reloadBlock - Send block back to loader for updates
 func reloadBlock(number uint32) error {
 
 	curBlock, err := GetBlockModel().SelectOne(number)
