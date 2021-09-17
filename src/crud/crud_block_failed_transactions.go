@@ -88,7 +88,7 @@ func (m *BlockFailedTransactionModel) SelectMany(number uint32) (*[]models.Block
 	// Set table
 	db = db.Model(&models.BlockFailedTransaction{})
 
-	// Transaction hash
+	// Number
 	db = db.Where("number = ?", number)
 
 	blockFailedTransactions := &[]models.BlockFailedTransaction{}

@@ -81,6 +81,22 @@ func (m *BlockTransactionModel) SelectOne(transactionHash string) (*models.Block
 	return blockTransaction, db.Error
 }
 
+// SelectMany - select many from blockTransactions table by block number
+func (m *BlockTransactionModel) SelectMany(number uint32) (*[]models.BlockTransaction, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.BlockTransaction{})
+
+	// Number
+	db = db.Where("number = ?", number)
+
+	blockTransactions := &[]models.BlockTransaction{}
+	db = db.Find(blockTransactions)
+
+	return blockTransactions, db.Error
+}
+
 // UpdateOne - update in blockTransactions table
 func (m *BlockTransactionModel) UpdateOne(blockTransaction *models.BlockTransaction) error {
 	db := m.db
