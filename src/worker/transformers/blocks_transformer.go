@@ -19,12 +19,12 @@ func blocksTransformer() {
 	consumerTopicNameBlocks := config.Config.ConsumerTopicBlocks
 
 	// Input channels
-	consumerTopicChanBlocks := kafka.KafkaTopicConsumers[consumerTopicNameBlocks].TopicChan
+	consumerTopicChanBlocks := kafka.KafkaTopicConsumers[consumerTopicNameBlocks].TopicChannel
 
 	// Output channels
-	blockLoaderChan := crud.GetBlockModel().WriteChan
-	blockWebsocketLoaderChan := crud.GetBlockWebsocketIndexModel().WriteChan
-	blockCountLoaderChan := crud.GetBlockCountModel().WriteChan
+	blockLoaderChan := crud.GetBlockModel().LoaderChannel
+	blockWebsocketLoaderChan := crud.GetBlockWebsocketIndexModel().LoaderChannel
+	blockCountLoaderChan := crud.GetBlockCountModel().LoaderChannel
 
 	zap.S().Debug("Blocks transformer: started working")
 	for {

@@ -23,10 +23,10 @@ func logsTransformer() {
 	consumerTopicNameLogs := config.Config.ConsumerTopicLogs
 
 	// Input channels
-	consumerTopicChanLogs := kafka.KafkaTopicConsumers[consumerTopicNameLogs].TopicChan
+	consumerTopicChanLogs := kafka.KafkaTopicConsumers[consumerTopicNameLogs].TopicChannel
 
 	// Output channels
-	blockInternalTransactionChan := crud.GetBlockInternalTransactionModel().WriteChan
+	blockInternalTransactionChan := crud.GetBlockInternalTransactionModel().LoaderChannel
 
 	zap.S().Debug("Logs Transformer: started working")
 	for {

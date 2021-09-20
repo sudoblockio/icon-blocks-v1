@@ -14,10 +14,10 @@ import (
 
 // BlockWebsocketIndexModel - type for blockWebsocketIndex table model
 type BlockWebsocketIndexModel struct {
-	db        *gorm.DB
-	model     *models.BlockWebsocketIndex
-	modelORM  *models.BlockWebsocketIndexORM
-	WriteChan chan *models.BlockWebsocket // Write BlockWebsocket to create a BlockWebsocketIndex
+	db            *gorm.DB
+	model         *models.BlockWebsocketIndex
+	modelORM      *models.BlockWebsocketIndexORM
+	LoaderChannel chan *models.BlockWebsocket // Write BlockWebsocket to create a BlockWebsocketIndex
 }
 
 var blockWebsocketIndexModel *BlockWebsocketIndexModel
@@ -32,9 +32,9 @@ func GetBlockWebsocketIndexModel() *BlockWebsocketIndexModel {
 		}
 
 		blockWebsocketIndexModel = &BlockWebsocketIndexModel{
-			db:        dbConn,
-			model:     &models.BlockWebsocketIndex{},
-			WriteChan: make(chan *models.BlockWebsocket, 1),
+			db:            dbConn,
+			model:         &models.BlockWebsocketIndex{},
+			LoaderChannel: make(chan *models.BlockWebsocket, 1),
 		}
 
 		err := blockWebsocketIndexModel.Migrate()
@@ -89,7 +89,7 @@ func StartBlockWebsocketIndexLoader() {
 
 		for {
 			// Read block
-			newBlockWebsocket := <-GetBlockWebsocketIndexModel().WriteChan
+			newBlockWebsocket := <-GetBlockWebsocketIndexModel().LoaderChannel
 
 			// BlockWebsocket -> BlockWebsocketIndex
 			newBlockWebsocketIndex := &models.BlockWebsocketIndex{

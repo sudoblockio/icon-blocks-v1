@@ -16,10 +16,10 @@ import (
 
 // BlockModel - type for block table model
 type BlockModel struct {
-	db        *gorm.DB
-	model     *models.Block
-	modelORM  *models.BlockORM
-	WriteChan chan *models.Block
+	db            *gorm.DB
+	model         *models.Block
+	modelORM      *models.BlockORM
+	LoaderChannel chan *models.Block
 }
 
 var blockModel *BlockModel
@@ -34,9 +34,9 @@ func GetBlockModel() *BlockModel {
 		}
 
 		blockModel = &BlockModel{
-			db:        dbConn,
-			model:     &models.Block{},
-			WriteChan: make(chan *models.Block, 1),
+			db:            dbConn,
+			model:         &models.Block{},
+			LoaderChannel: make(chan *models.Block, 1),
 		}
 
 		err := blockModel.Migrate()
@@ -182,7 +182,7 @@ func StartBlockLoader() {
 
 		for {
 			// Read block
-			newBlock := <-GetBlockModel().WriteChan
+			newBlock := <-GetBlockModel().LoaderChannel
 
 			/////////////////
 			// Enrichments //
@@ -291,7 +291,7 @@ func reloadBlock(number uint32) error {
 		// Postgress error
 		return err
 	}
-	GetBlockModel().WriteChan <- curBlock
+	GetBlockModel().LoaderChannel <- curBlock
 
 	return nil
 }

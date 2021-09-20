@@ -12,10 +12,10 @@ import (
 
 // BlockCountModel - type for block table model
 type BlockCountModel struct {
-	db        *gorm.DB
-	model     *models.BlockCount
-	modelORM  *models.BlockCountORM
-	WriteChan chan *models.BlockCount
+	db            *gorm.DB
+	model         *models.BlockCount
+	modelORM      *models.BlockCountORM
+	LoaderChannel chan *models.BlockCount
 }
 
 var blockCountModel *BlockCountModel
@@ -30,9 +30,9 @@ func GetBlockCountModel() *BlockCountModel {
 		}
 
 		blockCountModel = &BlockCountModel{
-			db:        dbConn,
-			model:     &models.BlockCount{},
-			WriteChan: make(chan *models.BlockCount, 1),
+			db:            dbConn,
+			model:         &models.BlockCount{},
+			LoaderChannel: make(chan *models.BlockCount, 1),
 		}
 
 		err := blockCountModel.Migrate()
@@ -103,7 +103,7 @@ func StartBlockCountLoader() {
 
 		for {
 			// Read newBlockCount
-			newBlockCount := <-GetBlockCountModel().WriteChan
+			newBlockCount := <-GetBlockCountModel().LoaderChannel
 
 			// Insert
 			_, err := GetBlockCountModel().SelectOne(

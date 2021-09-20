@@ -11,9 +11,9 @@ import (
 )
 
 type kafkaTopicConsumer struct {
-	brokerURL string
-	topicName string
-	TopicChan chan *sarama.ConsumerMessage
+	brokerURL    string
+	topicName    string
+	TopicChannel chan *sarama.ConsumerMessage
 }
 
 var KafkaTopicConsumers map[string]*kafkaTopicConsumer
@@ -86,7 +86,7 @@ func (k *kafkaTopicConsumer) consumeGroup(group string, startOffset int64) {
 		claimConsumer := &ClaimConsumer{
 			startOffset: startOffset,
 			topicName:   k.topicName,
-			topicChan:   k.TopicChan,
+			topicChan:   k.TopicChannel,
 			group:       group,
 		}
 

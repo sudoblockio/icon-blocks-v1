@@ -132,7 +132,7 @@ func TestBlockCountModelLoader(t *testing.T) {
 	// Write to loader channel
 	go func() {
 		for {
-			blockCountModel.WriteChan <- blockCountFixture
+			blockCountModel.LoaderChannel <- blockCountFixture
 			time.Sleep(1)
 		}
 	}()

@@ -12,10 +12,10 @@ import (
 
 // BlockInternalTransactionModel - type for block table model
 type BlockInternalTransactionModel struct {
-	db        *gorm.DB
-	model     *models.BlockInternalTransaction
-	modelORM  *models.BlockInternalTransactionORM
-	WriteChan chan *models.BlockInternalTransaction
+	db            *gorm.DB
+	model         *models.BlockInternalTransaction
+	modelORM      *models.BlockInternalTransactionORM
+	LoaderChannel chan *models.BlockInternalTransaction
 }
 
 var blockInternalTransactionModel *BlockInternalTransactionModel
@@ -30,9 +30,9 @@ func GetBlockInternalTransactionModel() *BlockInternalTransactionModel {
 		}
 
 		blockInternalTransactionModel = &BlockInternalTransactionModel{
-			db:        dbConn,
-			model:     &models.BlockInternalTransaction{},
-			WriteChan: make(chan *models.BlockInternalTransaction, 1),
+			db:            dbConn,
+			model:         &models.BlockInternalTransaction{},
+			LoaderChannel: make(chan *models.BlockInternalTransaction, 1),
 		}
 
 		err := blockInternalTransactionModel.Migrate()
@@ -124,7 +124,7 @@ func StartBlockInternalTransactionLoader() {
 
 		for {
 			// Read newBlockInternalTransaction
-			newBlockInternalTransaction := <-GetBlockInternalTransactionModel().WriteChan
+			newBlockInternalTransaction := <-GetBlockInternalTransactionModel().LoaderChannel
 
 			// Insert
 			_, err := GetBlockInternalTransactionModel().SelectOne(
