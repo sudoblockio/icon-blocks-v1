@@ -59,7 +59,7 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 
 	// Default params
 	if params.Limit == 0 {
-		params.Limit = 1
+		params.Limit = 25
 	}
 
 	// Check params
