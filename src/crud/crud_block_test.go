@@ -159,7 +159,7 @@ func TestBlockModelLoader(t *testing.T) {
 	// Write to loader channel
 	go func() {
 		for _, fixture := range blockFixtures {
-			blockModel.WriteChan <- fixture
+			blockModel.LoaderChannel <- fixture
 		}
 	}()
 

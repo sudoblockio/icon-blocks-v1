@@ -12,10 +12,10 @@ import (
 
 // BlockFailedTransactionModel - type for block table model
 type BlockFailedTransactionModel struct {
-	db        *gorm.DB
-	model     *models.BlockFailedTransaction
-	modelORM  *models.BlockFailedTransactionORM
-	WriteChan chan *models.BlockFailedTransaction
+	db            *gorm.DB
+	model         *models.BlockFailedTransaction
+	modelORM      *models.BlockFailedTransactionORM
+	LoaderChannel chan *models.BlockFailedTransaction
 }
 
 var blockFailedTransactionModel *BlockFailedTransactionModel
@@ -30,9 +30,9 @@ func GetBlockFailedTransactionModel() *BlockFailedTransactionModel {
 		}
 
 		blockFailedTransactionModel = &BlockFailedTransactionModel{
-			db:        dbConn,
-			model:     &models.BlockFailedTransaction{},
-			WriteChan: make(chan *models.BlockFailedTransaction, 1),
+			db:            dbConn,
+			model:         &models.BlockFailedTransaction{},
+			LoaderChannel: make(chan *models.BlockFailedTransaction, 1),
 		}
 
 		err := blockFailedTransactionModel.Migrate()
@@ -118,7 +118,7 @@ func StartBlockFailedTransactionLoader() {
 
 		for {
 			// Read newBlockFailedTransaction
-			newBlockFailedTransaction := <-GetBlockFailedTransactionModel().WriteChan
+			newBlockFailedTransaction := <-GetBlockFailedTransactionModel().LoaderChannel
 
 			// Insert
 			_, err := GetBlockFailedTransactionModel().SelectOne(

@@ -12,10 +12,10 @@ import (
 
 // BlockTransactionModel - type for block table model
 type BlockTransactionModel struct {
-	db        *gorm.DB
-	model     *models.BlockTransaction
-	modelORM  *models.BlockTransactionORM
-	WriteChan chan *models.BlockTransaction
+	db            *gorm.DB
+	model         *models.BlockTransaction
+	modelORM      *models.BlockTransactionORM
+	LoaderChannel chan *models.BlockTransaction
 }
 
 var blockTransactionModel *BlockTransactionModel
@@ -30,9 +30,9 @@ func GetBlockTransactionModel() *BlockTransactionModel {
 		}
 
 		blockTransactionModel = &BlockTransactionModel{
-			db:        dbConn,
-			model:     &models.BlockTransaction{},
-			WriteChan: make(chan *models.BlockTransaction, 1),
+			db:            dbConn,
+			model:         &models.BlockTransaction{},
+			LoaderChannel: make(chan *models.BlockTransaction, 1),
 		}
 
 		err := blockTransactionModel.Migrate()
@@ -118,7 +118,7 @@ func StartBlockTransactionLoader() {
 
 		for {
 			// Read newBlockTransaction
-			newBlockTransaction := <-GetBlockTransactionModel().WriteChan
+			newBlockTransaction := <-GetBlockTransactionModel().LoaderChannel
 
 			// Insert
 			_, err := GetBlockTransactionModel().SelectOne(
