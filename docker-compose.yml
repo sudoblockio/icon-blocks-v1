@@ -5,9 +5,6 @@ x-env: &env
   NETWORK_NAME: "mainnet"
 
   # Ports
-  PORT: "8000"
-  HEALTH_PORT: "8180"
-  METRICS_PORT: "9400"
 
   # Prefix
   REST_PREFIX: "/api/v1"
@@ -88,6 +85,9 @@ services:
       - ${BLOCKS_CONTEXT:-.}/src:/app
     environment:
       <<: *env
+      PORT: "8000"
+      HEALTH_PORT: "8180"
+      METRICS_PORT: "9400"
 
   blocks-worker:
     build:
@@ -111,3 +111,6 @@ services:
       - ${BLOCKS_CONTEXT:-.}/src:/app
     environment:
       <<: *env
+      PORT: "8001"
+      HEALTH_PORT: "8181"
+      METRICS_PORT: "9401"
