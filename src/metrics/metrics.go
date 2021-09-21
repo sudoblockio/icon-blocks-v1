@@ -3,14 +3,15 @@ package metrics
 import (
 	"net/http"
 
-	"github.com/geometry-labs/icon-blocks/config"
-	"go.uber.org/zap"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.uber.org/zap"
+
+	"github.com/geometry-labs/icon-blocks/config"
 )
 
+// Metrics
 var (
 	MaxBlockNumberBlocksRawGauge = promauto.NewGauge(prometheus.GaugeOpts{
 		Name:        "max_block_number_blocks_raw",
