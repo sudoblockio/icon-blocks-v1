@@ -18,7 +18,7 @@ func main() {
 	log.Printf("Main: Starting logging with level %s", config.Config.LogLevel)
 
 	// Start Prometheus client
-	metrics.WorkerStart()
+	metrics.Start()
 
 	// Start kafka consumer
 	// 1

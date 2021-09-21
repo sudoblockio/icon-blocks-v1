@@ -10,6 +10,7 @@ import (
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/crud"
 	"github.com/geometry-labs/icon-blocks/kafka"
+	"github.com/geometry-labs/icon-blocks/metrics"
 	"github.com/geometry-labs/icon-blocks/models"
 )
 
@@ -30,15 +31,21 @@ func transactionsTransformer() {
 
 	zap.S().Debug("Transactions Transformer: started working")
 	for {
-		// Read from kafka
+
+		///////////////////
+		// Kafka Message //
+		///////////////////
+
 		consumerTopicMsg := <-consumerTopicChanTransactions
-		// Transaction message from ETL
-		// Regular transactions
 		transactionRaw, err := convertBytesToTransactionRawProtoBuf(consumerTopicMsg.Value)
 		zap.S().Debug("Transactions Transformer: Processing block #", transactionRaw.BlockNumber)
 		if err != nil {
 			zap.S().Fatal("Unable to proceed cannot convert kafka msg value to TransactionRaw, err: ", err.Error())
 		}
+
+		/////////////
+		// Loaders //
+		/////////////
 
 		// Loads to: block_transactions
 		blockTransaction := transformTransactionRawToBlockTransaction(transactionRaw)
@@ -51,6 +58,13 @@ func transactionsTransformer() {
 			continue
 		}
 		blockFailedTransactionLoaderChan <- blockFailedTransaction
+
+		/////////////
+		// Metrics //
+		/////////////
+
+		// max_block_number_transactions_raw
+		metrics.MaxBlockNumberTransactionsRawGauge.Set(float64(transactionRaw.BlockNumber))
 	}
 }
 

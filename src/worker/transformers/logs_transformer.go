@@ -6,11 +6,11 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
-	"gopkg.in/Shopify/sarama.v1"
 
 	"github.com/geometry-labs/icon-blocks/config"
 	"github.com/geometry-labs/icon-blocks/crud"
 	"github.com/geometry-labs/icon-blocks/kafka"
+	"github.com/geometry-labs/icon-blocks/metrics"
 	"github.com/geometry-labs/icon-blocks/models"
 )
 
@@ -30,19 +30,24 @@ func logsTransformer() {
 
 	zap.S().Debug("Logs Transformer: started working")
 	for {
-		// Read from kafka
-		var consumerTopicMsg *sarama.ConsumerMessage
 
-		consumerTopicMsg = <-consumerTopicChanLogs
-		// Transaction message from ETL
-		// NOTE: Only internal transactions
+		///////////////////
+		// Kafka Message //
+		///////////////////
+
+		consumerTopicMsg := <-consumerTopicChanLogs
 		logRaw, err := convertBytesToLogRawProtoBuf(consumerTopicMsg.Value)
 		zap.S().Info("Logs Transformer: Processing block #", logRaw.BlockNumber)
 		if err != nil {
 			zap.S().Fatal("Unable to proceed cannot convert kafka msg value to Log, err: ", err.Error())
 		}
 
+		/////////////
+		// Loaders //
+		/////////////
+
 		// Create partial block from log
+		// NOTE: Only internal transactions
 		blockInternalTransaction := transformLogRawToBlockInternalTransaction(logRaw)
 		if blockInternalTransaction == nil {
 			// Not an internal transaction
@@ -51,6 +56,13 @@ func logsTransformer() {
 
 		// Load to Postgres
 		blockInternalTransactionChan <- blockInternalTransaction
+
+		/////////////
+		// Metrics //
+		/////////////
+
+		// max_block_number_logs_raw
+		metrics.MaxBlockNumberLogsRawGauge.Set(float64(logRaw.BlockNumber))
 	}
 }
 
