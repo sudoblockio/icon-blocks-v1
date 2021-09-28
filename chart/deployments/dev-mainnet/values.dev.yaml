@@ -6,12 +6,15 @@ api:
   annotations: |
     "consul.hashicorp.com/connect-inject": "true"
     "consul.hashicorp.com/transparent-proxy": "false"
+    "geometrylabs.io/logging": "true"
   kafka:
     topics:
       blocks: blocks-raw
       transactions: transactions-raw
       logs: logs-raw
 worker:
+  annotations: |
+    "geometrylabs.io/logging": "true"
   image:
     tag: '72'
   kafka:
@@ -22,6 +25,7 @@ worker:
 db:
   sslMode: require
 redis:
-  sentinel:
-    clientMasterName: mymaster
-    clientMode: true
+  host: "10.101.62.32"
+#  sentinel:
+#    clientMasterName: mymaster
+#    clientMode: true
