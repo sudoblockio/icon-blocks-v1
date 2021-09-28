@@ -192,7 +192,7 @@ func StartBlockLoader() {
 			internalTransactionAmount := ""
 			internalTransactionCount := 0
 			failedTransactionCount := 0
-			// blockCreationTime := 0 // TODO
+			blockTime := uint64(0)
 
 			////////////////////////
 			// Block Transactions //
@@ -255,11 +255,27 @@ func StartBlockLoader() {
 			}
 			failedTransactionCount = len(*allBlockFailedTransactions)
 
+			////////////////
+			// Block Time //
+			////////////////
+			blockTimeRow, err := GetBlockTimeModel().SelectOne(newBlock.Number)
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				// No block_time entry yet
+				blockTime = 0
+			} else if err == nil {
+				// Success
+				blockTime = blockTimeRow.Time
+			} else {
+				// Postgres error
+				zap.S().Fatal(err.Error())
+			}
+
 			newBlock.TransactionFees = transactionFees
 			newBlock.TransactionAmount = transactionAmount
 			newBlock.InternalTransactionAmount = internalTransactionAmount
 			newBlock.InternalTransactionCount = uint32(internalTransactionCount)
 			newBlock.FailedTransactionCount = uint32(failedTransactionCount)
+			newBlock.BlockTime = blockTime
 
 			//////////////////////
 			// Load to postgres //

@@ -21,6 +21,7 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 type BlockORM struct {
+	BlockTime                 uint64
 	FailedTransactionCount    uint32
 	Hash                      string
 	InternalTransactionAmount string
@@ -74,6 +75,7 @@ func (m *Block) ToORM(ctx context.Context) (BlockORM, error) {
 	to.InternalTransactionAmount = m.InternalTransactionAmount
 	to.InternalTransactionCount = m.InternalTransactionCount
 	to.FailedTransactionCount = m.FailedTransactionCount
+	to.BlockTime = m.BlockTime
 	if posthook, ok := interface{}(m).(BlockWithAfterToORM); ok {
 		err = posthook.AfterToORM(ctx, &to)
 	}
@@ -108,6 +110,7 @@ func (m *BlockORM) ToPB(ctx context.Context) (Block, error) {
 	to.InternalTransactionAmount = m.InternalTransactionAmount
 	to.InternalTransactionCount = m.InternalTransactionCount
 	to.FailedTransactionCount = m.FailedTransactionCount
+	to.BlockTime = m.BlockTime
 	if posthook, ok := interface{}(m).(BlockWithAfterToPB); ok {
 		err = posthook.AfterToPB(ctx, &to)
 	}
@@ -249,6 +252,10 @@ func DefaultApplyFieldMaskBlock(ctx context.Context, patchee *Block, patcher *Bl
 		}
 		if f == prefix+"FailedTransactionCount" {
 			patchee.FailedTransactionCount = patcher.FailedTransactionCount
+			continue
+		}
+		if f == prefix+"BlockTime" {
+			patchee.BlockTime = patcher.BlockTime
 			continue
 		}
 	}
