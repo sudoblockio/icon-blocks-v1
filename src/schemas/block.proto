@@ -28,4 +28,5 @@ message Block {
   string internal_transaction_amount = 16;  // block_internal_transactions
   uint32 internal_transaction_count = 17;   // block_internal_transactions
   uint32 failed_transaction_count = 18;     // block_failed_transactions
+  uint64 block_time = 19;                   // block_times
 }

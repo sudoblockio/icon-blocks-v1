@@ -96,6 +96,7 @@ func transformBlockRawToBlock(blockRaw *models.BlockRaw) *models.Block {
 		InternalTransactionAmount: "0x0", // Adds in loader
 		InternalTransactionCount:  0,     // Adds in loader
 		FailedTransactionCount:    0,     // Adds in loader
+		BlockTime:                 0,     // Adds in loader
 	}
 }
 
