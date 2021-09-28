@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/Shopify/sarama"
 	"go.uber.org/zap"
-	"gopkg.in/Shopify/sarama.v1"
 
 	"github.com/geometry-labs/icon-blocks/config"
 )

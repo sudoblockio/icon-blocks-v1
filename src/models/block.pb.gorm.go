@@ -32,7 +32,7 @@ type BlockORM struct {
 	NextLeader                string
 	Number                    uint32 `gorm:"primary_key"`
 	ParentHash                string
-	PeerId                    string `gorm:"index:block_idx_peer_id"`
+	PeerId                    string
 	Signature                 string
 	Timestamp                 uint64 `gorm:"index:block_idx_timestamp"`
 	TransactionAmount         string

@@ -40,6 +40,7 @@ type configType struct {
 	KafkaBrokerURL    string `envconfig:"KAFKA_BROKER_URL" required:"false" default:"kafka:9092"`
 	SchemaRegistryURL string `envconfig:"SCHEMA_REGISTRY_URL" required:"false" default:"schemaregistry:8081"`
 	KafkaGroupID      string `envconfig:"KAFKA_GROUP_ID" required:"false" default:"blocks-service"`
+	KafkaCreateTopic  bool   `envconfig:"KAFKA_CREATE_TOPIC" required:"false" default:"false"`
 
 	// Topics
 	ConsumerGroup             string            `envconfig:"CONSUMER_GROUP" required:"false" default:"blocks-consumer-group"`

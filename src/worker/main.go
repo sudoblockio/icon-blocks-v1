@@ -21,6 +21,9 @@ func main() {
 	// Start Prometheus client
 	metrics.Start()
 
+	// Start Kafka Topic Init
+	kafka.TopicInit()
+
 	// Start kafka consumer
 	// 1
 	kafka.StartWorkerConsumers()
