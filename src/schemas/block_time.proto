@@ -1,0 +1,13 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+message BlockTime {
+  option (gorm.opts) = {ormable: true};
+
+  // Base
+  uint32 number = 1 [(gorm.field).tag = {primary_key: true}];
+  uint64 time = 2 [(gorm.field).tag = {index: "block_time_idx_time"}];
+}
