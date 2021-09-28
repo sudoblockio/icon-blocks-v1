@@ -1,4 +1,4 @@
-FROM golang:1.17-buster AS builder
+FROM golang:1.16-buster AS builder
 
 ARG SERVICE_NAME
 ENV SERVICE_NAME ${SERVICE_NAME:-api}

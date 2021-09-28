@@ -7,8 +7,8 @@ import (
 
 	"github.com/geometry-labs/icon-blocks/config"
 
+	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/Shopify/sarama.v1"
 )
 
 func init() {
