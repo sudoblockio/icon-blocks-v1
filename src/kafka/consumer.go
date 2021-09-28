@@ -133,13 +133,13 @@ func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sar
 			continue
 		}
 
-		zap.S().Debug("GROUP=", c.group, ",TOPIC=", c.topicName, ",OFFSET=", topicMsg.Offset, " - New message")
+		zap.S().Debug("GROUP=", c.group, ",TOPIC=", c.topicName, ",PARTITION=", topicMsg.Partition, ",OFFSET=", topicMsg.Offset, " - New message")
 
 		// Commit offset
 		if c.startOffset != 0 {
 			// If startOffset is 0, this is the TAIL consumer
 			// Only head consumer commits offsets
-			zap.S().Debug("GROUP=", c.group, ",TOPIC=", c.topicName, ",OFFSET=", topicMsg.Offset, " - Committing offset")
+			zap.S().Debug("GROUP=", c.group, ",TOPIC=", c.topicName, ",PARTITION=", topicMsg.Partition, ",OFFSET=", topicMsg.Offset, " - Committing offset")
 			sess.MarkMessage(topicMsg, "")
 		}
 

@@ -192,6 +192,7 @@ func StartBlockLoader() {
 			internalTransactionAmount := ""
 			internalTransactionCount := 0
 			failedTransactionCount := 0
+			// blockCreationTime := 0 // TODO
 
 			////////////////////////
 			// Block Transactions //
@@ -288,7 +289,7 @@ func reloadBlock(number uint32) error {
 		curBlock = &models.Block{}
 		curBlock.Number = number
 	} else if err != nil {
-		// Postgress error
+		// Postgres error
 		return err
 	}
 	GetBlockModel().LoaderChannel <- curBlock

@@ -21,6 +21,9 @@ type configType struct {
 	HealthPrefix    string `envconfig:"HEALTH_PREFIX" required:"false" default:"/health"`
 	MetricsPrefix   string `envconfig:"METRICS_PREFIX" required:"false" default:"/metrics"`
 
+	// Endpoints
+	MaxPageSize int `envconfig:"MAX_PAGE_SIZE" required:"false" default:"100"`
+
 	// CORS
 	CORSAllowOrigins string `envconfig:"CORS_ALLOW_ORIGINS" required:"false" default:"*"`
 
@@ -56,9 +59,6 @@ type configType struct {
 	DbName     string `envconfig:"DB_DBNAME" required:"false" default:"postgres"`
 	DbSslmode  string `envconfig:"DB_SSL_MODE" required:"false" default:"disable"`
 	DbTimezone string `envconfig:"DB_TIMEZONE" required:"false" default:"UTC"`
-
-	// Endpoints
-	MaxPageSize int `envconfig:"MAX_PAGE_SIZE" required:"false" default:"100"`
 
 	// Redis
 	RedisHost                     string `envconfig:"REDIS_HOST" required:"false" default:"redis"`

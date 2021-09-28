@@ -8,6 +8,7 @@ import (
 	"github.com/geometry-labs/icon-blocks/kafka"
 	"github.com/geometry-labs/icon-blocks/logging"
 	"github.com/geometry-labs/icon-blocks/metrics"
+	"github.com/geometry-labs/icon-blocks/worker/builders"
 	"github.com/geometry-labs/icon-blocks/worker/transformers"
 )
 
@@ -29,6 +30,9 @@ func main() {
 	transformers.StartBlocksTransformer()
 	transformers.StartTransactionsTransformer()
 	transformers.StartLogsTransformer()
+
+	// Start builders
+	builders.StartBlockTimeBuilder()
 
 	global.WaitShutdownSig()
 }

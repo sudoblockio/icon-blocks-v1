@@ -4,14 +4,16 @@ x-env: &env
   NAME: "blocks"
   NETWORK_NAME: "mainnet"
 
-  # Ports
-
   # Prefix
   REST_PREFIX: "/api/v1"
   WEBSOCKET_PREFIX: "/ws/v1"
   HEALTH_PREFIX: "/heath"
   METRICS_PREFIX: "/metrics"
 
+  # Endpoints
+  MAX_PAGE_SIZE: 100
+
+  # CORS
   CORS_ALLOW_ORIGINS: "*"
 
   # Monitoring
@@ -32,7 +34,6 @@ x-env: &env
   CONSUMER_GROUP: "blocks-consumer-group"
   SCHEMA_NAME_TOPICS: "blocks-ws:block"
   SCHEMA_FOLDER_PATH: "/app/schemas/"
-
   CONSUMER_TOPIC_BLOCKS: "blocks"
   CONSUMER_TOPIC_TRANSACTIONS: "transactions"
   CONSUMER_TOPIC_LOGS: "logs"
@@ -46,9 +47,6 @@ x-env: &env
   DB_DBNAME: "postgres"
   DB_SSLMODE: "disable"
   DB_TIMEZONE: "UTC"
-
-  # Endpoints
-  MAX_PAGE_SIZE: 100
 
   # Redis
   REDIS_HOST: "redis"
