@@ -87,51 +87,7 @@ services:
       HEALTH_PORT: "8180"
       METRICS_PORT: "9400"
 
-  blocks-worker-a:
-    build:
-      context: ${BLOCKS_CONTEXT:-.}
-      target: ${BLOCKS_TARGET:-prod}
-      args:
-        - SERVICE_NAME=worker
-    security_opt:
-      - "seccomp:unconfined"
-    cap_add:
-      - SYS_PTRACE
-#    depends_on:
-#      - kafka
-#      - schemaregistry
-#      - postgres
-    volumes:
-      - ${BLOCKS_CONTEXT:-.}/src:/app
-    environment:
-      <<: *env
-      PORT: "8001"
-      HEALTH_PORT: "8181"
-      METRICS_PORT: "9401"
-
-  blocks-worker-b:
-    build:
-      context: ${BLOCKS_CONTEXT:-.}
-      target: ${BLOCKS_TARGET:-prod}
-      args:
-        - SERVICE_NAME=worker
-    security_opt:
-      - "seccomp:unconfined"
-    cap_add:
-      - SYS_PTRACE
-#    depends_on:
-#      - kafka
-#      - schemaregistry
-#      - postgres
-    volumes:
-      - ${BLOCKS_CONTEXT:-.}/src:/app
-    environment:
-      <<: *env
-      PORT: "8001"
-      HEALTH_PORT: "8181"
-      METRICS_PORT: "9401"
-
-  blocks-worker-c:
+  blocks-worker:
     build:
       context: ${BLOCKS_CONTEXT:-.}
       target: ${BLOCKS_TARGET:-prod}
