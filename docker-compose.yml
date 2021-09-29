@@ -57,7 +57,7 @@ x-env: &env
   REDIS_SENTINEL_CLIENT_MASTER_NAME: "master"
 
   # GORM
-  GORM_SILENT_LOGGING: "false"
+  GORM_SILENT_LOGGING: "true"
 
 services:
   blocks-api:
@@ -93,10 +93,6 @@ services:
       target: ${BLOCKS_TARGET:-prod}
       args:
         - SERVICE_NAME=worker
-    ports:
-      - "8181:8181"     # Health
-      - "9401:9401"     # Prometheus
-      - "40001:40001"   # Remote Debug
     security_opt:
       - "seccomp:unconfined"
     cap_add:

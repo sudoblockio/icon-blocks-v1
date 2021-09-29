@@ -37,7 +37,7 @@ func logsTransformer() {
 
 		consumerTopicMsg := <-consumerTopicChanLogs
 		logRaw, err := convertBytesToLogRawProtoBuf(consumerTopicMsg.Value)
-		zap.S().Info("Logs Transformer: Processing block #", logRaw.BlockNumber)
+		zap.S().Debug("Logs Transformer: Processing block #", logRaw.BlockNumber)
 		if err != nil {
 			zap.S().Fatal("Unable to proceed cannot convert kafka msg value to Log, err: ", err.Error())
 		}
