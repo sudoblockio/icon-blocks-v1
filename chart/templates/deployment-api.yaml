@@ -36,6 +36,7 @@ spec:
           ports:
             - containerPort: {{ .Values.api.internal.port }}
             - containerPort: {{ .Values.api.health.port }}
+            - containerPort: {{ .Values.api.metrics.port }}
           livenessProbe:
             httpGet:
               path: {{ .Values.api.health.prefix }}
