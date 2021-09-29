@@ -7,6 +7,7 @@ api:
     "consul.hashicorp.com/connect-inject": "true"
     "consul.hashicorp.com/transparent-proxy": "false"
     "geometrylabs.io/logging": "true"
+    "prometheus.io/scrape": "true"
   kafka:
     topics:
       blocks: blocks-raw
@@ -15,6 +16,7 @@ api:
 worker:
   annotations: |
     "geometrylabs.io/logging": "true"
+    "prometheus.io/scrape": "true"
   image:
     tag: '79'
   kafka:
