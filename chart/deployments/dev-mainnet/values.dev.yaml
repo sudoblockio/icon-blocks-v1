@@ -8,7 +8,7 @@ api:
     "consul.hashicorp.com/transparent-proxy": "false"
     "geometrylabs.io/logging": "true"
     "prometheus.io/scrape": "true"
-    "prometheus.io/port": "9300"
+    "prometheus.io/port": "9400"
   kafka:
     topics:
       blocks: blocks-raw
@@ -18,7 +18,7 @@ worker:
   annotations: |
     "geometrylabs.io/logging": "true"
     "prometheus.io/scrape": "true"
-    "prometheus.io/port": "9300"
+    "prometheus.io/port": "9400"
   image:
     tag: '79'
   kafka:
