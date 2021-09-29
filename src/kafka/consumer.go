@@ -139,6 +139,11 @@ func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sar
 		var topicMsg *sarama.ConsumerMessage
 		select {
 		case msg := <-claim.Messages():
+			if msg == nil {
+				zap.S().Warn("GROUP=", c.group, ",TOPIC=", c.topicName, " - Kafka message is nil, waiting 5 seconds...")
+				time.Sleep(5 * time.Second)
+				continue
+			}
 			topicMsg = msg
 		case <-time.After(5 * time.Second):
 			zap.S().Info("GROUP=", c.group, ",TOPIC=", c.topicName, " - No new kafka messages, waited 5 secs...")
