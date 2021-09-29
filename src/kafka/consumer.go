@@ -59,9 +59,28 @@ func (k *kafkaTopicConsumer) consumeGroup(group string, startOffset int64) {
 		zap.S().Panic("CONSUME GROUP ERROR: parsing Kafka version: ", err.Error())
 	}
 
+	///////////////////////////
+	// Consumer Group Config //
+	///////////////////////////
+
 	saramaConfig := sarama.NewConfig()
+
+	// Version
 	saramaConfig.Version = version
-	saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
+
+	// Balance Strategy
+	switch config.Config.ConsumerGroupBalanceStrategy {
+	case "BalanceStrategyRange":
+		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+	case "BalanceStrategySticky":
+		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
+	case "BalanceStrategyRoundRobin":
+		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
+	default:
+		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+	}
+
+	// Start offset
 	if startOffset != 0 {
 		saramaConfig.Consumer.Offsets.Initial = startOffset
 	} else {
