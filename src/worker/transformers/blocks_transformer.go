@@ -36,7 +36,7 @@ func blocksTransformer() {
 
 		consumerTopicMsg := <-consumerTopicChanBlocks
 		blockRaw, err := convertToBlockRawProtoBuf(consumerTopicMsg.Value)
-		zap.S().Info("Blocks Transformer: Processing block #", blockRaw.Number)
+		zap.S().Debug("Blocks Transformer: Processing block #", blockRaw.Number)
 		if err != nil {
 			zap.S().Fatal("Blocks transformer: Unable to proceed cannot convert kafka msg value to BlockRaw, err: ", err.Error())
 		}

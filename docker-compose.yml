@@ -57,7 +57,7 @@ x-env: &env
   REDIS_SENTINEL_CLIENT_MASTER_NAME: "master"
 
   # GORM
-  GORM_SILENT_LOGGING: "false"
+  GORM_SILENT_LOGGING: "true"
 
 services:
   blocks-api:
@@ -87,16 +87,56 @@ services:
       HEALTH_PORT: "8180"
       METRICS_PORT: "9400"
 
-  blocks-worker:
+  blocks-worker-a:
     build:
       context: ${BLOCKS_CONTEXT:-.}
       target: ${BLOCKS_TARGET:-prod}
       args:
         - SERVICE_NAME=worker
-    ports:
-      - "8181:8181"     # Health
-      - "9401:9401"     # Prometheus
-      - "40001:40001"   # Remote Debug
+    security_opt:
+      - "seccomp:unconfined"
+    cap_add:
+      - SYS_PTRACE
+#    depends_on:
+#      - kafka
+#      - schemaregistry
+#      - postgres
+    volumes:
+      - ${BLOCKS_CONTEXT:-.}/src:/app
+    environment:
+      <<: *env
+      PORT: "8001"
+      HEALTH_PORT: "8181"
+      METRICS_PORT: "9401"
+
+  blocks-worker-b:
+    build:
+      context: ${BLOCKS_CONTEXT:-.}
+      target: ${BLOCKS_TARGET:-prod}
+      args:
+        - SERVICE_NAME=worker
+    security_opt:
+      - "seccomp:unconfined"
+    cap_add:
+      - SYS_PTRACE
+#    depends_on:
+#      - kafka
+#      - schemaregistry
+#      - postgres
+    volumes:
+      - ${BLOCKS_CONTEXT:-.}/src:/app
+    environment:
+      <<: *env
+      PORT: "8001"
+      HEALTH_PORT: "8181"
+      METRICS_PORT: "9401"
+
+  blocks-worker-c:
+    build:
+      context: ${BLOCKS_CONTEXT:-.}
+      target: ${BLOCKS_TARGET:-prod}
+      args:
+        - SERVICE_NAME=worker
     security_opt:
       - "seccomp:unconfined"
     cap_add:
