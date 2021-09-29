@@ -33,8 +33,8 @@ spec:
         - name: {{ .Chart.Name }}-worker
           image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
           imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
-{{/*          ports:*/}}
-{{/*            - containerPort: {{ .Values.api.health.port }}*/}}
+          ports:
+            - containerPort: {{ .Values.worker.metrics.port }}
 {{/*          livenessProbe:*/}}
 {{/*            httpGet:*/}}
 {{/*              path: {{ .Values.worker.health.prefix }}*/}}
