@@ -43,13 +43,14 @@ type configType struct {
 	KafkaCreateTopic  bool   `envconfig:"KAFKA_CREATE_TOPIC" required:"false" default:"false"`
 
 	// Topics
-	ConsumerGroup             string            `envconfig:"CONSUMER_GROUP" required:"false" default:"blocks-consumer-group"`
-	ConsumerTopicBlocks       string            `envconfig:"CONSUMER_TOPIC_BLOCKS" required:"false" default:"blocks"`
-	ConsumerTopicTransactions string            `envconfig:"CONSUMER_TOPIC_TRANSACTIONS" required:"false" default:"transactions"`
-	ConsumerTopicLogs         string            `envconfig:"CONSUMER_TOPIC_LOGS" required:"false" default:"logs"`
-	ProducerTopics            []string          `envconfig:"CONSUMER_TOPIC_NAME_LOGS" required:"false" default:""`
-	SchemaNameTopics          map[string]string `envconfig:"SCHEMA_NAME_TOPICS" required:"false" default:"blocks-ws:block"`
-	SchemaFolderPath          string            `envconfig:"SCHEMA_FOLDER_PATH" required:"false" default:"/app/schemas/"`
+	ConsumerGroup                string            `envconfig:"CONSUMER_GROUP" required:"false" default:"blocks-consumer-group"`
+	ConsumerGroupBalanceStrategy string            `envconfig:"CONSUMER_GROUP_BALANCE_STRATEGY" required:"false" default:"BalanceStrategyRange"`
+	ConsumerTopicBlocks          string            `envconfig:"CONSUMER_TOPIC_BLOCKS" required:"false" default:"blocks"`
+	ConsumerTopicTransactions    string            `envconfig:"CONSUMER_TOPIC_TRANSACTIONS" required:"false" default:"transactions"`
+	ConsumerTopicLogs            string            `envconfig:"CONSUMER_TOPIC_LOGS" required:"false" default:"logs"`
+	ProducerTopics               []string          `envconfig:"CONSUMER_TOPIC_NAME_LOGS" required:"false" default:""`
+	SchemaNameTopics             map[string]string `envconfig:"SCHEMA_NAME_TOPICS" required:"false" default:"blocks-ws:block"`
+	SchemaFolderPath             string            `envconfig:"SCHEMA_FOLDER_PATH" required:"false" default:"/app/schemas/"`
 
 	// DB
 	DbDriver   string `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
