@@ -113,7 +113,8 @@ kafka:
   kafkaBrokerURL: ""
   schemaRegistryURL: ""
   kafkaGroupID: websocket-group
-  consumerGroup: blocks-consumer-group
+  consumerGroupHead: blocks-consumer-group-head
+  consumerGroupTail: blocks-consumer-group-tail
   schemaNameTopics: "blocks-ws:block"
 
 db:
