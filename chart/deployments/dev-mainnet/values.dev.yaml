@@ -30,3 +30,6 @@ db:
   sslMode: require
 redis:
   host: 10.101.62.32
+kafka:
+  consumerGroupHead: "blocks-consumer-group-head"
+  consumerGroupTail: "blocks-consumer-group-tail"
