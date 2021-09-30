@@ -78,8 +78,10 @@ spec:
               value: {{ .Values.kafka.schemaRegistryURL }}
             - name: KAFKA_GROUP_ID
               value: {{ .Values.kafka.kafkaGroupID }}
-            - name: CONSUMER_GROUP
-              value: {{ .Values.kafka.consumerGroup }}
+            - name: CONSUMER_GROUP_HEAD
+              value: {{ .Values.kafka.consumerGroupHead }}
+            - name: CONSUMER_GROUP_TAIL
+              value: {{ .Values.kafka.consumerGroupTail }}
             - name: CONSUMER_TOPIC_BLOCKS
               value: {{ .Values.api.kafka.topics.blocks }}
             - name: CONSUMER_TOPIC_TRANSACTIONS
