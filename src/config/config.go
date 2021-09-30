@@ -44,7 +44,7 @@ type configType struct {
 
 	// Topics
 	ConsumerGroup                string            `envconfig:"CONSUMER_GROUP" required:"false" default:"blocks-consumer-group"`
-	ConsumerGroupBalanceStrategy string            `envconfig:"CONSUMER_GROUP_BALANCE_STRATEGY" required:"false" default:"BalanceStrategyRange"`
+	ConsumerGroupBalanceStrategy string            `envconfig:"CONSUMER_GROUP_BALANCE_STRATEGY" required:"false" default:"BalanceStrategySticky"`
 	ConsumerTopicBlocks          string            `envconfig:"CONSUMER_TOPIC_BLOCKS" required:"false" default:"blocks"`
 	ConsumerTopicTransactions    string            `envconfig:"CONSUMER_TOPIC_TRANSACTIONS" required:"false" default:"transactions"`
 	ConsumerTopicLogs            string            `envconfig:"CONSUMER_TOPIC_LOGS" required:"false" default:"logs"`
