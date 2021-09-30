@@ -41,12 +41,10 @@ spec:
             httpGet:
               path: {{ .Values.api.health.prefix }}
               port: {{ .Values.api.health.port }}
-            initialDelaySeconds: 60
           readinessProbe:
             httpGet:
               path: {{ .Values.api.health.prefix }}
               port: {{ .Values.api.health.port }}
-            initialDelaySeconds: 60
           env:
             - name: NAME
               value: {{ .Values.networkName }}
