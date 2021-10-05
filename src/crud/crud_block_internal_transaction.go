@@ -1,11 +1,12 @@
 package crud
 
 import (
-	"errors"
+	"reflect"
 	"sync"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/geometry-labs/icon-blocks/models"
 )
@@ -118,6 +119,111 @@ func (m *BlockInternalTransactionModel) UpdateOne(blockInternalTransaction *mode
 	return db.Error
 }
 
+func (m *BlockInternalTransactionModel) UpsertOne(
+	blockInternalTransaction *models.BlockInternalTransaction,
+) error {
+	db := m.db
+
+	// Create map[]interface{} with only non-nil fields
+	updateOnConflictValues := map[string]interface{}{}
+
+	// Loop through struct using reflect package
+	blockInternalTransactionValueOf := reflect.ValueOf(*blockInternalTransaction)
+	blockInternalTransactionTypeOf := reflect.TypeOf(*blockInternalTransaction)
+	for i := 0; i < blockInternalTransactionValueOf.NumField(); i++ {
+		blockInternalTransactionField := blockInternalTransactionValueOf.Field(i)
+		blockInternalTransactionType := blockInternalTransactionTypeOf.Field(i)
+
+		blockInternalTransactionTypeJSONTag := blockInternalTransactionType.Tag.Get("json")
+		if blockInternalTransactionTypeJSONTag != "" {
+			// exported field
+
+			// Check if field if filled
+			blockInternalTransactionFieldKind := blockInternalTransactionField.Kind()
+			isBlockFieldFilled := true
+			switch blockInternalTransactionFieldKind {
+			case reflect.String:
+				v := blockInternalTransactionField.Interface().(string)
+				if v == "" {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int:
+				v := blockInternalTransactionField.Interface().(int)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int8:
+				v := blockInternalTransactionField.Interface().(int8)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int16:
+				v := blockInternalTransactionField.Interface().(int16)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int32:
+				v := blockInternalTransactionField.Interface().(int32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int64:
+				v := blockInternalTransactionField.Interface().(int64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint:
+				v := blockInternalTransactionField.Interface().(uint)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint8:
+				v := blockInternalTransactionField.Interface().(uint8)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint16:
+				v := blockInternalTransactionField.Interface().(uint16)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint32:
+				v := blockInternalTransactionField.Interface().(uint32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint64:
+				v := blockInternalTransactionField.Interface().(uint64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Float32:
+				v := blockInternalTransactionField.Interface().(float32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Float64:
+				v := blockInternalTransactionField.Interface().(float64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			}
+
+			if isBlockFieldFilled == true {
+				updateOnConflictValues[blockInternalTransactionTypeJSONTag] = blockInternalTransactionField.Interface()
+			}
+		}
+	}
+
+	// Upsert
+	db = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "transaction_hash"}, {Name: "log_index"}}, // NOTE set to primary keys for table
+		DoUpdates: clause.Assignments(updateOnConflictValues),
+	}).Create(blockInternalTransaction)
+
+	return db.Error
+}
+
 // StartBlockInternalTransactionLoader starts loader
 func StartBlockInternalTransactionLoader() {
 	go func() {
@@ -126,29 +232,14 @@ func StartBlockInternalTransactionLoader() {
 			// Read newBlockInternalTransaction
 			newBlockInternalTransaction := <-GetBlockInternalTransactionModel().LoaderChannel
 
-			// Insert
-			_, err := GetBlockInternalTransactionModel().SelectOne(
-				newBlockInternalTransaction.TransactionHash,
-				newBlockInternalTransaction.LogIndex,
-			)
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// Insert
-				err = GetBlockInternalTransactionModel().Insert(newBlockInternalTransaction)
-				if err != nil {
-					zap.S().Fatal(err.Error())
-				}
-
-				zap.S().Debug("Loader=BlockInternalTransaction, Number=", newBlockInternalTransaction.Number, " TransactionHash=", newBlockInternalTransaction.TransactionHash, " LogIndex=", newBlockInternalTransaction.LogIndex, " - Insert")
-			} else if err == nil {
-				// Update
-				err = GetBlockInternalTransactionModel().UpdateOne(newBlockInternalTransaction)
-				if err != nil {
-					zap.S().Fatal(err.Error())
-				}
-
-				zap.S().Debug("Loader=BlockInternalTransaction, Number=", newBlockInternalTransaction.Number, " TransactionHash=", newBlockInternalTransaction.TransactionHash, " LogIndex=", newBlockInternalTransaction.LogIndex, " - Update")
-			} else if err != nil {
-				// Error
+			//////////////////////
+			// Load to postgres //
+			//////////////////////
+			err := GetBlockInternalTransactionModel().UpsertOne(newBlockInternalTransaction)
+			zap.S().Debug("Loader=BlockInternalTransaction, Number=", newBlockInternalTransaction.Number, " TransactionHash=", newBlockInternalTransaction.TransactionHash, " LogIndex=", newBlockInternalTransaction.LogIndex, " - Upserted")
+			if err != nil {
+				// Postgres error
+				zap.S().Info("Loader=BlockInternalTransaction, Number=", newBlockInternalTransaction.Number, " TransactionHash=", newBlockInternalTransaction.TransactionHash, " LogIndex=", newBlockInternalTransaction.LogIndex, " - FATAL")
 				zap.S().Fatal(err.Error())
 			}
 

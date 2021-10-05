@@ -96,7 +96,7 @@ func StartBlockWebsocketIndexLoader() {
 				Number: newBlockWebsocket.Number,
 			}
 
-			// Update/Insert
+			// Insert
 			_, err := GetBlockWebsocketIndexModel().SelectOne(newBlockWebsocketIndex.Number)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 

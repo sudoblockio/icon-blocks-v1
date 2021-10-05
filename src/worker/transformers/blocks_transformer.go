@@ -91,12 +91,12 @@ func transformBlockRawToBlock(blockRaw *models.BlockRaw) *models.Block {
 		Hash:                      blockRaw.Hash,
 		ParentHash:                blockRaw.ParentHash,
 		Timestamp:                 blockRaw.Timestamp,
-		TransactionFees:           "0x0", // Adds in loader
-		TransactionAmount:         "0x0", // Adds in loader
-		InternalTransactionAmount: "0x0", // Adds in loader
-		InternalTransactionCount:  0,     // Adds in loader
-		FailedTransactionCount:    0,     // Adds in loader
-		BlockTime:                 0,     // Adds in loader
+		TransactionFees:           "", // Adds in loader
+		TransactionAmount:         "", // Adds in loader
+		InternalTransactionAmount: "", // Adds in loader
+		InternalTransactionCount:  0,  // Adds in loader
+		FailedTransactionCount:    0,  // Adds in loader
+		BlockTime:                 0,  // Adds in loader
 	}
 }
 

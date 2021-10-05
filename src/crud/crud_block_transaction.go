@@ -1,11 +1,12 @@
 package crud
 
 import (
-	"errors"
+	"reflect"
 	"sync"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/geometry-labs/icon-blocks/models"
 )
@@ -112,6 +113,111 @@ func (m *BlockTransactionModel) UpdateOne(blockTransaction *models.BlockTransact
 	return db.Error
 }
 
+func (m *BlockTransactionModel) UpsertOne(
+	blockTransaction *models.BlockTransaction,
+) error {
+	db := m.db
+
+	// Create map[]interface{} with only non-nil fields
+	updateOnConflictValues := map[string]interface{}{}
+
+	// Loop through struct using reflect package
+	blockTransactionValueOf := reflect.ValueOf(*blockTransaction)
+	blockTransactionTypeOf := reflect.TypeOf(*blockTransaction)
+	for i := 0; i < blockTransactionValueOf.NumField(); i++ {
+		blockTransactionField := blockTransactionValueOf.Field(i)
+		blockTransactionType := blockTransactionTypeOf.Field(i)
+
+		blockTransactionTypeJSONTag := blockTransactionType.Tag.Get("json")
+		if blockTransactionTypeJSONTag != "" {
+			// exported field
+
+			// Check if field if filled
+			blockTransactionFieldKind := blockTransactionField.Kind()
+			isBlockFieldFilled := true
+			switch blockTransactionFieldKind {
+			case reflect.String:
+				v := blockTransactionField.Interface().(string)
+				if v == "" {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int:
+				v := blockTransactionField.Interface().(int)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int8:
+				v := blockTransactionField.Interface().(int8)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int16:
+				v := blockTransactionField.Interface().(int16)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int32:
+				v := blockTransactionField.Interface().(int32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int64:
+				v := blockTransactionField.Interface().(int64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint:
+				v := blockTransactionField.Interface().(uint)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint8:
+				v := blockTransactionField.Interface().(uint8)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint16:
+				v := blockTransactionField.Interface().(uint16)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint32:
+				v := blockTransactionField.Interface().(uint32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint64:
+				v := blockTransactionField.Interface().(uint64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Float32:
+				v := blockTransactionField.Interface().(float32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Float64:
+				v := blockTransactionField.Interface().(float64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			}
+
+			if isBlockFieldFilled == true {
+				updateOnConflictValues[blockTransactionTypeJSONTag] = blockTransactionField.Interface()
+			}
+		}
+	}
+
+	// Upsert
+	db = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "transaction_hash"}}, // NOTE set to primary keys for table
+		DoUpdates: clause.Assignments(updateOnConflictValues),
+	}).Create(blockTransaction)
+
+	return db.Error
+}
+
 // StartBlockTransactionLoader starts loader
 func StartBlockTransactionLoader() {
 	go func() {
@@ -120,28 +226,14 @@ func StartBlockTransactionLoader() {
 			// Read newBlockTransaction
 			newBlockTransaction := <-GetBlockTransactionModel().LoaderChannel
 
-			// Insert
-			_, err := GetBlockTransactionModel().SelectOne(
-				newBlockTransaction.TransactionHash,
-			)
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// Insert
-				err = GetBlockTransactionModel().Insert(newBlockTransaction)
-				if err != nil {
-					zap.S().Fatal(err.Error())
-				}
-
-				zap.S().Debug("Loader=BlockTransaction, Number=", newBlockTransaction.Number, " TransactionHash=", newBlockTransaction.TransactionHash, " - Insert")
-			} else if err == nil {
-				// Update
-				err = GetBlockTransactionModel().UpdateOne(newBlockTransaction)
-				if err != nil {
-					zap.S().Fatal(err.Error())
-				}
-
-				zap.S().Debug("Loader=BlockTransaction, Number=", newBlockTransaction.Number, " TransactionHash=", newBlockTransaction.TransactionHash, " - Update")
-			} else if err != nil {
-				// Error
+			//////////////////////
+			// Load to postgres //
+			//////////////////////
+			err := GetBlockTransactionModel().UpsertOne(newBlockTransaction)
+			zap.S().Debug("Loader=BlockTransaction, Number=", newBlockTransaction.Number, " TransactionHash=", newBlockTransaction.TransactionHash, " - Upserted")
+			if err != nil {
+				// Postgres error
+				zap.S().Info("Loader=BlockTransaction, Number=", newBlockTransaction.Number, " TransactionHash=", newBlockTransaction.TransactionHash, " - FATAL")
 				zap.S().Fatal(err.Error())
 			}
 
