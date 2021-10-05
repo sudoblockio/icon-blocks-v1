@@ -112,89 +112,89 @@ func (m *BlockTimeModel) UpsertOne(
 	updateOnConflictValues := map[string]interface{}{}
 
 	// Loop through struct using reflect package
-	blockTimeValueOf := reflect.ValueOf(*blockTime)
-	blockTimeTypeOf := reflect.TypeOf(*blockTime)
-	for i := 0; i < blockTimeValueOf.NumField(); i++ {
-		blockTimeField := blockTimeValueOf.Field(i)
-		blockTimeType := blockTimeTypeOf.Field(i)
+	modelValueOf := reflect.ValueOf(*blockTime)
+	modelTypeOf := reflect.TypeOf(*blockTime)
+	for i := 0; i < modelValueOf.NumField(); i++ {
+		modelField := modelValueOf.Field(i)
+		modelType := modelTypeOf.Field(i)
 
-		blockTimeTypeJSONTag := blockTimeType.Tag.Get("json")
-		if blockTimeTypeJSONTag != "" {
+		modelTypeJSONTag := modelType.Tag.Get("json")
+		if modelTypeJSONTag != "" {
 			// exported field
 
 			// Check if field if filled
-			blockTimeFieldKind := blockTimeField.Kind()
+			modelFieldKind := modelField.Kind()
 			isBlockFieldFilled := true
-			switch blockTimeFieldKind {
+			switch modelFieldKind {
 			case reflect.String:
-				v := blockTimeField.Interface().(string)
+				v := modelField.Interface().(string)
 				if v == "" {
 					isBlockFieldFilled = false
 				}
 			case reflect.Int:
-				v := blockTimeField.Interface().(int)
+				v := modelField.Interface().(int)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Int8:
-				v := blockTimeField.Interface().(int8)
+				v := modelField.Interface().(int8)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Int16:
-				v := blockTimeField.Interface().(int16)
+				v := modelField.Interface().(int16)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Int32:
-				v := blockTimeField.Interface().(int32)
+				v := modelField.Interface().(int32)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Int64:
-				v := blockTimeField.Interface().(int64)
+				v := modelField.Interface().(int64)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Uint:
-				v := blockTimeField.Interface().(uint)
+				v := modelField.Interface().(uint)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Uint8:
-				v := blockTimeField.Interface().(uint8)
+				v := modelField.Interface().(uint8)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Uint16:
-				v := blockTimeField.Interface().(uint16)
+				v := modelField.Interface().(uint16)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Uint32:
-				v := blockTimeField.Interface().(uint32)
+				v := modelField.Interface().(uint32)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Uint64:
-				v := blockTimeField.Interface().(uint64)
+				v := modelField.Interface().(uint64)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Float32:
-				v := blockTimeField.Interface().(float32)
+				v := modelField.Interface().(float32)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Float64:
-				v := blockTimeField.Interface().(float64)
+				v := modelField.Interface().(float64)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			}
 
 			if isBlockFieldFilled == true {
-				updateOnConflictValues[blockTimeTypeJSONTag] = blockTimeField.Interface()
+				updateOnConflictValues[modelTypeJSONTag] = modelField.Interface()
 			}
 		}
 	}

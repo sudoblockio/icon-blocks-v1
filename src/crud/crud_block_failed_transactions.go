@@ -122,89 +122,89 @@ func (m *BlockFailedTransactionModel) UpsertOne(
 	updateOnConflictValues := map[string]interface{}{}
 
 	// Loop through struct using reflect package
-	blockFailedTransactionValueOf := reflect.ValueOf(*blockFailedTransaction)
-	blockFailedTransactionTypeOf := reflect.TypeOf(*blockFailedTransaction)
-	for i := 0; i < blockFailedTransactionValueOf.NumField(); i++ {
-		blockFailedTransactionField := blockFailedTransactionValueOf.Field(i)
-		blockFailedTransactionType := blockFailedTransactionTypeOf.Field(i)
+	modelValueOf := reflect.ValueOf(*blockFailedTransaction)
+	modelTypeOf := reflect.TypeOf(*blockFailedTransaction)
+	for i := 0; i < modelValueOf.NumField(); i++ {
+		modelField := modelValueOf.Field(i)
+		modelType := modelTypeOf.Field(i)
 
-		blockFailedTransactionTypeJSONTag := blockFailedTransactionType.Tag.Get("json")
-		if blockFailedTransactionTypeJSONTag != "" {
+		modelTypeJSONTag := modelType.Tag.Get("json")
+		if modelTypeJSONTag != "" {
 			// exported field
 
 			// Check if field if filled
-			blockFailedTransactionFieldKind := blockFailedTransactionField.Kind()
+			modelFieldKind := modelField.Kind()
 			isBlockFieldFilled := true
-			switch blockFailedTransactionFieldKind {
+			switch modelFieldKind {
 			case reflect.String:
-				v := blockFailedTransactionField.Interface().(string)
+				v := modelField.Interface().(string)
 				if v == "" {
 					isBlockFieldFilled = false
 				}
 			case reflect.Int:
-				v := blockFailedTransactionField.Interface().(int)
+				v := modelField.Interface().(int)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Int8:
-				v := blockFailedTransactionField.Interface().(int8)
+				v := modelField.Interface().(int8)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Int16:
-				v := blockFailedTransactionField.Interface().(int16)
+				v := modelField.Interface().(int16)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Int32:
-				v := blockFailedTransactionField.Interface().(int32)
+				v := modelField.Interface().(int32)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Int64:
-				v := blockFailedTransactionField.Interface().(int64)
+				v := modelField.Interface().(int64)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Uint:
-				v := blockFailedTransactionField.Interface().(uint)
+				v := modelField.Interface().(uint)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Uint8:
-				v := blockFailedTransactionField.Interface().(uint8)
+				v := modelField.Interface().(uint8)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Uint16:
-				v := blockFailedTransactionField.Interface().(uint16)
+				v := modelField.Interface().(uint16)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Uint32:
-				v := blockFailedTransactionField.Interface().(uint32)
+				v := modelField.Interface().(uint32)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Uint64:
-				v := blockFailedTransactionField.Interface().(uint64)
+				v := modelField.Interface().(uint64)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Float32:
-				v := blockFailedTransactionField.Interface().(float32)
+				v := modelField.Interface().(float32)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			case reflect.Float64:
-				v := blockFailedTransactionField.Interface().(float64)
+				v := modelField.Interface().(float64)
 				if v == 0 {
 					isBlockFieldFilled = false
 				}
 			}
 
 			if isBlockFieldFilled == true {
-				updateOnConflictValues[blockFailedTransactionTypeJSONTag] = blockFailedTransactionField.Interface()
+				updateOnConflictValues[modelTypeJSONTag] = modelField.Interface()
 			}
 		}
 	}
