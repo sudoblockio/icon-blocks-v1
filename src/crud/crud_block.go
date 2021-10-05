@@ -4,12 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"reflect"
 	"strings"
 	"sync"
 
 	"github.com/cenkalti/backoff/v4"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/geometry-labs/icon-blocks/models"
 )
@@ -36,6 +38,7 @@ func GetBlockModel() *BlockModel {
 		blockModel = &BlockModel{
 			db:            dbConn,
 			model:         &models.Block{},
+			modelORM:      &models.BlockORM{},
 			LoaderChannel: make(chan *models.Block, 1),
 		}
 
@@ -176,6 +179,111 @@ func (m *BlockModel) UpdateOne(
 	return db.Error
 }
 
+func (m *BlockModel) UpsertOne(
+	block *models.Block,
+) error {
+	db := m.db
+
+	// Create map[]interface{} with only non-nil fields
+	updateOnConflictValues := map[string]interface{}{}
+
+	// Loop through struct using reflect package
+	blockValueOf := reflect.ValueOf(*block)
+	blockTypeOf := reflect.TypeOf(*block)
+	for i := 0; i < blockValueOf.NumField(); i++ {
+		blockField := blockValueOf.Field(i)
+		blockType := blockTypeOf.Field(i)
+
+		blockTypeJSONTag := blockType.Tag.Get("json")
+		if blockTypeJSONTag != "" {
+			// exported field
+
+			// Check if field if filled
+			blockFieldKind := blockField.Kind()
+			isBlockFieldFilled := true
+			switch blockFieldKind {
+			case reflect.String:
+				v := blockField.Interface().(string)
+				if v == "" {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int:
+				v := blockField.Interface().(int)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int8:
+				v := blockField.Interface().(int8)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int16:
+				v := blockField.Interface().(int16)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int32:
+				v := blockField.Interface().(int32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int64:
+				v := blockField.Interface().(int64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint:
+				v := blockField.Interface().(uint)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint8:
+				v := blockField.Interface().(uint8)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint16:
+				v := blockField.Interface().(uint16)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint32:
+				v := blockField.Interface().(uint32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint64:
+				v := blockField.Interface().(uint64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Float32:
+				v := blockField.Interface().(float32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Float64:
+				v := blockField.Interface().(float64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			}
+
+			if isBlockFieldFilled == true {
+				updateOnConflictValues[blockTypeJSONTag] = blockField.Interface()
+			}
+		}
+	}
+
+	// Upsert
+	db = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "number"}}, // NOTE set to primary keys for table
+		DoUpdates: clause.Assignments(updateOnConflictValues),
+	}).Create(block)
+
+	return db.Error
+}
+
 // StartBlockLoader starts loader
 func StartBlockLoader() {
 	go func() {
@@ -280,16 +388,11 @@ func StartBlockLoader() {
 			//////////////////////
 			// Load to postgres //
 			//////////////////////
-			_, err = GetBlockModel().SelectOne(newBlock.Number)
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// Insert
-				GetBlockModel().Insert(newBlock)
-			} else if err == nil {
-				// Update
-				GetBlockModel().UpdateOne(newBlock)
-				zap.S().Debug("Loader=Block, Number=", newBlock.Number, " - Updated")
-			} else {
+			err = GetBlockModel().UpsertOne(newBlock)
+			zap.S().Debug("Loader=Block, Number=", newBlock.Number, " - Upserted")
+			if err != nil {
 				// Postgres error
+				zap.S().Info("Loader=Block, Number=", newBlock.Number, " - FATAL")
 				zap.S().Fatal(err.Error())
 			}
 		}
