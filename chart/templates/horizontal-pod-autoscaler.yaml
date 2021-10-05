@@ -22,12 +22,12 @@ spec:
           averageUtilization: {{ .Values.autoscaler.averageCPU }}
     - type: Object
       object:
+        describedObject:
+          kind: Service
+          name: {{ .Release.Name }}
         metric:
           name: envoy_upstream_active_requests
-        describedObject:
-          apiVersion: custom.metrics.k8s.io/v1beta1
-          kind: MetricValueList
-          name: envoy_upstream_active_requests
         target:
+          type: AverageValue
           averageValue: "100"
 {{- end }}
