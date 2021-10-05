@@ -1,13 +1,14 @@
 package crud
 
 import (
-	"errors"
+	"reflect"
 	"strings"
 	"sync"
 
 	"github.com/cenkalti/backoff/v4"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/geometry-labs/icon-blocks/models"
 )
@@ -102,6 +103,111 @@ func (m *BlockTimeModel) UpdateOne(
 	return db.Error
 }
 
+func (m *BlockTimeModel) UpsertOne(
+	blockTime *models.BlockTime,
+) error {
+	db := m.db
+
+	// Create map[]interface{} with only non-nil fields
+	updateOnConflictValues := map[string]interface{}{}
+
+	// Loop through struct using reflect package
+	blockTimeValueOf := reflect.ValueOf(*blockTime)
+	blockTimeTypeOf := reflect.TypeOf(*blockTime)
+	for i := 0; i < blockTimeValueOf.NumField(); i++ {
+		blockTimeField := blockTimeValueOf.Field(i)
+		blockTimeType := blockTimeTypeOf.Field(i)
+
+		blockTimeTypeJSONTag := blockTimeType.Tag.Get("json")
+		if blockTimeTypeJSONTag != "" {
+			// exported field
+
+			// Check if field if filled
+			blockTimeFieldKind := blockTimeField.Kind()
+			isBlockFieldFilled := true
+			switch blockTimeFieldKind {
+			case reflect.String:
+				v := blockTimeField.Interface().(string)
+				if v == "" {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int:
+				v := blockTimeField.Interface().(int)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int8:
+				v := blockTimeField.Interface().(int8)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int16:
+				v := blockTimeField.Interface().(int16)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int32:
+				v := blockTimeField.Interface().(int32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int64:
+				v := blockTimeField.Interface().(int64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint:
+				v := blockTimeField.Interface().(uint)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint8:
+				v := blockTimeField.Interface().(uint8)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint16:
+				v := blockTimeField.Interface().(uint16)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint32:
+				v := blockTimeField.Interface().(uint32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint64:
+				v := blockTimeField.Interface().(uint64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Float32:
+				v := blockTimeField.Interface().(float32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Float64:
+				v := blockTimeField.Interface().(float64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			}
+
+			if isBlockFieldFilled == true {
+				updateOnConflictValues[blockTimeTypeJSONTag] = blockTimeField.Interface()
+			}
+		}
+	}
+
+	// Upsert
+	db = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "number"}}, // NOTE set to primary keys for table
+		DoUpdates: clause.Assignments(updateOnConflictValues),
+	}).Create(blockTime)
+
+	return db.Error
+}
+
 // StartBlockTimeLoader starts loader
 func StartBlockTimeLoader() {
 	go func() {
@@ -113,16 +219,11 @@ func StartBlockTimeLoader() {
 			//////////////////////
 			// Load to postgres //
 			//////////////////////
-			_, err := GetBlockTimeModel().SelectOne(newBlockTime.Number)
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// Insert
-				GetBlockTimeModel().Insert(newBlockTime)
-			} else if err == nil {
-				// Update
-				GetBlockTimeModel().UpdateOne(newBlockTime)
-				zap.S().Debug("Loader=BlockTime, Number=", newBlockTime.Number, " - Updated")
-			} else {
+			err := GetBlockTimeModel().UpsertOne(newBlockTime)
+			zap.S().Debug("Loader=BlockTime, Number=", newBlockTime.Number, " - Upserted")
+			if err != nil {
 				// Postgres error
+				zap.S().Info("Loader=BlockTime, Number=", newBlockTime.Number, " - FATAL")
 				zap.S().Fatal(err.Error())
 			}
 

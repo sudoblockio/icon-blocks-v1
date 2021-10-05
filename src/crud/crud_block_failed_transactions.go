@@ -1,11 +1,12 @@
 package crud
 
 import (
-	"errors"
+	"reflect"
 	"sync"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/geometry-labs/icon-blocks/models"
 )
@@ -112,6 +113,111 @@ func (m *BlockFailedTransactionModel) UpdateOne(blockFailedTransaction *models.B
 	return db.Error
 }
 
+func (m *BlockFailedTransactionModel) UpsertOne(
+	blockFailedTransaction *models.BlockFailedTransaction,
+) error {
+	db := m.db
+
+	// Create map[]interface{} with only non-nil fields
+	updateOnConflictValues := map[string]interface{}{}
+
+	// Loop through struct using reflect package
+	blockFailedTransactionValueOf := reflect.ValueOf(*blockFailedTransaction)
+	blockFailedTransactionTypeOf := reflect.TypeOf(*blockFailedTransaction)
+	for i := 0; i < blockFailedTransactionValueOf.NumField(); i++ {
+		blockFailedTransactionField := blockFailedTransactionValueOf.Field(i)
+		blockFailedTransactionType := blockFailedTransactionTypeOf.Field(i)
+
+		blockFailedTransactionTypeJSONTag := blockFailedTransactionType.Tag.Get("json")
+		if blockFailedTransactionTypeJSONTag != "" {
+			// exported field
+
+			// Check if field if filled
+			blockFailedTransactionFieldKind := blockFailedTransactionField.Kind()
+			isBlockFieldFilled := true
+			switch blockFailedTransactionFieldKind {
+			case reflect.String:
+				v := blockFailedTransactionField.Interface().(string)
+				if v == "" {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int:
+				v := blockFailedTransactionField.Interface().(int)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int8:
+				v := blockFailedTransactionField.Interface().(int8)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int16:
+				v := blockFailedTransactionField.Interface().(int16)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int32:
+				v := blockFailedTransactionField.Interface().(int32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Int64:
+				v := blockFailedTransactionField.Interface().(int64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint:
+				v := blockFailedTransactionField.Interface().(uint)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint8:
+				v := blockFailedTransactionField.Interface().(uint8)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint16:
+				v := blockFailedTransactionField.Interface().(uint16)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint32:
+				v := blockFailedTransactionField.Interface().(uint32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Uint64:
+				v := blockFailedTransactionField.Interface().(uint64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Float32:
+				v := blockFailedTransactionField.Interface().(float32)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			case reflect.Float64:
+				v := blockFailedTransactionField.Interface().(float64)
+				if v == 0 {
+					isBlockFieldFilled = false
+				}
+			}
+
+			if isBlockFieldFilled == true {
+				updateOnConflictValues[blockFailedTransactionTypeJSONTag] = blockFailedTransactionField.Interface()
+			}
+		}
+	}
+
+	// Upsert
+	db = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "transaction_hash"}}, // NOTE set to primary keys for table
+		DoUpdates: clause.Assignments(updateOnConflictValues),
+	}).Create(blockFailedTransaction)
+
+	return db.Error
+}
+
 // StartBlockFailedTransactionLoader starts loader
 func StartBlockFailedTransactionLoader() {
 	go func() {
@@ -120,28 +226,14 @@ func StartBlockFailedTransactionLoader() {
 			// Read newBlockFailedTransaction
 			newBlockFailedTransaction := <-GetBlockFailedTransactionModel().LoaderChannel
 
-			// Insert
-			_, err := GetBlockFailedTransactionModel().SelectOne(
-				newBlockFailedTransaction.TransactionHash,
-			)
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// Insert
-				err = GetBlockFailedTransactionModel().Insert(newBlockFailedTransaction)
-				if err != nil {
-					zap.S().Fatal(err.Error())
-				}
-
-				zap.S().Debug("Loader=BlockFailedTransaction, Number=", newBlockFailedTransaction.Number, " TransactionHash=", newBlockFailedTransaction.TransactionHash, " - Insert")
-			} else if err == nil {
-				// Update
-				err = GetBlockFailedTransactionModel().UpdateOne(newBlockFailedTransaction)
-				if err != nil {
-					zap.S().Fatal(err.Error())
-				}
-
-				zap.S().Debug("Loader=BlockFailedTransaction, Number=", newBlockFailedTransaction.Number, " TransactionHash=", newBlockFailedTransaction.TransactionHash, " - Update")
-			} else if err != nil {
+			//////////////////////
+			// Load to postgres //
+			//////////////////////
+			err := GetBlockFailedTransactionModel().UpsertOne(newBlockFailedTransaction)
+			zap.S().Debug("Loader=BlockFailedTransaction, TransactionHash=", newBlockFailedTransaction.TransactionHash, " - Upserted")
+			if err != nil {
 				// Error
+				zap.S().Info("Loader=BlockFailedTransaction, TransactionHash=", newBlockFailedTransaction.TransactionHash, " - FATAL")
 				zap.S().Fatal(err.Error())
 			}
 

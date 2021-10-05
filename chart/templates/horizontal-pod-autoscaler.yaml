@@ -2,7 +2,7 @@
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Release.Name }}-api
   labels:
 {{ include "labels" . | indent 6 }}
 
@@ -12,7 +12,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ .Release.Name }}
+    name: {{ .Release.Name }}-api
   metrics:
     - type: Resource
       resource:
@@ -20,4 +20,14 @@ spec:
         target:
           type: Utilization
           averageUtilization: {{ .Values.autoscaler.averageCPU }}
+    - type: Object
+      object:
+        describedObject:
+          kind: Service
+          name: {{ .Release.Name }}
+        metric:
+          name: envoy_upstream_active_requests
+        target:
+          type: AverageValue
+          averageValue: "100"
 {{- end }}
