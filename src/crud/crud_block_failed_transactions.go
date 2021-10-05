@@ -134,76 +134,76 @@ func (m *BlockFailedTransactionModel) UpsertOne(
 
 			// Check if field if filled
 			modelFieldKind := modelField.Kind()
-			isBlockFieldFilled := true
+			isFieldFilled := true
 			switch modelFieldKind {
 			case reflect.String:
 				v := modelField.Interface().(string)
 				if v == "" {
-					isBlockFieldFilled = false
+					isFieldFilled = false
 				}
 			case reflect.Int:
 				v := modelField.Interface().(int)
 				if v == 0 {
-					isBlockFieldFilled = false
+					isFieldFilled = false
 				}
 			case reflect.Int8:
 				v := modelField.Interface().(int8)
 				if v == 0 {
-					isBlockFieldFilled = false
+					isFieldFilled = false
 				}
 			case reflect.Int16:
 				v := modelField.Interface().(int16)
 				if v == 0 {
-					isBlockFieldFilled = false
+					isFieldFilled = false
 				}
 			case reflect.Int32:
 				v := modelField.Interface().(int32)
 				if v == 0 {
-					isBlockFieldFilled = false
+					isFieldFilled = false
 				}
 			case reflect.Int64:
 				v := modelField.Interface().(int64)
 				if v == 0 {
-					isBlockFieldFilled = false
+					isFieldFilled = false
 				}
 			case reflect.Uint:
 				v := modelField.Interface().(uint)
 				if v == 0 {
-					isBlockFieldFilled = false
+					isFieldFilled = false
 				}
 			case reflect.Uint8:
 				v := modelField.Interface().(uint8)
 				if v == 0 {
-					isBlockFieldFilled = false
+					isFieldFilled = false
 				}
 			case reflect.Uint16:
 				v := modelField.Interface().(uint16)
 				if v == 0 {
-					isBlockFieldFilled = false
+					isFieldFilled = false
 				}
 			case reflect.Uint32:
 				v := modelField.Interface().(uint32)
 				if v == 0 {
-					isBlockFieldFilled = false
+					isFieldFilled = false
 				}
 			case reflect.Uint64:
 				v := modelField.Interface().(uint64)
 				if v == 0 {
-					isBlockFieldFilled = false
+					isFieldFilled = false
 				}
 			case reflect.Float32:
 				v := modelField.Interface().(float32)
 				if v == 0 {
-					isBlockFieldFilled = false
+					isFieldFilled = false
 				}
 			case reflect.Float64:
 				v := modelField.Interface().(float64)
 				if v == 0 {
-					isBlockFieldFilled = false
+					isFieldFilled = false
 				}
 			}
 
-			if isBlockFieldFilled == true {
+			if isFieldFilled == true {
 				updateOnConflictValues[modelTypeJSONTag] = modelField.Interface()
 			}
 		}
