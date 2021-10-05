@@ -3,7 +3,6 @@ apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ .Release.Name }}-api
-  namespace: kube-system
   labels:
 {{ include "labels" . | indent 6 }}
 
