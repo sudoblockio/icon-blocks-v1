@@ -11,9 +11,13 @@ api:
     "prometheus.io/port": "9400"
   kafka:
     topics:
-      blocks: blocks-raw
-      transactions: transactions-raw
-      logs: logs-raw
+      blocks: v015a-blocks-raw
+      transactions: v015a-transactions-raw
+      logs: v015a-logs-raw
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
 worker:
   annotations: |
     "geometrylabs.io/logging": "true"
@@ -23,9 +27,9 @@ worker:
     tag: '89'
   kafka:
     topics:
-      blocks: blocks-raw
-      transactions: transactions-raw
-      logs: logs-raw
+      blocks: v015a-blocks-raw
+      transactions: v015a-transactions-raw
+      logs: v015a-logs-raw
 db:
   sslMode: require
 redis:
@@ -33,3 +37,5 @@ redis:
 kafka:
   consumerGroupHead: blocks-consumer-group-head
   consumerGroupTail: blocks-consumer-group-tail
+autoscaler:
+  maxReplicas: 50
