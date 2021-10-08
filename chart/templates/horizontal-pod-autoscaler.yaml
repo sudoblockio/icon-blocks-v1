@@ -33,4 +33,6 @@ spec:
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 30
 {{- end }}
