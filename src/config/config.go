@@ -25,8 +25,9 @@ type configType struct {
 	MaxPageSize int `envconfig:"MAX_PAGE_SIZE" required:"false" default:"100"`
 
 	// CORS
-	CORSAllowOrigins string `envconfig:"CORS_ALLOW_ORIGINS" required:"false" default:"*"`
-	CORSAllowHeaders string `envconfig:"CORS_ALLOW_HEADERS" required:"false" default:"*"`
+	CORSAllowOrigins  string `envconfig:"CORS_ALLOW_ORIGINS" required:"false" default:"*"`
+	CORSAllowHeaders  string `envconfig:"CORS_ALLOW_HEADERS" required:"false" default:"*"`
+	CORSExposeHeaders string `envconfig:"CORS_EXPOSE_HEADERS" required:"false" default:"*"`
 
 	// Monitoring
 	HealthPollingInterval int `envconfig:"HEALTH_POLLING_INTERVAL" required:"false" default:"10"`

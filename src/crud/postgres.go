@@ -58,6 +58,10 @@ func createSession(dsn string) (*gorm.DB, error) {
 		zap.S().Info("err:", err)
 	}
 
+	sqlDB, _ := db.DB()
+	sqlDB.SetMaxIdleConns(2)
+	sqlDB.SetMaxOpenConns(10)
+
 	return db, err
 }
 
