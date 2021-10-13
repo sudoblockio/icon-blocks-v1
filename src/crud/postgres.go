@@ -59,8 +59,8 @@ func createSession(dsn string) (*gorm.DB, error) {
 	}
 
 	sqlDB, _ := db.DB()
-	sqlDB.SetMaxIdleConns(2)
-	sqlDB.SetMaxOpenConns(10)
+	sqlDB.SetMaxIdleConns(config.Config.DbMaxIdleConnections)
+	sqlDB.SetMaxOpenConns(config.Config.DbMaxOpenConnections)
 
 	return db, err
 }
