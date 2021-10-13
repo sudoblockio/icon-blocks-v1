@@ -36,8 +36,9 @@ func Start() {
 
 	// CORS Middleware
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: config.Config.CORSAllowOrigins,
-		AllowHeaders: config.Config.CORSAllowHeaders,
+		AllowOrigins:  config.Config.CORSAllowOrigins,
+		AllowHeaders:  config.Config.CORSAllowHeaders,
+		ExposeHeaders: config.Config.CORSExposeHeaders,
 	}))
 
 	// Swagger docs
