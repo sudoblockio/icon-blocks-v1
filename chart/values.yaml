@@ -26,6 +26,10 @@ api:
   annotations: null
   internal:
     port: 80
+    cors:
+      allowOrigins: ""
+      alllowHeaders: ""
+      exposeHeaders: ""
   health:
     port: 9300
     prefix: "/health"
@@ -122,6 +126,8 @@ db:
   name: blocks
   sslMode: disable
   timezone: UTC
+  maxIdle:
+  maxOpen:
 
 redis:
   host: "redis"
