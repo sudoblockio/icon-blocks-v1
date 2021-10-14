@@ -51,6 +51,8 @@ api:
     password: changeme
     host: localhost
     port: 5432
+    maxIdle: 1
+    maxOpen: 1
   kafka:
     topics:
       blocks: blocks
@@ -96,6 +98,8 @@ worker:
     password: changeme
     host: localhost
     port: 5432
+    maxIdle: 0
+    maxOpen: 1
   kafka:
     topics:
       blocks: blocks
@@ -126,8 +130,6 @@ db:
   name: blocks
   sslMode: disable
   timezone: UTC
-  maxIdle:
-  maxOpen:
 
 redis:
   host: "redis"

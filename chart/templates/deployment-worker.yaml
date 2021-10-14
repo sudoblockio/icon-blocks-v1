@@ -107,9 +107,9 @@ spec:
             - name: DB_TIMEZONE
               value: {{ .Values.db.timezone }}
             - name: DB_MAX_IDLE_CONNECTIONS
-              value: {{ .Values.db.maxIdle | quote }}
+              value: {{ .Values.worker.db.maxIdle | quote }}
             - name: DB_MAX_OPEN_CONNECTIONS
-              value: {{ .Values.db.maxOpen | quote }}
+              value: {{ .Values.worker.db.maxOpen | quote }}
             - name: REDIS_HOST
               value: {{ .Values.redis.host }}
             - name: REDIS_PORT
