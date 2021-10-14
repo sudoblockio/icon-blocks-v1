@@ -47,7 +47,7 @@ spec:
 {{/*            initialDelaySeconds: 60*/}}
           env:
             - name: NAME
-              value: {{ .Values.networkName }}
+              value: {{ .Values.name }}
             - name: NETWORK_NAME
               value: {{ .Values.networkName }}
             - name: HEALTH_PORT
@@ -106,6 +106,10 @@ spec:
               value: {{ .Values.db.sslMode }}
             - name: DB_TIMEZONE
               value: {{ .Values.db.timezone }}
+            - name: DB_MAX_IDLE_CONNECTIONS
+              value: {{ .Values.worker.db.maxIdle | quote }}
+            - name: DB_MAX_OPEN_CONNECTIONS
+              value: {{ .Values.worker.db.maxOpen | quote }}
             - name: REDIS_HOST
               value: {{ .Values.redis.host }}
             - name: REDIS_PORT

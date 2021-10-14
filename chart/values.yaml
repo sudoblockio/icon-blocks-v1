@@ -26,6 +26,10 @@ api:
   annotations: null
   internal:
     port: 80
+    cors:
+      allowOrigins: ""
+      alllowHeaders: ""
+      exposeHeaders: ""
   health:
     port: 9300
     prefix: "/health"
@@ -47,6 +51,8 @@ api:
     password: changeme
     host: localhost
     port: 5432
+    maxIdle: 1
+    maxOpen: 1
   kafka:
     topics:
       blocks: blocks
@@ -92,6 +98,8 @@ worker:
     password: changeme
     host: localhost
     port: 5432
+    maxIdle: 0
+    maxOpen: 1
   kafka:
     topics:
       blocks: blocks
