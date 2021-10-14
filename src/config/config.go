@@ -33,10 +33,11 @@ type configType struct {
 	HealthPollingInterval int `envconfig:"HEALTH_POLLING_INTERVAL" required:"false" default:"10"`
 
 	// Logging
-	LogLevel    string `envconfig:"LOG_LEVEL" required:"false" default:"INFO"`
-	LogToFile   bool   `envconfig:"LOG_TO_FILE" required:"false" default:"false"`
-	LogFileName string `envconfig:"LOG_FILE_NAME" required:"false" default:"blocks-service.log"`
-	LogFormat   string `envconfig:"LOG_FORMAT" required:"false" default:"json"`
+	LogLevel         string `envconfig:"LOG_LEVEL" required:"false" default:"INFO"`
+	LogToFile        bool   `envconfig:"LOG_TO_FILE" required:"false" default:"false"`
+	LogFileName      string `envconfig:"LOG_FILE_NAME" required:"false" default:"blocks-service.log"`
+	LogFormat        string `envconfig:"LOG_FORMAT" required:"false" default:"json"`
+	LogIsDevelopment bool   `envconfig:"LOG_IS_DEVELOPMENT" required:"false" default:"true"`
 
 	// Kafka
 	KafkaBrokerURL    string `envconfig:"KAFKA_BROKER_URL" required:"false" default:"kafka:9092"`
