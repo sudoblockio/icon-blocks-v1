@@ -77,7 +77,7 @@ type configType struct {
 	RedisSentinelClientMasterName string `envconfig:"REDIS_SENTINEL_CLIENT_MASTER_NAME" required:"false" default:"master"`
 
 	// GORM
-	GormSilentLogging bool `envconfig:"GORM_SILENT_LOGGING" required:"false" default:"false"`
+	GormLoggingThresholdMilli int `envconfig:"GORM_LOGGING_THRESHOLD_MILLI" required:"false" default:"100"`
 }
 
 // Config - runtime config struct

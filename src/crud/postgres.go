@@ -46,9 +46,9 @@ func createSession(dsn string) (*gorm.DB, error) {
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
-			SlowThreshold:             (50 * time.Millisecond), // Slow SQL threshold
-			LogLevel:                  logger.Warn,             // Log level
-			IgnoreRecordNotFoundError: true,                    // Ignore ErrRecordNotFound error for logger
+			SlowThreshold:             (config.Config.GormLoggingThresholdMilli * time.Millisecond), // Slow SQL threshold
+			LogLevel:                  logger.Warn,                                                  // Log level
+			IgnoreRecordNotFoundError: true,                                                         // Ignore ErrRecordNotFound error for logger
 			Colorful:                  true,
 		},
 	)
