@@ -43,12 +43,13 @@ func getPostgresConn() *gorm.DB {
 
 func createSession(dsn string) (*gorm.DB, error) {
 
+	slowThreshold := (time.Duration(config.Config.GormLoggingThresholdMilli) * time.Millisecond)
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
-			SlowThreshold:             (config.Config.GormLoggingThresholdMilli * time.Millisecond), // Slow SQL threshold
-			LogLevel:                  logger.Warn,                                                  // Log level
-			IgnoreRecordNotFoundError: true,                                                         // Ignore ErrRecordNotFound error for logger
+			SlowThreshold:             slowThreshold, // Slow SQL threshold
+			LogLevel:                  logger.Warn,   // Log level
+			IgnoreRecordNotFoundError: true,          // Ignore ErrRecordNotFound error for logger
 			Colorful:                  true,
 		},
 	)
