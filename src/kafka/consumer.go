@@ -119,13 +119,13 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 
 			kafkaJobs, err = crud.GetKafkaJobModel().SelectMany(
 				jobID,
-				config.Config.ConsumerGroup,
+				group,
 				k.topicName,
 			)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				zap.S().Info(
 					"JobID=", jobID,
-					",ConsumerGroup=", config.Config.ConsumerGroup,
+					",ConsumerGroup=", group,
 					",Topic=", k.topicName,
 					" - Waiting for Kafka Job in database...")
 				time.Sleep(1)
