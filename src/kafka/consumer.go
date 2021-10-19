@@ -2,12 +2,17 @@ package kafka
 
 import (
 	"context"
+	"errors"
+	"os"
 	"time"
 
 	"github.com/Shopify/sarama"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/crud"
+	"github.com/geometry-labs/icon-blocks/models"
 )
 
 type kafkaTopicConsumer struct {
@@ -32,8 +37,8 @@ func StartWorkerConsumers() {
 
 func startKafkaTopicConsumers(topicName string) {
 	kafkaBroker := config.Config.KafkaBrokerURL
-	consumerGroupHead := config.Config.ConsumerGroupHead
-	consumerGroupTail := config.Config.ConsumerGroupTail
+	consumerGroup := config.Config.ConsumerGroup
+	consumerIsTail := config.Config.ConsumerIsTail
 
 	if KafkaTopicConsumers == nil {
 		KafkaTopicConsumers = make(map[string]*kafkaTopicConsumer)
@@ -45,14 +50,25 @@ func startKafkaTopicConsumers(topicName string) {
 		make(chan *sarama.ConsumerMessage),
 	}
 
-	zap.S().Info("kafkaBroker=", kafkaBroker, " consumerTopics=", topicName, " consumerGroup=", consumerGroupHead, " - Starting Consumers")
-	go KafkaTopicConsumers[topicName].consumeGroup(consumerGroupHead, sarama.OffsetOldest)
-
-	zap.S().Info("kafkaBroker=", kafkaBroker, " consumerTopics=", topicName, " consumerGroup=", consumerGroupTail, " - Starting Consumers")
-	go KafkaTopicConsumers[topicName].consumeGroup(consumerGroupTail, sarama.OffsetOldest)
+	if consumerIsTail == false {
+		// Head
+		zap.S().Info(
+			"kafkaBroker=", kafkaBroker,
+			" consumerTopics=", topicName,
+			" consumerGroup=", consumerGroup,
+			" - Starting Consumers")
+		go KafkaTopicConsumers[topicName].consumeGroup(consumerGroup + "-head")
+	} else {
+		// Tail
+		zap.S().Info("kafkaBroker=", kafkaBroker,
+			" consumerTopics=", topicName,
+			" consumerGroup=", consumerGroup,
+			" - Starting Consumers")
+		go KafkaTopicConsumers[topicName].consumeGroup(consumerGroup + "-" + config.Config.ConsumerJobID)
+	}
 }
 
-func (k *kafkaTopicConsumer) consumeGroup(group string, startOffset int64) {
+func (k *kafkaTopicConsumer) consumeGroup(group string) {
 	version, err := sarama.ParseKafkaVersion("2.1.1")
 	if err != nil {
 		zap.S().Panic("CONSUME GROUP ERROR: parsing Kafka version: ", err.Error())
@@ -67,6 +83,9 @@ func (k *kafkaTopicConsumer) consumeGroup(group string, startOffset int64) {
 	// Version
 	saramaConfig.Version = version
 
+	// Initial Offset
+	saramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
+
 	// Balance Strategy
 	switch config.Config.ConsumerGroupBalanceStrategy {
 	case "BalanceStrategyRange":
@@ -77,13 +96,6 @@ func (k *kafkaTopicConsumer) consumeGroup(group string, startOffset int64) {
 		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
 	default:
 		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
-	}
-
-	// Start offset
-	if startOffset != 0 {
-		saramaConfig.Consumer.Offsets.Initial = startOffset
-	} else {
-		saramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
 	}
 
 	var consumerGroup sarama.ConsumerGroup
@@ -98,14 +110,43 @@ func (k *kafkaTopicConsumer) consumeGroup(group string, startOffset int64) {
 		break
 	}
 
+	// Get Kafka Jobs from database
+	jobID := config.Config.ConsumerJobID
+	kafkaJobs := &[]models.KafkaJob{}
+	if jobID != "" {
+		for {
+			// Wait until jobs are present
+
+			kafkaJobs, err = crud.GetKafkaJobModel().SelectMany(
+				jobID,
+				group,
+				k.topicName,
+			)
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				zap.S().Info(
+					"JobID=", jobID,
+					",ConsumerGroup=", group,
+					",Topic=", k.topicName,
+					" - Waiting for Kafka Job in database...")
+				time.Sleep(1)
+				continue
+			} else if err != nil {
+				// Postgres error
+				zap.S().Fatal(err.Error())
+			}
+
+			break
+		}
+	}
+
 	// From example: /sarama/blob/master/examples/consumergroup/main.go
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		claimConsumer := &ClaimConsumer{
-			startOffset: startOffset,
-			topicName:   k.topicName,
-			topicChan:   k.TopicChannel,
-			group:       group,
+			topicName: k.topicName,
+			topicChan: k.TopicChannel,
+			group:     group,
+			kafkaJobs: *kafkaJobs,
 		}
 
 		for {
@@ -131,29 +172,24 @@ func (k *kafkaTopicConsumer) consumeGroup(group string, startOffset int64) {
 }
 
 type ClaimConsumer struct {
-	startOffset int64
-	topicName   string
-	topicChan   chan *sarama.ConsumerMessage
-	group       string
+	topicName string
+	topicChan chan *sarama.ConsumerMessage
+	group     string
+	kafkaJobs []models.KafkaJob
 }
 
-func (c *ClaimConsumer) Setup(sess sarama.ConsumerGroupSession) error {
-
-	/*
-		// Reset offsets
-		if c.startOffset == 0 {
-			partitions := sess.Claims()[c.topicName]
-
-			for _, p := range partitions {
-				sess.ResetOffset(c.topicName, p, 0, "reset")
-			}
-		}
-	*/
-
-	return nil
-}
+func (c *ClaimConsumer) Setup(_ sarama.ConsumerGroupSession) error { return nil }
 func (*ClaimConsumer) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+
+	// find kafka job
+	var kafkaJob *models.KafkaJob = nil
+	for i, k := range c.kafkaJobs {
+		if k.Partition == uint64(claim.Partition()) {
+			kafkaJob = &(c.kafkaJobs[i])
+			break
+		}
+	}
 
 	for {
 		var topicMsg *sarama.ConsumerMessage
@@ -178,6 +214,21 @@ func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sar
 
 		// Broadcast
 		c.topicChan <- topicMsg
+
+		// Check if kafka job is done
+		// NOTE only applicable if ConsumerKafkaJobID is given
+		if kafkaJob != nil &&
+			uint64(topicMsg.Offset) >= kafkaJob.StopOffset+1000 {
+			// Job done
+			zap.S().Info(
+				"JOBID=", config.Config.ConsumerJobID,
+				"GROUP=", c.group,
+				",TOPIC=", c.topicName,
+				",PARTITION=", topicMsg.Partition,
+				" - Kafka Job done...exiting",
+			)
+			os.Exit(0)
+		}
 	}
 	return nil
 }
