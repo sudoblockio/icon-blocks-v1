@@ -1,0 +1,23 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+// Represents kafka consumer status, create by k9 bash job
+// CREATE TABLE kafka_jobs (
+//  job_id varchar,
+//  worker_group varchar,
+//  topic varchar,
+//  partition bigint,
+//  stop_offset bigint,
+//  PRIMARY KEY (job_id, worker_group, topic, partition, stop_offset));
+message KafkaJob {
+  option (gorm.opts) = {ormable: true};
+
+  string job_id = 1 [(gorm.field).tag = {primary_key: true}];
+  string worker_group = 2 [(gorm.field).tag = {primary_key: true}];
+  string topic = 3 [(gorm.field).tag = {primary_key: true}];
+  uint64 partition = 4 [(gorm.field).tag = {primary_key: true}];
+  uint64 stop_offset = 5;
+}
