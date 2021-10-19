@@ -101,7 +101,10 @@ func StartBlockWebsocketIndexLoader() {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 
 				// Insert
-				GetBlockWebsocketIndexModel().Insert(newBlockWebsocketIndex)
+				err = GetBlockWebsocketIndexModel().Insert(newBlockWebsocketIndex)
+				if err != nil {
+					zap.S().Warn(err.Error())
+				}
 
 				// Publish to redis
 				newBlockWebsocketJSON, _ := json.Marshal(newBlockWebsocket)
