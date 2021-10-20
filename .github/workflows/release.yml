@@ -110,50 +110,37 @@ jobs:
             geometrylabs/icon-blocks-worker:latest
             geometrylabs/icon-blocks-worker:${{ steps.source.outputs.TAG }}
 
-      - name: Update dev-mainnet deployment values file (API) and re-commit
+      - name: Checkout charts repo
+        uses: actions/checkout@v2
+        with:
+          repository: geometry-labs/icon-charts
+          ref: main
+          path: charts
+          token: ${{ secrets.ICON_CHARTS_PAT }}
+
+      - name: Update prod-mainnet deployment values file (API) and re-commit
         uses: fjogeleit/yaml-update-action@master
         with:
-          valueFile: 'chart/deployments/dev-mainnet/values.dev.yaml'
+          workDir: charts
+          repository: geometry-labs/icon-charts
+          valueFile: 'deployments/prod/mainnet/blocks/values.yaml'
           propertyPath: 'api.image.tag'
           value: ${{ github.run_number }}
-          branch: deployment
-          targetBranch: main
+          branch: main
           createPR: 'false'
-          message: 'Update prod deployment (API) image version to ${{ github.run_number }}'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          updateFile: true
+          commitChange: false
 
-      - name: Update dev-mainnet deployment values file (WORKER) and re-commit
+      - name: Update prod-mainnet deployment values file (WORKER) and re-commit
         uses: fjogeleit/yaml-update-action@master
         with:
-          valueFile: 'chart/deployments/dev-mainnet/values.dev.yaml'
+          workDir: charts
+          repository: geometry-labs/icon-charts
+          valueFile: 'deployments/prod/mainnet/blocks/values.yaml'
           propertyPath: 'worker.image.tag'
           value: ${{ github.run_number }}
-          branch: deployment
-          targetBranch: main
+          branch: main
           createPR: 'false'
-          message: 'Update prod deployment (WORKER) image version to ${{ github.run_number }}'
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update dev-mainnet deployment values file (API) and re-commit
-        uses: fjogeleit/yaml-update-action@master
-        with:
-          valueFile: 'chart/deployments/dev-sejong/values.dev.yaml'
-          propertyPath: 'api.image.tag'
-          value: ${{ github.run_number }}
-          branch: deployment
-          targetBranch: main
-          createPR: 'false'
-          message: 'Update prod deployment (API) image version to ${{ github.run_number }}'
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update dev-mainnet deployment values file (WORKER) and re-commit
-        uses: fjogeleit/yaml-update-action@master
-        with:
-          valueFile: 'chart/deployments/dev-sejong/values.dev.yaml'
-          propertyPath: 'worker.image.tag'
-          value: ${{ github.run_number }}
-          branch: deployment
-          targetBranch: main
-          createPR: 'false'
-          message: 'Update prod deployment (WORKER) image version to ${{ github.run_number }}'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          message: 'blocks prod deployment (mainnet) image versions to ${{ github.run_number }}'
+          token: ${{ secrets.ICON_CHARTS_PAT }}
+          updateFile: true
