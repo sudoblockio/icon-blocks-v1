@@ -148,8 +148,7 @@ func StartBlockFailedTransactionLoader() {
 			zap.S().Debug("Loader=BlockFailedTransaction, TransactionHash=", newBlockFailedTransaction.TransactionHash, " - Upserted")
 			if err != nil {
 				// Error
-				zap.S().Info("Loader=BlockFailedTransaction, TransactionHash=", newBlockFailedTransaction.TransactionHash, " - FATAL")
-				zap.S().Fatal(err.Error())
+				zap.S().Fatal("Loader=BlockFailedTransaction, TransactionHash=", newBlockFailedTransaction.TransactionHash, " - Error: ", err.Error())
 			}
 
 			///////////////////////
