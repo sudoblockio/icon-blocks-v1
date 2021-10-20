@@ -307,8 +307,7 @@ func StartBlockLoader() {
 			zap.S().Debug("Loader=Block, Number=", newBlock.Number, " - Upserted")
 			if err != nil {
 				// Postgres error
-				zap.S().Info("Loader=Block, Number=", newBlock.Number, " - FATAL")
-				zap.S().Fatal(err.Error())
+				zap.S().Fatal("Loader=Block, Number=", newBlock.Number, " - Error: ", err.Error())
 			}
 		}
 	}()

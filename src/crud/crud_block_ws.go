@@ -103,7 +103,7 @@ func StartBlockWebsocketIndexLoader() {
 				// Insert
 				err = GetBlockWebsocketIndexModel().Insert(newBlockWebsocketIndex)
 				if err != nil {
-					zap.S().Warn(err.Error())
+					zap.S().Warn("Loader=Block, Number=", newBlockWebsocket.Number, " - Error: ", err.Error())
 				}
 
 				// Publish to redis
@@ -111,7 +111,7 @@ func StartBlockWebsocketIndexLoader() {
 				redis.GetRedisClient().Publish(newBlockWebsocketJSON)
 			} else if err != nil {
 				// Postgres error
-				zap.S().Fatal(err.Error())
+				zap.S().Fatal("Loader=Block, Number=", newBlockWebsocket.Number, " - Error: ", err.Error())
 			}
 		}
 	}()

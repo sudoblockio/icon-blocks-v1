@@ -113,7 +113,7 @@ func StartBlockCountLoader() {
 				// Insert
 				err = GetBlockCountModel().Insert(newBlockCount)
 				if err != nil {
-					zap.S().Warn(err.Error())
+					zap.S().Warn("Loader=BlockCount, Number=", newBlockCount.Number, " - Error: ", err.Error())
 				}
 
 				zap.S().Debug("Loader=BlockCount, Number=", newBlockCount.Number, " - Insert")

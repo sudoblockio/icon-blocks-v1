@@ -148,8 +148,7 @@ func StartBlockTransactionLoader() {
 			zap.S().Debug("Loader=BlockTransaction, Number=", newBlockTransaction.Number, " TransactionHash=", newBlockTransaction.TransactionHash, " - Upserted")
 			if err != nil {
 				// Postgres error
-				zap.S().Info("Loader=BlockTransaction, Number=", newBlockTransaction.Number, " TransactionHash=", newBlockTransaction.TransactionHash, " - FATAL")
-				zap.S().Fatal(err.Error())
+				zap.S().Fatal("Loader=BlockTransaction, Number=", newBlockTransaction.Number, " TransactionHash=", newBlockTransaction.TransactionHash, " - Error: ", err.Error())
 			}
 
 			///////////////////////

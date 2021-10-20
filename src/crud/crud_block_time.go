@@ -138,8 +138,7 @@ func StartBlockTimeLoader() {
 			zap.S().Debug("Loader=BlockTime, Number=", newBlockTime.Number, " - Upserted")
 			if err != nil {
 				// Postgres error
-				zap.S().Info("Loader=BlockTime, Number=", newBlockTime.Number, " - FATAL")
-				zap.S().Fatal(err.Error())
+				zap.S().Fatal("Loader=BlockTime, Number=", newBlockTime.Number, " - Error: ", err.Error())
 			}
 
 			///////////////////////
