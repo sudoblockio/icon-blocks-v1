@@ -30,10 +30,10 @@ func handlerGetBlocks(c *websocket.Conn) {
 
 	// Add broadcaster
 	msgChan := make(chan []byte)
-	id := redis.GetBroadcaster().AddBroadcastChannel(msgChan)
+	broadcasterID := redis.GetBroadcaster().AddBroadcastChannel(msgChan)
 	defer func() {
 		// Remove broadcaster
-		redis.GetBroadcaster().RemoveBroadcastChannel(id)
+		redis.GetBroadcaster().RemoveBroadcastChannel(broadcasterID)
 	}()
 
 	// Read for close

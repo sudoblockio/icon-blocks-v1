@@ -1,9 +1,12 @@
 package redis
 
-import "sync"
+import (
+	"sync"
+	"time"
+)
 
 // BroadcasterID - type for broadcaster channel IDs
-type BroadcasterID int
+type BroadcasterID uint64
 
 var lastBroadcasterID BroadcasterID = 0
 
@@ -21,8 +24,8 @@ var broadcasterOnce sync.Once
 func GetBroadcaster() *Broadcaster {
 	broadcasterOnce.Do(func() {
 		broadcaster = &Broadcaster{
-			make(chan []byte),
-			make(map[BroadcasterID]chan []byte),
+			InputChannel:   make(chan []byte),
+			OutputChannels: make(map[BroadcasterID]chan []byte),
 		}
 	})
 
@@ -30,31 +33,37 @@ func GetBroadcaster() *Broadcaster {
 }
 
 // AddBroadcastChannel - add channel to  broadcaster
-func (tb *Broadcaster) AddBroadcastChannel(channel chan []byte) BroadcasterID {
+func (b *Broadcaster) AddBroadcastChannel(channel chan []byte) BroadcasterID {
+
 	id := lastBroadcasterID
 	lastBroadcasterID++
 
-	tb.OutputChannels[id] = channel
+	b.OutputChannels[id] = channel
 
 	return id
 }
 
 // RemoveBroadcastChannelnel - remove channel from broadcaster
-func (tb *Broadcaster) RemoveBroadcastChannel(id BroadcasterID) {
-	_, ok := tb.OutputChannels[id]
+func (b *Broadcaster) RemoveBroadcastChannel(id BroadcasterID) {
+
+	_, ok := b.OutputChannels[id]
 	if ok {
-		delete(tb.OutputChannels, id)
+		delete(b.OutputChannels, id)
 	}
 }
 
 // Start - Start broadcaster go routine
-func (tb *Broadcaster) Start() {
+func (b *Broadcaster) Start() {
 	go func() {
 		for {
-			msg := <-tb.InputChannel
+			msg := <-b.InputChannel
 
-			for _, channel := range tb.OutputChannels {
-				channel <- msg
+			for id, channel := range b.OutputChannels {
+				select {
+				case channel <- msg:
+				case <-time.After(time.Second * 1):
+					b.RemoveBroadcastChannel(id)
+				}
 			}
 		}
 	}()
