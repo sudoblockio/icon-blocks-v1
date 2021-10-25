@@ -113,6 +113,8 @@ func transformBlockToBlockWS(block *models.Block) *models.BlockWebsocket {
 func transformBlockToBlockCount(block *models.Block) *models.BlockCount {
 
 	return &models.BlockCount{
+		Type:   "block",
+		Count:  0, // Adds in loader
 		Number: block.Number,
 	}
 }

@@ -101,7 +101,7 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 	} else {
 		// No filters given, count all
 		// Total count in the block_counts table
-		counter, err := crud.GetBlockCountModel().SelectLargestCount()
+		counter, err := crud.GetBlockCountModel().SelectCount("block")
 		if err != nil {
 			counter = 0
 			zap.S().Warn("Could not retrieve block count: ", err.Error())

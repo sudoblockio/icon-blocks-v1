@@ -2,15 +2,18 @@ package crud
 
 import (
 	"errors"
+	"reflect"
 	"sync"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/geometry-labs/icon-blocks/models"
+	"github.com/geometry-labs/icon-blocks/redis"
 )
 
-// BlockCountModel - type for block table model
+// BlockCountModel - type for address table model
 type BlockCountModel struct {
 	db            *gorm.DB
 	model         *models.BlockCount
@@ -21,7 +24,7 @@ type BlockCountModel struct {
 var blockCountModel *BlockCountModel
 var blockCountModelOnce sync.Once
 
-// GetBlockModel - create and/or return the blocks table model
+// GetAddressModel - create and/or return the addresss table model
 func GetBlockCountModel() *BlockCountModel {
 	blockCountModelOnce.Do(func() {
 		dbConn := getPostgresConn()
@@ -53,27 +56,15 @@ func (m *BlockCountModel) Migrate() error {
 	return err
 }
 
-// Insert - Insert blockCount into table
-func (m *BlockCountModel) Insert(blockCount *models.BlockCount) error {
-	db := m.db
-
-	// Set table
-	db = db.Model(&models.BlockCount{})
-
-	db = db.Create(blockCount)
-
-	return db.Error
-}
-
 // Select - select from blockCounts table
-func (m *BlockCountModel) SelectOne(number uint32) (*models.BlockCount, error) {
+func (m *BlockCountModel) SelectOne(_type string) (*models.BlockCount, error) {
 	db := m.db
 
 	// Set table
 	db = db.Model(&models.BlockCount{})
 
-	// Number
-	db = db.Where("number = ?", number)
+	// Address
+	db = db.Where("type = ?", _type)
 
 	blockCount := &models.BlockCount{}
 	db = db.First(blockCount)
@@ -81,45 +72,139 @@ func (m *BlockCountModel) SelectOne(number uint32) (*models.BlockCount, error) {
 	return blockCount, db.Error
 }
 
-func (m *BlockCountModel) SelectLargestCount() (uint32, error) {
-
+// Select - select from blockCounts table
+func (m *BlockCountModel) SelectCount(_type string) (uint64, error) {
 	db := m.db
-	//computeCount := false
 
 	// Set table
 	db = db.Model(&models.BlockCount{})
 
-	// Get max id
-	count := uint32(0)
-	row := db.Select("max(id)").Row()
-	row.Scan(&count)
+	// Address
+	db = db.Where("type = ?", _type)
+
+	blockCount := &models.BlockCount{}
+	db = db.First(blockCount)
+
+	count := uint64(0)
+	if blockCount != nil {
+		count = blockCount.Count
+	}
 
 	return count, db.Error
+}
+
+func (m *BlockCountModel) UpsertOne(
+	blockCount *models.BlockCount,
+) error {
+	db := m.db
+
+	// map[string]interface{}
+	updateOnConflictValues := extractFilledFieldsFromModel(
+		reflect.ValueOf(*blockCount),
+		reflect.TypeOf(*blockCount),
+	)
+
+	// Upsert
+	db = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "type"}}, // NOTE set to primary keys for table
+		DoUpdates: clause.Assignments(updateOnConflictValues),
+	}).Create(blockCount)
+
+	return db.Error
 }
 
 // StartBlockCountLoader starts loader
 func StartBlockCountLoader() {
 	go func() {
+		postgresLoaderChan := GetBlockCountModel().LoaderChannel
 
 		for {
-			// Read newBlockCount
-			newBlockCount := <-GetBlockCountModel().LoaderChannel
+			// Read block
+			newBlockCount := <-postgresLoaderChan
 
-			// Insert
-			_, err := GetBlockCountModel().SelectOne(
-				newBlockCount.Number,
-			)
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// Insert
-				err = GetBlockCountModel().Insert(newBlockCount)
-				if err != nil {
-					zap.S().Warn("Loader=BlockCount, Number=", newBlockCount.Number, " - Error: ", err.Error())
+			//////////////////////////
+			// Get count from redis //
+			//////////////////////////
+			countKey := "block_count_" + newBlockCount.Type
+
+			count, err := redis.GetRedisClient().GetCount(countKey)
+			if err != nil {
+				zap.S().Fatal(
+					"Loader=Block,",
+					"Number=", newBlockCount.Number,
+					" Type=", newBlockCount.Type,
+					" - Error: ", err.Error())
+			}
+
+			// No count set yet
+			// Get from database
+			if count == -1 {
+				curBlockCount, err := GetBlockCountModel().SelectOne(newBlockCount.Type)
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					count = 0
+				} else if err != nil {
+					zap.S().Fatal(
+						"Loader=Block,",
+						"Number=", newBlockCount.Number,
+						" Type=", newBlockCount.Type,
+						" - Error: ", err.Error())
+				} else {
+					count = int64(curBlockCount.Count)
 				}
 
-				zap.S().Debug("Loader=BlockCount, Number=", newBlockCount.Number, " - Insert")
-			} else if err != nil {
-				// Error
-				zap.S().Fatal(err.Error())
+				// Set count
+				err = redis.GetRedisClient().SetCount(countKey, int64(count))
+				if err != nil {
+					// Redis error
+					zap.S().Fatal(
+						"Loader=Block,",
+						"Number=", newBlockCount.Number,
+						" Type=", newBlockCount.Type,
+						" - Error: ", err.Error())
+				}
+			}
+
+			//////////////////////
+			// Load to postgres //
+			//////////////////////
+
+			// Add block to indexed
+			if newBlockCount.Type == "block" {
+				newBlockCountIndex := &models.BlockCountIndex{
+					Number: newBlockCount.Number,
+				}
+				err = GetBlockCountIndexModel().Insert(newBlockCountIndex)
+				if err != nil {
+					// Record already exists, continue
+					continue
+				}
+			}
+
+			// Increment records
+			count, err = redis.GetRedisClient().IncCount(countKey)
+			if err != nil {
+				// Redis error
+				zap.S().Fatal(
+					"Loader=Block,",
+					"Number=", newBlockCount.Number,
+					" Type=", newBlockCount.Type,
+					" - Error: ", err.Error())
+			}
+			newBlockCount.Count = uint64(count)
+
+			err = GetBlockCountModel().UpsertOne(newBlockCount)
+			zap.S().Debug(
+				"Loader=Block,",
+				"Number=", newBlockCount.Number,
+				" Type=", newBlockCount.Type,
+				" - Upsert")
+			if err != nil {
+				// Postgres error
+				zap.S().Fatal(
+					"Loader=Block,",
+					"Number=", newBlockCount.Number,
+					" Type=", newBlockCount.Type,
+					" - Error: ", err.Error())
 			}
 		}
 	}()

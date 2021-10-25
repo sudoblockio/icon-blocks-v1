@@ -182,7 +182,7 @@ func DefaultListBlockInternalTransaction(ctx context.Context, db *gorm1.DB) ([]*
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("transaction_hash")
+	db = db.Order("log_index")
 	ormResponse := []BlockInternalTransactionORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

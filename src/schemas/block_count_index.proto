@@ -4,10 +4,8 @@ option go_package = "./models";
 
 import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
 
-message BlockCount {
+message BlockCountIndex {
   option (gorm.opts) = {ormable: true};
 
-  string type = 1 [(gorm.field).tag = {primary_key: true}];
-  uint64 count = 2;
-  uint32 number = 3;
+  uint32 number = 1 [(gorm.field).tag = {primary_key: true}];
 }
