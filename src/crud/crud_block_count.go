@@ -125,7 +125,7 @@ func StartBlockCountLoader() {
 			//////////////////////////
 			// Get count from redis //
 			//////////////////////////
-			countKey := "block_count_" + newBlockCount.Type
+			countKey := "icon_blocks_block_count_" + newBlockCount.Type
 
 			count, err := redis.GetRedisClient().GetCount(countKey)
 			if err != nil {
