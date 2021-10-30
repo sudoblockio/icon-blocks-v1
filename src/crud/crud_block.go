@@ -86,7 +86,7 @@ func (m *BlockModel) SelectMany(
 	endNumber uint32,
 	hash string,
 	createdBy string,
-) (*[]models.BlockAPI, int64, error) {
+) (*[]models.BlockAPIList, int64, error) {
 	db := m.db
 	computeCount := false
 
@@ -117,7 +117,7 @@ func (m *BlockModel) SelectMany(
 	// Hash
 	if hash != "" {
 		computeCount = true
-		db = db.Where("hash = ?", hash[2:])
+		db = db.Where("hash = ?", hash)
 	}
 
 	// Created By (peer id)
@@ -142,7 +142,7 @@ func (m *BlockModel) SelectMany(
 		db = db.Offset(skip)
 	}
 
-	blocks := &[]models.BlockAPI{}
+	blocks := &[]models.BlockAPIList{}
 	db = db.Find(blocks)
 
 	return blocks, count, db.Error

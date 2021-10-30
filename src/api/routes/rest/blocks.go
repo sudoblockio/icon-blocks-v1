@@ -46,7 +46,7 @@ type paramsGetBlocks struct {
 // @Param hash query string false "find by block hash"
 // @Param created_by query string false "find by block creator"
 // @Router /api/v1/blocks [get]
-// @Success 200 {object} []models.BlockAPI
+// @Success 200 {object} []models.BlockAPIList
 // @Failure 422 {object} map[string]interface{}
 func handlerGetBlocks(c *fiber.Ctx) error {
 	params := &paramsGetBlocks{}
