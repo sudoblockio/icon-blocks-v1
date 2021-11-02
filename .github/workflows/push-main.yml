@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Create last_synced_block.txt
-        run: mkdir ./volumes && mkdir ./volumes/etl && echo "34000000" >> ./volumes/etl/last_synced_block.txt
+        run: mkdir ./volumes && mkdir ./volumes/etl && echo "34000000" >> ./volumes/etl/last_synced_block.txt && chmod 777 ./volumes/etl/last_synced_block.txt
 
       - name: Bring up DBs
         run: docker-compose -f docker-compose.db.yml up -d && sleep 30
