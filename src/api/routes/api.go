@@ -16,12 +16,9 @@ import (
 	"github.com/geometry-labs/icon-blocks/api/routes/ws"
 )
 
-// Start - start fiber server
 // @title Go api template docs
 // @version 2.0
 // @description This is a sample server server.
-// @host localhost:8000
-// @BasePath /
 func Start() {
 
 	app := fiber.New()
