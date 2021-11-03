@@ -194,11 +194,9 @@ jobs:
       - name: Remove volumes
         run: sudo rm -rf volumes
 
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Push tags
         run: |
+          git pull
           git tag -f blocks-prod-uswest2
           git tag -f blocks-prod-euwest2
           git push -f origin --tags
