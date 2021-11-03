@@ -2,7 +2,6 @@ package tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -215,7 +214,6 @@ func TestBlocksEndpointListHash(t *testing.T) {
 
 	// Get testable number
 	blockHash := bodyMap[0].(map[string]interface{})["hash"].(string)
-	fmt.Println(blockHash)
 
 	// Test number
 	resp, err = http.Get(blocksServiceURL + blocksServiceRestPrefx + "/blocks?hash=" + blockHash)
