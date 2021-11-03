@@ -191,6 +191,9 @@ jobs:
           token: ${{ secrets.ICON_CHARTS_PAT }}
           updateFile: true
 
+      - name: Remove volumes
+        run: sudo rm -rf volumes
+
       - name: Checkout
         uses: actions/checkout@v2
 
