@@ -77,7 +77,7 @@ func (m *BlockModel) Insert(block *models.Block) error {
 }
 
 // SelectMany - select from blocks table
-// Returns: models, total count (if filters), error (if present)
+// Returns: models, error (if present)
 func (m *BlockModel) SelectMany(
 	limit int,
 	skip int,
@@ -86,9 +86,8 @@ func (m *BlockModel) SelectMany(
 	endNumber uint32,
 	hash string,
 	createdBy string,
-) (*[]models.BlockAPIList, int64, error) {
+) (*[]models.BlockAPIList, error) {
 	db := m.db
-	computeCount := false
 
 	// Latest blocks first
 	db = db.Order("number desc")
@@ -98,46 +97,32 @@ func (m *BlockModel) SelectMany(
 
 	// Number
 	if number != 0 {
-		computeCount = true
 		db = db.Where("number = ?", number)
 	}
 
 	// Start number and end number
 	if startNumber != 0 && endNumber != 0 {
-		computeCount = true
 		db = db.Where("number BETWEEN ? AND ?", startNumber, endNumber)
 	} else if startNumber != 0 {
-		computeCount = true
 		db = db.Where("number > ?", startNumber)
 	} else if endNumber != 0 {
-		computeCount = true
 		db = db.Where("number < ?", endNumber)
 	}
 
 	// Hash
 	if hash != "" {
-		computeCount = true
 		db = db.Where("hash = ?", hash)
 	}
 
 	// Created By (peer id)
 	if createdBy != "" {
-		computeCount = true
 		db = db.Where("peer_id = ?", createdBy)
 	}
 
-	// Count, if needed
-	count := int64(-1)
-	if computeCount {
-		db.Count(&count)
-	}
-
 	// Limit is required and defaulted to 1
-	// NOTE: Count before setting limit
 	db = db.Limit(limit)
 
 	// Skip
-	// NOTE: Count before setting skip
 	if skip != 0 {
 		db = db.Offset(skip)
 	}
