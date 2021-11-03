@@ -71,10 +71,6 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 		c.Status(422)
 		return c.SendString(`{"error": "end_number is less than start_number"}`)
 	}
-	if params.EndNumber-params.StartNumber > 1000 {
-		c.Status(422)
-		return c.SendString(`{"error": "block range is too big, max is 1,000"}`)
-	}
 
 	blocks, err := crud.GetBlockModel().SelectMany(
 		params.Limit,
