@@ -191,6 +191,9 @@ jobs:
           token: ${{ secrets.ICON_CHARTS_PAT }}
           updateFile: true
 
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Push tags
         run: |
           git tag -f blocks-prod-uswest2
