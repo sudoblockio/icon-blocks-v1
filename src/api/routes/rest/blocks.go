@@ -76,7 +76,7 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 		return c.SendString(`{"error": "block range is too big, max is 1,000"}`)
 	}
 
-	blocks, count, err := crud.GetBlockModel().SelectMany(
+	blocks, err := crud.GetBlockModel().SelectMany(
 		params.Limit,
 		params.Skip,
 		params.Number,
@@ -95,20 +95,13 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 	}
 
 	// Set X-TOTAL-COUNT
-	if count != -1 {
-		// Filters given, count some
-		c.Append("X-TOTAL-COUNT", strconv.FormatInt(count, 10))
-	} else {
-		// No filters given, count all
-		// Total count in the block_counts table
-		counter, err := crud.GetBlockCountModel().SelectCount("block")
-		if err != nil {
-			counter = 0
-			zap.S().Warn("Could not retrieve block count: ", err.Error())
-		}
-
-		c.Append("X-TOTAL-COUNT", strconv.FormatUint(uint64(counter), 10))
+	counter, err := crud.GetBlockCountModel().SelectCount("block")
+	if err != nil {
+		counter = 0
+		zap.S().Warn("Could not retrieve block count: ", err.Error())
 	}
+
+	c.Append("X-TOTAL-COUNT", strconv.FormatUint(uint64(counter), 10))
 
 	body, _ := json.Marshal(&blocks)
 	return c.SendString(string(body))
