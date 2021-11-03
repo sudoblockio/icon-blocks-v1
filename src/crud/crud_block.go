@@ -130,7 +130,7 @@ func (m *BlockModel) SelectMany(
 	blocks := &[]models.BlockAPIList{}
 	db = db.Find(blocks)
 
-	return blocks, count, db.Error
+	return blocks, db.Error
 }
 
 // SelectOne - select from blocks table
