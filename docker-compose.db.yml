@@ -5,14 +5,15 @@ services:
     image: geometrylabs/iconetl:${ICON_ETL_TAG:-latest}
     command: [
       "stream",
+      "-s", "40000000",
       "-o", "kafka:9092",
       "--period-seconds", "1",
       "-p", "https://icon.geometry-dev.net/api/v3",
+      "--kafka-schema-registry-url", "http://schemaregistry:8081",
+      "--kafka-use-schema-registry", "true",
     ]
     depends_on:
       - kafka
-#    volumes:
-#      - "./volumes/etl/last_synced_block.txt:/icon-etl/last_synced_block.txt"
 
   ############
   # Database #
@@ -124,6 +125,3 @@ services:
     image: redis:alpine
     ports:
       - "6379:6379"
-#    volumes:
-#      - "./volumes/redis-data:/var/lib/redis"
-#      - "./volumes/redis.conf:/usr/local/etc/redis/redis.conf"
