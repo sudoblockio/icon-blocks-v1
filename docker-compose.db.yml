@@ -5,15 +5,9 @@ services:
     image: geometrylabs/iconetl:${ICON_ETL_TAG:-latest}
     command: [
       "stream",
-      # "-s", "34000000",
       "-o", "kafka:9092",
       "--period-seconds", "1",
-      #"--values-as-hex", "True",
-      "--provider-uri", "http://34.218.244.40:9000/api/v3",
-      "-b", "100",
-      "-B", "100",
-      "--kafka-schema-registry-url", "http://schemaregistry:8081",
-      "--kafka-use-schema-registry", "true",
+      "-p", "https://icon.geometry-dev.net/api/v3",
     ]
     depends_on:
       - kafka
