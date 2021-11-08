@@ -191,8 +191,13 @@ jobs:
           token: ${{ secrets.ICON_CHARTS_PAT }}
           updateFile: true
 
+      - name: Remove volumes
+        run: sudo rm -rf volumes
+
       - name: Push tags
         run: |
+          git stash
+          git pull
           git tag -f blocks-prod-uswest2
           git tag -f blocks-prod-euwest2
           git push -f origin --tags
