@@ -177,6 +177,19 @@ jobs:
           updateFile: true
           commitChange: false
 
+      - name: Update prod-mainnet deployment values file (builder) and re-commit
+        uses: fjogeleit/yaml-update-action@master
+        with:
+          workDir: charts
+          repository: geometry-labs/icon-charts
+          valueFile: 'deployments/prod-us-west-2/mainnet/blocks/values.yaml'
+          propertyPath: 'builder.image.tag'
+          value: ${{ steps.source.outputs.TAG }}
+          branch: main
+          createPR: 'false'
+          updateFile: true
+          commitChange: false
+
       - name: Update prod-mainnet deployment values file (WORKER) and re-commit
         uses: fjogeleit/yaml-update-action@master
         with:
