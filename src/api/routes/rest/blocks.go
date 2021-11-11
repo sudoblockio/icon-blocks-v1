@@ -65,7 +65,11 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 	// Check params
 	if params.Limit < 1 || params.Limit > config.Config.MaxPageSize {
 		c.Status(422)
-		return c.SendString(`{"error": "limit must be greater than 0 and less than 101"}`)
+		return c.SendString(`{"error": "invalid limit"}`)
+	}
+	if params.Skip < 0 || params.Skip > config.Config.MaxPageSkip {
+		c.Status(422)
+		return c.SendString(`{"error": "invalid skip"}`)
 	}
 	if params.EndNumber < params.StartNumber {
 		c.Status(422)

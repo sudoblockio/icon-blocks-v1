@@ -23,6 +23,7 @@ type configType struct {
 
 	// Endpoints
 	MaxPageSize int `envconfig:"MAX_PAGE_SIZE" required:"false" default:"100"`
+	MaxPageSkip int `envconfig:"MAX_PAGE_SKIP" required:"false" default:"1000000"`
 
 	// CORS
 	CORSAllowOrigins  string `envconfig:"CORS_ALLOW_ORIGINS" required:"false" default:"*"`
