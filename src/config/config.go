@@ -80,6 +80,9 @@ type configType struct {
 
 	// GORM
 	GormLoggingThresholdMilli int `envconfig:"GORM_LOGGING_THRESHOLD_MILLI" required:"false" default:"250"`
+
+	// Feature flags
+	OnlyRunBlockTimeBuilder bool `envconfig:"ONLY_RUN_BLOCK_TIME_BUILDER" required:"false" default:"false"`
 }
 
 // Config - runtime config struct

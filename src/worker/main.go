@@ -21,6 +21,13 @@ func main() {
 	// Start Prometheus client
 	metrics.Start()
 
+	if config.Config.OnlyRunBlockTimeBuilder == true {
+		// Start builders
+		builders.StartBlockTimeBuilder()
+
+		global.WaitShutdownSig()
+	}
+
 	// Start kafka consumer
 	// 1
 	kafka.StartWorkerConsumers()
@@ -30,9 +37,6 @@ func main() {
 	transformers.StartBlocksTransformer()
 	transformers.StartTransactionsTransformer()
 	transformers.StartLogsTransformer()
-
-	// Start builders
-	builders.StartBlockTimeBuilder()
 
 	global.WaitShutdownSig()
 }
