@@ -171,7 +171,7 @@ jobs:
           repository: geometry-labs/icon-charts
           valueFile: 'deployments/prod-us-west-2/mainnet/blocks/values.yaml'
           propertyPath: 'api.image.tag'
-          value: ${{ steps.source.outputs.TAG }}
+          value: prod-${{ steps.source.outputs.TAG }}
           branch: main
           createPR: 'false'
           updateFile: true
@@ -191,13 +191,14 @@ jobs:
           commitChange: false
 
       - name: Update prod-mainnet deployment values file (WORKER) and re-commit
+        id: yaml-update
         uses: fjogeleit/yaml-update-action@master
         with:
           workDir: charts
           repository: geometry-labs/icon-charts
           valueFile: 'deployments/prod-us-west-2/mainnet/blocks/values.yaml'
           propertyPath: 'worker.image.tag'
-          value: ${{ steps.source.outputs.TAG }}
+          value: prod-${{ steps.source.outputs.TAG }}
           branch: main
           createPR: 'false'
           message: 'blocks prod deployment (mainnet) image versions to ${{ steps.source.outputs.TAG }}'
@@ -211,7 +212,7 @@ jobs:
         run: |
           git stash
           git pull
-          git tag -f blocks-prod-uswest2
-          git tag -f blocks-prod-euwest2
+          git tag -f blocks-prod-uswest2 ${{ steps.yaml-update.outputs.commit }}
+          git tag -f blocks-prod-euwest2 ${{ steps.yaml-update.outputs.commit }}
           git push -f origin --tags
         working-directory: charts
