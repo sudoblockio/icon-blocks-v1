@@ -22,7 +22,7 @@ func main() {
 	metrics.Start()
 
 	if config.Config.OnlyRunBlockTimeBuilder == true {
-		// Start builders
+		// Start builder
 		builders.StartBlockTimeBuilder()
 
 		global.WaitShutdownSig()

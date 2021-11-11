@@ -16,55 +16,52 @@ import (
 )
 
 type kafkaTopicConsumer struct {
-	brokerURL    string
-	topicName    string
-	TopicChannel chan *sarama.ConsumerMessage
+	brokerURL     string
+	topicNames    []string
+	TopicChannels map[string]chan *sarama.ConsumerMessage
 }
 
-var KafkaTopicConsumers map[string]*kafkaTopicConsumer
+var KafkaTopicConsumer *kafkaTopicConsumer
 
 // StartWorkerConsumers - start consumer goroutines for Worker config
 func StartWorkerConsumers() {
 
-	consumerTopicNameBlocks := config.Config.ConsumerTopicBlocks
-	consumerTopicNameTransactions := config.Config.ConsumerTopicTransactions
-	consumerTopicNameLogs := config.Config.ConsumerTopicLogs
-
-	startKafkaTopicConsumers(consumerTopicNameBlocks)
-	startKafkaTopicConsumers(consumerTopicNameTransactions)
-	startKafkaTopicConsumers(consumerTopicNameLogs)
-}
-
-func startKafkaTopicConsumers(topicName string) {
-	kafkaBroker := config.Config.KafkaBrokerURL
-	consumerGroup := config.Config.ConsumerGroup
-	consumerIsTail := config.Config.ConsumerIsTail
-
-	if KafkaTopicConsumers == nil {
-		KafkaTopicConsumers = make(map[string]*kafkaTopicConsumer)
+	// Init topic names
+	topicNames := []string{
+		config.Config.ConsumerTopicBlocks,
+		config.Config.ConsumerTopicTransactions,
+		config.Config.ConsumerTopicLogs,
 	}
 
-	KafkaTopicConsumers[topicName] = &kafkaTopicConsumer{
-		kafkaBroker,
-		topicName,
-		make(chan *sarama.ConsumerMessage),
+	// Init topic channels
+	topicChannels := make(map[string]chan *sarama.ConsumerMessage)
+	for _, topicName := range topicNames {
+		topicChannels[topicName] = make(chan *sarama.ConsumerMessage)
 	}
 
-	if consumerIsTail == false {
+	// Init consumer
+	KafkaTopicConsumer = &kafkaTopicConsumer{
+		brokerURL:     config.Config.KafkaBrokerURL,
+		topicNames:    topicNames,
+		TopicChannels: topicChannels,
+	}
+
+	if config.Config.ConsumerIsTail == false {
 		// Head
 		zap.S().Info(
-			"kafkaBroker=", kafkaBroker,
-			" consumerTopics=", topicName,
-			" consumerGroup=", consumerGroup,
+			"kafkaBroker=", config.Config.KafkaBrokerURL,
+			" consumerTopics=", topicNames,
+			" consumerGroup=", config.Config.ConsumerGroup+"-head",
 			" - Starting Consumers")
-		go KafkaTopicConsumers[topicName].consumeGroup(consumerGroup + "-head")
+		go KafkaTopicConsumer.consumeGroup(config.Config.ConsumerGroup + "-head")
 	} else {
 		// Tail
-		zap.S().Info("kafkaBroker=", kafkaBroker,
-			" consumerTopics=", topicName,
-			" consumerGroup=", consumerGroup,
+		zap.S().Info(
+			"kafkaBroker=", config.Config.KafkaBrokerURL,
+			" consumerTopics=", topicNames,
+			" consumerGroup=", config.Config.ConsumerGroup+"-"+config.Config.ConsumerJobID,
 			" - Starting Consumers")
-		go KafkaTopicConsumers[topicName].consumeGroup(consumerGroup + "-" + config.Config.ConsumerJobID)
+		go KafkaTopicConsumer.consumeGroup(config.Config.ConsumerGroup + "-" + config.Config.ConsumerJobID)
 	}
 }
 
@@ -120,13 +117,11 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 			kafkaJobs, err = crud.GetKafkaJobModel().SelectMany(
 				jobID,
 				group,
-				k.topicName,
 			)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				zap.S().Info(
 					"JobID=", jobID,
 					",ConsumerGroup=", group,
-					",Topic=", k.topicName,
 					" - Waiting for Kafka Job in database...")
 				time.Sleep(1)
 				continue
@@ -143,17 +138,17 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		claimConsumer := &ClaimConsumer{
-			topicName: k.topicName,
-			topicChan: k.TopicChannel,
-			group:     group,
-			kafkaJobs: *kafkaJobs,
+			topicNames: k.topicNames,
+			topicChans: k.TopicChannels,
+			group:      group,
+			kafkaJobs:  *kafkaJobs,
 		}
 
 		for {
 			// `Consume` should be called inside an infinite loop, when a
 			// server-side rebalance happens, the consumer session will need to be
 			// recreated to get the new claims
-			err := consumerGroup.Consume(ctx, []string{k.topicName}, claimConsumer)
+			err := consumerGroup.Consume(ctx, k.topicNames, claimConsumer)
 			if err != nil {
 				zap.S().Warn("CONSUME GROUP ERROR: from consumer: ", err.Error())
 			}
@@ -172,20 +167,23 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 }
 
 type ClaimConsumer struct {
-	topicName string
-	topicChan chan *sarama.ConsumerMessage
-	group     string
-	kafkaJobs []models.KafkaJob
+	topicNames []string
+	topicChans map[string]chan *sarama.ConsumerMessage
+	group      string
+	kafkaJobs  []models.KafkaJob
 }
 
 func (c *ClaimConsumer) Setup(_ sarama.ConsumerGroupSession) error { return nil }
 func (*ClaimConsumer) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 
+	topicName := claim.Topic()
+	partition := uint64(claim.Partition())
+
 	// find kafka job
 	var kafkaJob *models.KafkaJob = nil
 	for i, k := range c.kafkaJobs {
-		if k.Partition == uint64(claim.Partition()) {
+		if k.Partition == partition && k.Topic == topicName {
 			kafkaJob = &(c.kafkaJobs[i])
 			break
 		}
@@ -196,24 +194,24 @@ func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sar
 		select {
 		case msg := <-claim.Messages():
 			if msg == nil {
-				zap.S().Warn("GROUP=", c.group, ",TOPIC=", c.topicName, " - Kafka message is nil, exiting ConsumeClaim loop...")
+				zap.S().Warn("GROUP=", c.group, ",TOPIC=", topicName, " - Kafka message is nil, exiting ConsumeClaim loop...")
 				return nil
 			}
 
 			topicMsg = msg
 		case <-time.After(5 * time.Second):
-			zap.S().Info("GROUP=", c.group, ",TOPIC=", c.topicName, " - No new kafka messages, waited 5 secs...")
+			zap.S().Info("GROUP=", c.group, ",TOPIC=", topicName, " - No new kafka messages, waited 5 secs...")
 			continue
 		case <-sess.Context().Done():
-			zap.S().Warn("GROUP=", c.group, ",TOPIC=", c.topicName, " - Session is done, exiting ConsumeClaim loop...")
+			zap.S().Warn("GROUP=", c.group, ",TOPIC=", topicName, " - Session is done, exiting ConsumeClaim loop...")
 			return nil
 		}
 
-		zap.S().Info("GROUP=", c.group, ",TOPIC=", c.topicName, ",PARTITION=", topicMsg.Partition, ",OFFSET=", topicMsg.Offset, " - New message")
+		zap.S().Info("GROUP=", c.group, ",TOPIC=", topicName, ",PARTITION=", partition, ",OFFSET=", topicMsg.Offset, " - New message")
 		sess.MarkMessage(topicMsg, "")
 
 		// Broadcast
-		c.topicChan <- topicMsg
+		c.topicChans[topicName] <- topicMsg
 
 		// Check if kafka job is done
 		// NOTE only applicable if ConsumerKafkaJobID is given
@@ -223,8 +221,8 @@ func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sar
 			zap.S().Info(
 				"JOBID=", config.Config.ConsumerJobID,
 				"GROUP=", c.group,
-				",TOPIC=", c.topicName,
-				",PARTITION=", topicMsg.Partition,
+				",TOPIC=", topicName,
+				",PARTITION=", partition,
 				" - Kafka Job done...exiting",
 			)
 			os.Exit(0)

@@ -55,7 +55,6 @@ func (m *KafkaJobModel) Migrate() error {
 func (m *KafkaJobModel) SelectMany(
 	jobID string,
 	workerGroup string,
-	topic string,
 ) (*[]models.KafkaJob, error) {
 	db := m.db
 
@@ -64,9 +63,6 @@ func (m *KafkaJobModel) SelectMany(
 
 	// Worker Group
 	db = db.Where("worker_group = ?", workerGroup)
-
-	// Topic
-	db = db.Where("topic = ?", topic)
 
 	kafkaJob := &[]models.KafkaJob{}
 	db = db.Find(kafkaJob)
