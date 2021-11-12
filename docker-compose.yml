@@ -45,7 +45,7 @@ x-env: &env
   DB_USER: "postgres"
   DB_PASSWORD: "changeme"
   DB_DBNAME: "postgres"
-  DB_SSLMODE: "disable"
+  DB_SSL_MODE: "disable"
   DB_TIMEZONE: "UTC"
 
   # Redis
