@@ -23,7 +23,7 @@ up:  ## Bring everything up as containers
 	docker-compose -f docker-compose.db.yml -f docker-compose.yml up -d
 
 down:  ## Take down all the containers
-	docker-compose -f docker-compose.db.yml -f docker-compose.yml down
+	docker-compose -f docker-compose.db.yml -f docker-compose.yml down -v
 
 clean:
 	docker volume rm $(docker volume ls -q)
