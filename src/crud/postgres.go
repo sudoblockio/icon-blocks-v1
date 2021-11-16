@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -15,30 +16,52 @@ import (
 	"github.com/geometry-labs/icon-blocks/config"
 )
 
+var postgresSession *gorm.DB
+var postgresSessionOnce sync.Once
+
 func formatPostgresDSN(host string, port string, user string, password string, dbname string, sslmode string, timezone string) string {
 	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
 		host, user, password, dbname, port, sslmode, timezone)
 }
 
 func getPostgresConn() *gorm.DB {
-	dsn := formatPostgresDSN(
-		config.Config.DbHost,
-		config.Config.DbPort,
-		config.Config.DbUser,
-		config.Config.DbPassword,
-		config.Config.DbName,
-		config.Config.DbSslmode,
-		config.Config.DbTimezone,
-	)
+	postgresSessionOnce.Do(func() {
+		dsn := formatPostgresDSN(
+			config.Config.DbHost,
+			config.Config.DbPort,
+			config.Config.DbUser,
+			config.Config.DbPassword,
+			config.Config.DbName,
+			config.Config.DbSslmode,
+			config.Config.DbTimezone,
+		)
 
-	session, err := retryGetPostgresSession(dsn)
-	if err != nil {
-		zap.S().Warn("Cannot create a connection to postgres", err)
-		return nil
+		var err error
+		postgresSession, err = retryGetPostgresSession(dsn)
+		if err != nil {
+			zap.S().Fatal("Cannot create a connection to postgres", err)
+		}
+
+		zap.S().Info("Successful connection to postgres")
+	})
+
+	return postgresSession
+}
+
+func retryGetPostgresSession(dsn string) (*gorm.DB, error) {
+	var session *gorm.DB
+	operation := func() error {
+		sess, err := createSession(dsn)
+		if err != nil {
+			zap.S().Info("POSTGRES SESSION Error : ", err.Error())
+		} else {
+			session = sess
+		}
+		return err
 	}
-
-	zap.S().Info("Successful connection to postgres")
-	return session
+	neb := backoff.NewExponentialBackOff()
+	err := backoff.Retry(operation, neb)
+	return session, err
 }
 
 func createSession(dsn string) (*gorm.DB, error) {
@@ -64,20 +87,4 @@ func createSession(dsn string) (*gorm.DB, error) {
 	sqlDB.SetMaxOpenConns(config.Config.DbMaxOpenConnections)
 
 	return db, err
-}
-
-func retryGetPostgresSession(dsn string) (*gorm.DB, error) {
-	var session *gorm.DB
-	operation := func() error {
-		sess, err := createSession(dsn)
-		if err != nil {
-			zap.S().Info("POSTGRES SESSION Error : ", err.Error())
-		} else {
-			session = sess
-		}
-		return err
-	}
-	neb := backoff.NewExponentialBackOff()
-	err := backoff.Retry(operation, neb)
-	return session, err
 }
