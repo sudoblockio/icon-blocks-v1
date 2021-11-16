@@ -49,7 +49,7 @@ func startBlockTimeBuilder(startParentBlockNumber uint32, startChildBlockNumber 
 
 		// Child block
 		childBlock, err := crud.GetBlockModel().SelectOne(childBlockNumber)
-		if errors.Is(err, gorm.ErrRecordNotFound) || childBlock.TimeStamp == 0 {
+		if errors.Is(err, gorm.ErrRecordNotFound) || childBlock.Timestamp == 0 {
 			// Block does not exist yet
 			// Sleep and try again
 			zap.S().Info("Builder=BlockTimeBuilder, BlockNumber=", childBlockNumber, " - Block not seen yet. Sleeping 3 seconds...")
