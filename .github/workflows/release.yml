@@ -139,7 +139,7 @@ jobs:
         with:
           context: .
           build-args: |
-            SERVICE_NAME=api
+            SERVICE_NAME=worker
           file: ./Dockerfile
           target: prod
           push: true
@@ -150,7 +150,7 @@ jobs:
         with:
           context: .
           build-args: |
-            SERVICE_NAME=api
+            SERVICE_NAME=worker
           file: ./Dockerfile
           target: prod
           push: true
