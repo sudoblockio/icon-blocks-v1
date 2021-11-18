@@ -46,25 +46,51 @@ func StartWorkerConsumers() {
 		TopicChannels: topicChannels,
 	}
 
-	if config.Config.ConsumerIsTail == false {
-		// Head
+	////////////////////
+	// Consumer Modes //
+	////////////////////
+
+	// Partition
+	if config.Config.ConsumerIsPartitionConsumer == true {
 		zap.S().Info(
 			"kafkaBroker=", config.Config.KafkaBrokerURL,
-			" consumerTopics=", topicNames,
-			" consumerGroup=", config.Config.ConsumerGroup+"-head",
+			" ConsumerPartitionTopic=", config.Config.ConsumerPartitionTopic,
+			" ConsumerPartition=", config.Config.ConsumerPartition,
+			" ConsumerPartitionStartOffset=", config.Config.ConsumerPartitionStartOffset,
 			" - Starting Consumers")
-		go KafkaTopicConsumer.consumeGroup(config.Config.ConsumerGroup + "-head")
-	} else {
-		// Tail
+		go KafkaTopicConsumer.consumePartition(
+			config.Config.ConsumerPartitionTopic,
+			config.Config.ConsumerPartition,
+			config.Config.ConsumerPartitionStartOffset,
+		)
+		return
+	}
+
+	// Tail
+	if config.Config.ConsumerIsTail == true {
 		zap.S().Info(
 			"kafkaBroker=", config.Config.KafkaBrokerURL,
 			" consumerTopics=", topicNames,
 			" consumerGroup=", config.Config.ConsumerGroup+"-"+config.Config.ConsumerJobID,
 			" - Starting Consumers")
 		go KafkaTopicConsumer.consumeGroup(config.Config.ConsumerGroup + "-" + config.Config.ConsumerJobID)
+		return
 	}
+
+	// Head
+	// Default
+	zap.S().Info(
+		"kafkaBroker=", config.Config.KafkaBrokerURL,
+		" consumerTopics=", topicNames,
+		" consumerGroup=", config.Config.ConsumerGroup+"-head",
+		" - Starting Consumers")
+	go KafkaTopicConsumer.consumeGroup(config.Config.ConsumerGroup + "-head")
+	return
 }
 
+////////////////////
+// Group Consumer //
+////////////////////
 func (k *kafkaTopicConsumer) consumeGroup(group string) {
 	version, err := sarama.ParseKafkaVersion("2.1.1")
 	if err != nil {
@@ -229,4 +255,77 @@ func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sar
 		}
 	}
 	return nil
+}
+
+////////////////////////
+// Partition Consumer //
+////////////////////////
+func (k *kafkaTopicConsumer) consumePartition(topic string, partition int, startOffset int) {
+	version, err := sarama.ParseKafkaVersion("2.1.1")
+	if err != nil {
+		zap.S().Panic("CONSUME GROUP ERROR: parsing Kafka version: ", err.Error())
+	}
+
+	///////////////////////////
+	// Consumer Group Config //
+	///////////////////////////
+
+	saramaConfig := sarama.NewConfig()
+
+	// Version
+	saramaConfig.Version = version
+
+	// Initial Offset
+	saramaConfig.Consumer.Offsets.Initial = sarama.OffsetNewest
+
+	var consumer sarama.Consumer
+	for {
+		consumer, err = sarama.NewConsumer([]string{k.brokerURL}, saramaConfig)
+		if err != nil {
+			zap.S().Warn("Creating consumer err: ", err.Error())
+			zap.S().Info("Retrying in 3 seconds...")
+			time.Sleep(3 * time.Second)
+			continue
+		}
+		break
+	}
+
+	// Clean up
+	defer func() {
+		if err := consumer.Close(); err != nil {
+			zap.S().Panic("KAFKA CONSUMER CLOSE PANIC: ", err.Error())
+		}
+	}()
+
+	// Connect to partition
+	pc, err := consumer.ConsumePartition(topic, int32(partition), int64(startOffset))
+
+	if err != nil {
+		zap.S().Panic("KAFKA CONSUMER PARTITIONS PANIC: ", err.Error())
+	}
+	if pc == nil {
+		zap.S().Panic("KAFKA CONSUMER PARTITIONS PANIC: Failed to create PartitionConsumer")
+	}
+
+	// Read partition
+	for {
+		var topic_msg *sarama.ConsumerMessage
+		select {
+		case msg := <-pc.Messages():
+			topic_msg = msg
+		case consumerErr := <-pc.Errors():
+			zap.S().Warn("KAFKA PARTITION CONSUMER ERROR:", consumerErr.Err)
+			//consumerErr.Err
+			continue
+		case <-time.After(5 * time.Second):
+			zap.S().Debug("Consumer ", topic, ": No new kafka messages, waited 5 secs")
+			continue
+		}
+		zap.S().Debug("Consumer ", topic, ": Consumed message key=", string(topic_msg.Key))
+
+		// Broadcast
+		k.TopicChannels[topic] <- topic_msg
+
+		zap.S().Debug("Consumer ", topic, ": Broadcasted message key=", string(topic_msg.Key))
+	}
 }
