@@ -136,7 +136,7 @@ jobs:
           updateFile: true
           commitChange: false
 
-      - name: Update dev-mainnet deployment values file (WORKER) and re-commit
+      - name: Update dev-mainnet deployment values file (WORKER)
         uses: fjogeleit/yaml-update-action@master
         with:
           workDir: charts
@@ -146,6 +146,12 @@ jobs:
           value: dev-${{ github.run_number }}
           branch: main
           createPR: 'false'
-          message: 'blocks dev deployment (mainnet) image versions to ${{ github.run_number }}'
           token: ${{ secrets.ICON_CHARTS_PAT }}
-          updateFile: true
+          commitChange: false
+
+      - name: Commit all updates
+        run: |
+          git add -A
+          git commit -m "blocks dev deployment (mainnet) image versions to ${{ github.run_number }}"
+          git push origin
+        working-directory: charts
