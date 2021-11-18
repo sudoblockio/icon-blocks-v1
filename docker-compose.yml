@@ -104,10 +104,6 @@ services:
       PORT: "8001"
       HEALTH_PORT: "8181"
       METRICS_PORT: "9401"
-      CONSUMER_IS_PARTITION_CONSUMER: "true"
-      CONSUMER_PARTITION: "0"
-      CONSUMER_PARTITION_TOPIC: "blocks"
-      CONSUMER_PARTITION_START_OFFSET: "400"
 
   blocks-time-worker:
     build:
