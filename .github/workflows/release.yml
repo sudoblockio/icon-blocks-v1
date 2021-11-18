@@ -205,9 +205,6 @@ jobs:
           updateFile: true
           commitChange: false
 
-      - name: Remove volumes
-        run: sudo rm -rf volumes
-
       - name: Configure credentials
         uses: oleksiyrudenko/gha-git-credentials@v2-latest
         with:
@@ -225,7 +222,7 @@ jobs:
 
       - name: Push tags
         run: |
-          git tag -f tracker-frontend-prod-uswest2
-          git tag -f tracker-frontend-prod-euwest2
+          git tag -f blocks-prod-uswest2
+          git tag -f blocks-prod-euwest2
           git push -f origin --tags
         working-directory: charts
