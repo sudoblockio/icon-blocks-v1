@@ -149,6 +149,14 @@ jobs:
           token: ${{ secrets.ICON_CHARTS_PAT }}
           commitChange: false
 
+      - name: Configure credentials
+        uses: oleksiyrudenko/gha-git-credentials@v2-latest
+        with:
+          token: '${{ secrets.ICON_CHARTS_PAT }}'
+          global: true
+          name: 'Geometry Bot'
+          email: '78675928+geometrybot@users.noreply.github.com'
+
       - name: Commit all updates
         run: |
           git add -A
