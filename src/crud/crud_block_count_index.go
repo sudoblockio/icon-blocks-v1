@@ -50,6 +50,21 @@ func (m *BlockCountIndexModel) Migrate() error {
 	return err
 }
 
+// Count - count all entries in blocblockices table
+// NOTE this function will take a long time
+func (m *BlockCountIndexModel) Count() (int64, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.BlockCountIndex{})
+
+	// Count
+	var count int64
+	db = db.Count(&count)
+
+	return count, db.Error
+}
+
 // Insert - Insert blockCountByIndex into table
 func (m *BlockCountIndexModel) Insert(blockCountIndex *models.BlockCountIndex) error {
 	db := m.db

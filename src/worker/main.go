@@ -9,6 +9,7 @@ import (
 	"github.com/geometry-labs/icon-blocks/logging"
 	"github.com/geometry-labs/icon-blocks/metrics"
 	"github.com/geometry-labs/icon-blocks/worker/builders"
+	"github.com/geometry-labs/icon-blocks/worker/routines"
 	"github.com/geometry-labs/icon-blocks/worker/transformers"
 )
 
@@ -21,9 +22,15 @@ func main() {
 	// Start Prometheus client
 	metrics.Start()
 
+	// Feature flags
 	if config.Config.OnlyRunBlockTimeBuilder == true {
 		// Start builder
 		builders.StartBlockTimeBuilder()
+
+		global.WaitShutdownSig()
+	} else if config.Config.OnlyRunAllRoutines == true {
+		// Start routines
+		routines.StartBlockCountRoutine()
 
 		global.WaitShutdownSig()
 	}

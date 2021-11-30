@@ -87,6 +87,7 @@ type configType struct {
 
 	// Feature flags
 	OnlyRunBlockTimeBuilder bool `envconfig:"ONLY_RUN_BLOCK_TIME_BUILDER" required:"false" default:"false"`
+	OnlyRunAllRoutines      bool `envconfig:"ONLY_RUN_ALL_ROUTINES" required:"false" default:"false"`
 }
 
 // Config - runtime config struct
