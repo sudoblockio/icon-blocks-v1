@@ -8,7 +8,7 @@ services:
       "-s", "186600",
       "-o", "kafka:9092",
       "--period-seconds", "1",
-      "-p", "https://icon.geometry-dev.net/api/v3",
+      "-p", "https://api.icon.geometry.io/api/v3",
       "--kafka-schema-registry-url", "http://schemaregistry:8081",
       "--kafka-use-schema-registry", "true",
     ]
