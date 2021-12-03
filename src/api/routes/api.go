@@ -35,6 +35,7 @@ func Start() {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:  config.Config.CORSAllowOrigins,
 		AllowHeaders:  config.Config.CORSAllowHeaders,
+		AllowMethods:  config.Config.CORSAllowMethods,
 		ExposeHeaders: config.Config.CORSExposeHeaders,
 	}))
 
