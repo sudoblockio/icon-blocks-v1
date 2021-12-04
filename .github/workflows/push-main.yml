@@ -148,6 +148,7 @@ jobs:
           createPR: 'false'
           token: ${{ secrets.ICON_CHARTS_PAT }}
           commitChange: false
+          updateFile: true
 
       - name: Configure credentials
         uses: oleksiyrudenko/gha-git-credentials@v2-latest
