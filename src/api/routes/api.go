@@ -43,7 +43,7 @@ func Start() {
 	// Compression Middleware
 	app.Use(compress.New(compress.Config{
 		// refer to gofiber/fiber/blob/v1.14.6/middleware/compress.go#L17
-		Level: config.Config.RestCompressLevel,
+		Level: compress.Level(config.Config.RestCompressLevel),
 	}))
 
 	// Swagger docs
