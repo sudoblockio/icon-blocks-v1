@@ -30,6 +30,9 @@ type configType struct {
 	CORSAllowHeaders  string `envconfig:"CORS_ALLOW_HEADERS" required:"false" default:"*"`
 	CORSExposeHeaders string `envconfig:"CORS_EXPOSE_HEADERS" required:"false" default:"*"`
 
+	// Compress
+	RestCompressLevel int `envconfig:"REST_COMPRESS_LEVEL" required:"false" default:"2"`
+
 	// Monitoring
 	HealthPollingInterval int `envconfig:"HEALTH_POLLING_INTERVAL" required:"false" default:"10"`
 

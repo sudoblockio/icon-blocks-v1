@@ -9,6 +9,7 @@ import (
 
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	fiber "github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 
 	_ "github.com/geometry-labs/icon-blocks/api/docs" // import for swagger docs
@@ -36,6 +37,12 @@ func Start() {
 		AllowOrigins:  config.Config.CORSAllowOrigins,
 		AllowHeaders:  config.Config.CORSAllowHeaders,
 		ExposeHeaders: config.Config.CORSExposeHeaders,
+	}))
+
+	// Compression Middleware
+	app.Use(compress.New(compress.Config{
+		// refer to gofiber/fiber/blob/v1.14.6/middleware/compress.go#L17
+		Level: config.Config.RestCompressLevel,
 	}))
 
 	// Swagger docs
