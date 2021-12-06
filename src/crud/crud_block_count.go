@@ -88,7 +88,7 @@ func (m *BlockCountModel) SelectCount(_type string) (uint64, error) {
 	count := uint64(0)
 	if blockCount != nil {
 		// NOTE just use block number for count
-		count = blockCount.Number
+		count = uint64(blockCount.Number)
 	}
 
 	return count, db.Error
