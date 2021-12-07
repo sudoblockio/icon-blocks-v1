@@ -2,19 +2,19 @@ package routes
 
 import (
 	"encoding/json"
-
-	"github.com/geometry-labs/icon-blocks/config"
-	"github.com/geometry-labs/icon-blocks/global"
-	"go.uber.org/zap"
+	"strings"
 
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	fiber "github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"go.uber.org/zap"
 
 	_ "github.com/geometry-labs/icon-blocks/api/docs" // import for swagger docs
 	"github.com/geometry-labs/icon-blocks/api/routes/rest"
 	"github.com/geometry-labs/icon-blocks/api/routes/ws"
+	"github.com/geometry-labs/icon-blocks/config"
+	"github.com/geometry-labs/icon-blocks/global"
 )
 
 // @title Go api template docs
@@ -44,6 +44,9 @@ func Start() {
 	app.Use(compress.New(compress.Config{
 		// refer to gofiber/fiber/blob/v1.14.6/middleware/compress.go#L17
 		Level: compress.Level(config.Config.RestCompressLevel),
+		Next: func(c *fiber.Ctx) bool {
+			return strings.Contains(c.Path(), "/docs/")
+		},
 	}))
 
 	// Swagger docs
