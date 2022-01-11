@@ -123,3 +123,22 @@ services:
       HEALTH_PORT: "8182"
       METRICS_PORT: "9402"
       ONLY_RUN_BLOCK_TIME_BUILDER: "true"
+
+  blocks-routine-worker:
+    build:
+      context: ${BLOCKS_CONTEXT:-.}
+      target: ${BLOCKS_TARGET:-prod}
+      args:
+        - SERVICE_NAME=worker
+    security_opt:
+      - "seccomp:unconfined"
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - ${BLOCKS_CONTEXT:-.}/src:/app
+    environment:
+      <<: *env
+      PORT: "8002"
+      HEALTH_PORT: "8182"
+      METRICS_PORT: "9402"
+      ONLY_RUN_ALL_ROUTINES: "true"

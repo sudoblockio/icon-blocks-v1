@@ -24,8 +24,8 @@ func blockMissingRoutine(duration time.Duration) {
 		currentBlockNumber := 1
 
 		for {
-			_, err := crud.GetBlockModel().SelectOne(uint32(currentBlockNumber))
-			if errors.Is(err, gorm.ErrRecordNotFound) {
+			block, err := crud.GetBlockModel().SelectOne(uint32(currentBlockNumber))
+			if errors.Is(err, gorm.ErrRecordNotFound) || block.Hash == "" {
 				blockMissing := &models.BlockMissing{
 					Number: uint32(currentBlockNumber),
 				}
