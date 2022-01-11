@@ -189,7 +189,7 @@ func DefaultListKafkaJob(ctx context.Context, db *gorm1.DB) ([]*KafkaJob, error)
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("worker_group")
+	db = db.Order("job_id")
 	ormResponse := []KafkaJobORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

@@ -1,0 +1,11 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+message BlockMissing {
+  option (gorm.opts) = {ormable: true};
+
+  uint32 number = 1 [(gorm.field).tag = {primary_key: true}];
+}

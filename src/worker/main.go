@@ -31,6 +31,7 @@ func main() {
 	} else if config.Config.OnlyRunAllRoutines == true {
 		// Start routines
 		routines.StartBlockCountRoutine()
+		routines.StartBlockMissingRoutine()
 
 		global.WaitShutdownSig()
 	}
