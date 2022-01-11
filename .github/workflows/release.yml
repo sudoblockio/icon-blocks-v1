@@ -169,7 +169,7 @@ jobs:
         with:
           workDir: charts
           repository: geometry-labs/icon-charts
-          valueFile: 'deployments/prod-us-west-2/lisbon/governance/values.yaml'
+          valueFile: 'deployments/prod-us-west-2/lisbon/blocks/values.yaml'
           propertyPath: 'api.image.tag'
           value: prod-${{ steps.source.outputs.TAG }}
           branch: main
@@ -182,7 +182,7 @@ jobs:
         with:
           workDir: charts
           repository: geometry-labs/icon-charts
-          valueFile: 'deployments/prod-us-west-2/lisbon/governance/values.yaml'
+          valueFile: 'deployments/prod-us-west-2/lisbon/blocks/values.yaml'
           propertyPath: 'builder.image.tag'
           value: prod-${{ steps.source.outputs.TAG }}
           branch: main
@@ -195,7 +195,7 @@ jobs:
         with:
           workDir: charts
           repository: geometry-labs/icon-charts
-          valueFile: 'deployments/prod-us-west-2/lisbon/governance/values.yaml'
+          valueFile: 'deployments/prod-us-west-2/lisbon/blocks/values.yaml'
           propertyPath: 'worker.image.tag'
           value: prod-${{ steps.source.outputs.TAG }}
           branch: main
@@ -208,7 +208,7 @@ jobs:
         with:
           workDir: charts
           repository: geometry-labs/icon-charts
-          valueFile: 'deployments/prod-us-west-2/berlin/governance/values.yaml'
+          valueFile: 'deployments/prod-us-west-2/berlin/blocks/values.yaml'
           propertyPath: 'api.image.tag'
           value: prod-${{ steps.source.outputs.TAG }}
           branch: main
@@ -221,7 +221,7 @@ jobs:
         with:
           workDir: charts
           repository: geometry-labs/icon-charts
-          valueFile: 'deployments/prod-us-west-2/berlin/governance/values.yaml'
+          valueFile: 'deployments/prod-us-west-2/berlin/blocks/values.yaml'
           propertyPath: 'builder.image.tag'
           value: prod-${{ steps.source.outputs.TAG }}
           branch: main
@@ -234,7 +234,7 @@ jobs:
         with:
           workDir: charts
           repository: geometry-labs/icon-charts
-          valueFile: 'deployments/prod-us-west-2/berlin/governance/values.yaml'
+          valueFile: 'deployments/prod-us-west-2/berlin/blocks/values.yaml'
           propertyPath: 'worker.image.tag'
           value: prod-${{ steps.source.outputs.TAG }}
           branch: main
