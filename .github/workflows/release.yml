@@ -269,7 +269,6 @@ jobs:
           commitChange: false
 
       - name: Update prod-mainnet deployment values file (WORKER)
-        id: yaml-update
         uses: fjogeleit/yaml-update-action@master
         with:
           workDir: charts
@@ -310,7 +309,6 @@ jobs:
           commitChange: false
 
       - name: Update prod-mainnet deployment values file (WORKER) - eu-west-1
-        id: yaml-update
         uses: fjogeleit/yaml-update-action@master
         with:
           workDir: charts
