@@ -39,7 +39,7 @@ func blockMissingRoutine(duration time.Duration) {
 			}
 
 			// Block is within an hour from current time
-			if (block.Timestamp / 1000000) > (time.Now().Unix() - 360) {
+			if int64(block.Timestamp/1000000) > int64(time.Now().Unix()-360) {
 				break
 			}
 
