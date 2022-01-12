@@ -38,10 +38,19 @@ func blockMissingRoutine(duration time.Duration) {
 				continue
 			}
 
+			// Block is within an hour from current time
+			if (block.Timestamp / 1000000) > (time.Now().Unix() - 360) {
+				break
+			}
+
+			if currentBlockNumber%100000 == 0 {
+				zap.S().Info("Routine=BlockMissing, CurrentBlockNumber= ", currentBlockNumber, " - Checked 100,000 blocks...")
+			}
+
 			currentBlockNumber++
 		}
 
-		zap.S().Info("Completed routine, sleeping...")
+		zap.S().Info("Routine=BlockMissing - Completed routine, sleeping...")
 		time.Sleep(duration)
 	}
 }
