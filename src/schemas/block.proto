@@ -20,7 +20,7 @@ message Block {
   string item_timestamp = 10;
   string hash = 11;
   string parent_hash = 12;
-  uint64 timestamp = 13 [(gorm.field).tag = {index: "block_idx_timestamp"}];
+  uint64 timestamp = 13;
 
   // Enriched from external tables
   string transaction_fees = 14;             // block_transactions

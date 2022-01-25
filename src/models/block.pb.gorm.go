@@ -34,7 +34,7 @@ type BlockORM struct {
 	ParentHash                string
 	PeerId                    string `gorm:"index:block_idx_peer_id"`
 	Signature                 string
-	Timestamp                 uint64 `gorm:"index:block_idx_timestamp"`
+	Timestamp                 uint64
 	TransactionAmount         string
 	TransactionCount          uint32
 	TransactionFees           string

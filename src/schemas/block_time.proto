@@ -9,5 +9,5 @@ message BlockTime {
 
   // Base
   uint32 number = 1 [(gorm.field).tag = {primary_key: true}];
-  uint64 time = 2 [(gorm.field).tag = {index: "block_time_idx_time"}];
+  uint64 time = 2;
 }
