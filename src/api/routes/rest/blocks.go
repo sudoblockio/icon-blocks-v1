@@ -29,6 +29,7 @@ type paramsGetBlocks struct {
 	EndNumber   uint32 `query:"end_number"`
 	Hash        string `query:"hash"`
 	CreatedBy   string `query:"created_by"`
+	Sort        string `query:"sort"`
 }
 
 // Blocks
@@ -45,6 +46,7 @@ type paramsGetBlocks struct {
 // @Param end_number query int false "range by end block number"
 // @Param hash query string false "find by block hash"
 // @Param created_by query string false "find by block creator"
+// @Param sort query string false "desc or asc"
 // @Router /api/v1/blocks [get]
 // @Success 200 {object} []models.BlockAPIList
 // @Failure 422 {object} map[string]interface{}
@@ -60,6 +62,12 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 	// Default params
 	if params.Limit == 0 {
 		params.Limit = 25
+	}
+	if params.Sort == "" {
+		params.Sort = "desc"
+	}
+	if params.Sort != "desc" && params.Sort != "asc" {
+		params.Sort = "desc"
 	}
 
 	// Check params
@@ -84,6 +92,7 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 		params.EndNumber,
 		params.Hash,
 		params.CreatedBy,
+		params.Sort,
 	)
 	if err != nil {
 		c.Status(500)

@@ -86,11 +86,14 @@ func (m *BlockModel) SelectMany(
 	endNumber uint32,
 	hash string,
 	createdBy string,
+	sort string,
 ) (*[]models.BlockAPIList, error) {
 	db := m.db
 
 	// Latest blocks first
-	db = db.Order("number desc")
+	if sort != "" {
+		db = db.Order("number " + sort)
+	}
 
 	// Set table
 	db = db.Model(&[]models.Block{})
