@@ -66,9 +66,6 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 	if params.Sort == "" {
 		params.Sort = "desc"
 	}
-	if params.Sort != "desc" && params.Sort != "asc" {
-		params.Sort = "desc"
-	}
 
 	// Check params
 	if params.Limit < 1 || params.Limit > config.Config.MaxPageSize {
@@ -82,6 +79,9 @@ func handlerGetBlocks(c *fiber.Ctx) error {
 	if params.EndNumber < params.StartNumber {
 		c.Status(422)
 		return c.SendString(`{"error": "end_number is less than start_number"}`)
+	}
+	if params.Sort != "desc" && params.Sort != "asc" {
+		params.Sort = "desc"
 	}
 
 	blocks, err := crud.GetBlockModel().SelectMany(
