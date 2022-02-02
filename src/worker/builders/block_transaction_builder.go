@@ -23,7 +23,7 @@ func StartBlockTransactionBuilder() {
 	go startBlockTransactionBuilder(45500000, "_head")
 }
 
-func startBlockTransactionBuilder(startBlockNumber, redisCounterSuffix) {
+func startBlockTransactionBuilder(startBlockNumber int64, redisCounterSuffix string) {
 
 	// Query Redis for start block number
 	countKey := "icon_blocks_block_transaction_builder_start_number" + redisCounterSuffix
@@ -107,7 +107,7 @@ func startBlockTransactionBuilder(startBlockNumber, redisCounterSuffix) {
 		///////////////
 		blockNumber++
 
-		if blockNumber % 100000 {
+		if blockNumber%100000 == 0 {
 			zap.S().Info("Builder=BlockTransactionBuilder, BlockNumber=", blockNumber, " - Finished 100,000 blocks")
 		}
 
