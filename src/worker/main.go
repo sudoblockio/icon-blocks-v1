@@ -23,15 +23,13 @@ func main() {
 	metrics.Start()
 
 	// Feature flags
-	if config.Config.OnlyRunBlockTimeBuilder == true {
-		// Start builder
-		builders.StartBlockTimeBuilder()
-
-		global.WaitShutdownSig()
-	} else if config.Config.OnlyRunAllRoutines == true {
+	if config.Config.OnlyRunAllRoutines == true {
 		// Start routines
 		routines.StartBlockCountRoutine()
-		routines.StartBlockMissingRoutine()
+
+		// Start builders
+		builders.StartBlockTimeBuilder()
+		builders.StartBlockTransactionBuilder()
 
 		global.WaitShutdownSig()
 	}
