@@ -27,14 +27,7 @@ jobs:
         run: make ps
 
       - name: Run unit tests
-        run: cd src && go test -v -covermode=atomic -coverprofile=coverage.out ./...
-
-      - uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./src/coverage.out
-          flags: unit
-          fail_ci_if_error: true
+        run: cd src && go test -v ./...
 
       - name: Bring up stack
         run: make up && sleep 30
@@ -53,13 +46,6 @@ jobs:
 
       - name: Run integration tests
         run: cd tests && go test -v -covermode=atomic -coverprofile=coverage.out ./...
-
-      - uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./tests/coverage.out
-          flags: integration
-          fail_ci_if_error: true
 
       - name: Tag name
         id: source
