@@ -20,7 +20,7 @@ func StartBlockTransactionBuilder() {
 
 	go startBlockTransactionBuilder(1, "_tail")
 
-	go startBlockTransactionBuilder(45500000, "_head")
+	go startBlockTransactionBuilder(45669090, "_head_v1")
 }
 
 func startBlockTransactionBuilder(startBlockNumber int64, redisCounterSuffix string) {
