@@ -46,6 +46,26 @@ func startBlockTransactionBuilder(startBlockNumber int64, redisCounterSuffix str
 		block, err := crud.GetBlockModel().SelectOne(blockNumber)
 		if errors.Is(err, gorm.ErrRecordNotFound) || block.Hash == "" {
 			// Block does not exist yet
+			if redisCounterSuffix == "_head_v1" {
+				// Special case for head
+				// Move on if block is old
+
+				// If err, continue to sleep
+				latestBlock, err := crud.GetBlockModel().SelectOne(0)
+				if err != nil {
+					// Sleep and try again
+					zap.S().Info("Builder=BlockTransactionBuilder, BlockNumber=", blockNumber, " - Block not seen yet. Sleeping 1 second...")
+
+					time.Sleep(1 * time.Second)
+					continue
+				}
+
+				if latestBlock.Number > blockNumber {
+					blockNumber++
+					continue
+				}
+			}
+
 			// Sleep and try again
 			zap.S().Info("Builder=BlockTransactionBuilder, BlockNumber=", blockNumber, " - Block not seen yet. Sleeping 1 second...")
 
@@ -59,6 +79,26 @@ func startBlockTransactionBuilder(startBlockNumber int64, redisCounterSuffix str
 		transactions, err := crud.GetBlockTransactionModel().SelectMany(blockNumber)
 		if errors.Is(err, gorm.ErrRecordNotFound) || len(*transactions) != int(block.TransactionCount) {
 			// Transacitons do not exist yet
+			if redisCounterSuffix == "_head_v1" {
+				// Special case for head
+				// Move on if block is old
+
+				// If err, continue to sleep
+				latestBlock, err := crud.GetBlockModel().SelectOne(0)
+				if err != nil {
+					// Sleep and try again
+					zap.S().Info("Builder=BlockTransactionBuilder, BlockNumber=", blockNumber, " - Block not seen yet. Sleeping 1 second...")
+
+					time.Sleep(1 * time.Second)
+					continue
+				}
+
+				if latestBlock.Number > blockNumber {
+					blockNumber++
+					continue
+				}
+			}
+
 			// Sleep and try again
 			zap.S().Info("Builder=BlockTransactionBuilder, BlockNumber=", blockNumber, " - Transactions not seen yet. Sleeping 1 second...")
 

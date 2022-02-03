@@ -144,7 +144,9 @@ func (m *BlockModel) SelectOne(
 
 	db = db.Order("number desc")
 
-	db = db.Where("number = ?", number)
+	if number != 0 {
+		db = db.Where("number = ?", number)
+	}
 
 	block := &models.Block{}
 	db = db.First(block)
