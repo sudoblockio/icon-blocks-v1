@@ -53,12 +53,12 @@ jobs:
       - name: Run integration tests
         run: cd tests && go test -v -covermode=atomic -coverprofile=coverage.out ./...
 
-      - uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./tests/coverage.out
-          flags: integration
-          fail_ci_if_error: true
+#      - uses: codecov/codecov-action@v2
+#        with:
+#          token: ${{ secrets.CODECOV_TOKEN }}
+#          files: ./tests/coverage.out
+#          flags: integration
+#          fail_ci_if_error: true
 
       - id: last
         uses: pozetroninc/github-action-get-latest-release@master
